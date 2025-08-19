@@ -15,14 +15,16 @@ void clearRTCAlarms(void);
 void printTimeComparison(void);
 void printTimeOndebugSerial(void);
 void print2digits(int number);
+
+void forcerSynchronisationDS3231(void);
+
 void synchronizeDS3231TimeToMicro(void);
 void copyDS3231TimeToMicro(bool forcer);
 
 void checkRTCStatus(void);
 
 // Gestion Config et EEPROM
-void initConfig(void);
-void loadConfigFromEEPROM(void);
+void readConfigFromEEPROM(void);
 void saveConfigToEEPROM(void);
 uint16_t calculateChecksum(ConfigGenerale_t* cfg);
 void setDefaultConfig(void);
@@ -117,9 +119,6 @@ void Reset_LoRa(void);
 void BuildLoraPayload(void);
 void sleep_LoRa(void);
 void wake_LoRa(void);
-
-
-
 
 
 

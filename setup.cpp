@@ -1,3 +1,4 @@
+#define __INIT_DONE
 #include ".\define.h"
     
 // Port Série Debug ----- initialisation ----- infos projet -----
