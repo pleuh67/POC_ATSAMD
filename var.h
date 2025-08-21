@@ -9,6 +9,7 @@ bool OLED = true;                    // Activer/désactiver OLED
 // ===== VARIABLES GLOBALES =====
 RTC_DS3231 rtc;
 //DS3231 Clock;
+// DateTime now;
 
 // variables clavier
 clavier_context_t clavierContext = {KEY_NONE, KEY_NONE, 0, 0, false};
@@ -81,7 +82,6 @@ uint8_t SN2483_List [6][9] = {   // donne le DevEUI (Module_ID)
   {  0x00, 0x04, 0xA3, 0x0B, 0x00, 0xEE, 0xEE, 0x01, 0x00 },  // Proto PCB#2-2 Ruches LOESS
   {  0x00, 0x04, 0xA3, 0x0B, 0x00, 0xEE, 0xA5, 0xD5, 0x00 },  // Proto PCB#2-3 Ruches Verger
   {  0x00, 0x04, 0xA3, 0x0B, 0x00, 0xF5, 0x47, 0xCF, 0x00 }   // Proto PCB#2-1 Cave
-
 };
 
 uint8_t AppEUI_List [6][9] ={ 
@@ -176,6 +176,33 @@ int HX711_NbLect = 10;//float calibration_factor = 7050; //-7050 worked for my 4
 #else
 
 
+// ===== FLAGS DEBUG =====
+extern bool DEBUG_WAKEUP_PAYLOAD;    // Activer/désactiver réveil payload
+extern bool DEBUG_INTERVAL_1SEC;     // Activer/désactiver réveil 1 seconde
+extern bool DEBUG_LOW_POWER;         // Activer/désactiver basse consommation
+extern bool OLED;                    // Activer/désactiver OLED
+
+// Variables pour gestion des interruptions
+extern volatile bool wakeupPayload;
+extern volatile bool wakeup1Sec;
+extern volatile bool modeExploitation;
+extern int switchToProgrammingMode;
+extern int switchToOperationMode;
+
+// Variables pour OLED scrolling
+extern bool modeDebugActif;
+extern unsigned long delaiAffichage;
+extern char lignesDebug[][21];
+
+// Variables pour saisies
+extern unsigned long lastBlink;
+extern bool blinkState;
+
+
+extern bool debugdrawtext;
+
+extern RTC_DS3231 rtc;
+
 #ifdef OLED096
   extern Adafruit_SSD1306 display; //(OLED_RESET);
 #else
@@ -185,15 +212,14 @@ int HX711_NbLect = 10;//float calibration_factor = 7050; //-7050 worked for my 4
 extern clavier_context_t clavierContext;
 
 extern char OLEDbuf[];
-extern char serialBuf[];
+extern char serialbuf[];
 extern char Module_ID[];
 
 extern uint8_t payloadSize; 
 extern uint8_t payload[];
 extern int hexPayloadSize;
 extern char hexPayload[];
-extern uint8_t testPayload[];
-//extern 
+extern uint8_t testPayload[]; 
 extern char HWEUI_List [][20];
 extern uint8_t SN2483_List [][9];
 extern uint8_t AppEUI_List [][9];
@@ -202,7 +228,8 @@ extern uint8_t *DevEUI;    // Orange : kit SodaQ RUCHE 0: 00 04 A3 0B 00 20 30 0
 extern uint8_t *AppEUI;    // Orange : kit SodaQ RUCHE 0 
 extern uint8_t *AppKey;    // Orange : kit SodaQ RUCHE 0 
 
-
+// Variables config
+extern ConfigGenerale_t config;
 
 // Variable définitions RUCHE
 extern HW_equipement Ruche;

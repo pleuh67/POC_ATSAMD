@@ -26,7 +26,7 @@
 // ===== SETUP =====
 void setup() 
 {
-    
+   initDebugSerial(); 
     // Initialisation des LEDs
     initLEDs();
     
@@ -92,7 +92,7 @@ debugSerial.println("Initialisation terminee");
 
     void forcerSynchronisationDS3231();
 
- debugSerial.println("Mise à l'heure");
+ debugSerial.println("Mise à l'heure\nStart loop(); =====================================");
     
     if (OLED) 
     {
@@ -105,10 +105,31 @@ debugSerial.println("Initialisation terminee");
  debugDisplayOLEDReset();
 }
 
+
+
+//int cnt=0;
+
 // ===== LOOP PRINCIPAL =====
 void loop() 
-{ 
-debugSerial.print("b");
+{  
+
+  
+/*
+cnt %10 ? debugSerial.print("b"); : debugSerial.print(cnt);
+if (cnt++ > 120)
+{
+//  sendPayload();
+//  init2483A();
+//  initLoRa();
+  Send_LoRa_Mess((uint8_t*)testPayload,7);
+  cnt =0;
+  debugSerial.println("");
+}
+*/
+
+
+
+/*    
     // *** TRAITEMENT CLAVIER NON-BLOQUANT ***
     processContinuousKeyboard();
     // *** UTILISATION DES TOUCHES ***
@@ -120,7 +141,7 @@ debugSerial.print("b");
         debugSerial.println(keyToString(touche));
     }
     
-    
+*/    
     // Vérification du mode
     modeExploitation = digitalRead(PIN_PE);
     if (modeExploitation)         // OK, validé, GreenLED => couleur Red
@@ -138,13 +159,15 @@ debugSerial.print("b");
     if (wakeupPayload) 
     {
         wakeupPayload = false;
-        debugSerial.println("PROG/Réveil payload");
-        
+//debugSerial.println("PROG/Réveil payload");
         if (OLED) 
         {
             debugDisplayOLED("PROG/Reveil payload");
         }
-        
+ // sendPayload();
+//  init2483A();
+//  initLoRa();
+  Send_LoRa_Mess((uint8_t*)testPayload,7);
         turnONRedLED();
         delay(RED_LED_DURATION);
         turnOffRedLED();
@@ -257,15 +280,11 @@ Alarme 2 → DS3231_A2_Minute pour payload
   // ALARME 2 : Payload toutes les X minutes
     if (DEBUG_WAKEUP_PAYLOAD) 
     {
-        DateTime nextPayload = rtc.now() + TimeSpan(0, 0, WAKEUP_INTERVAL_PAYLOAD, 0);
+//        DateTime nextPayload = rtc.now() + TimeSpan(0, 0, WAKEUP_INTERVAL_PAYLOAD, 0);
+        DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
         rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
-                // AJOUTÉ: Debug et confirmation
-        debugSerial.println("Interruption Alarme 2 activée");
-debugSerial.print("Alarme 2 (payload) programmée pour: ");
-        debugSerial.print(nextPayload.hour()); debugSerial.print(":");
-        debugSerial.print(nextPayload.minute()); debugSerial.print(":");
-        debugSerial.println(nextPayload.second());
-    }
+debugPrintNextAlarm2(nextPayload);
+     }
 
     
     // AJOUTÉ: Test état pin après configuration
@@ -882,7 +901,7 @@ void onRTCAlarm(void)
     {
         wakeup1Sec = true;
         rtc.clearAlarm(1);
-snprintf(buffer, sizeof(buffer), "IRQ 1s %d", counter1++);
+snprintf(buffer, sizeof(buffer), "IRQ 1s %d =====================================", counter1++);
 debugDisplayOLED(buffer);   
 debugSerial.println(buffer);        
 /* en mode  DS3231_A1_PerSecond, ne pas reprogrammer l'alarme
@@ -905,7 +924,7 @@ debugSerial.println(buffer);
     {
         wakeupPayload = true;
         rtc.clearAlarm(2);
-snprintf(buffer, sizeof(buffer), "IRQ Payload %d", counter2++);
+snprintf(buffer, sizeof(buffer), "IRQ Payload %d =====================================", counter2++);
 debugDisplayOLED(buffer);  
 debugSerial.println(buffer);  
         // Reprogrammer l'alarme payload
@@ -913,6 +932,7 @@ debugSerial.println(buffer);
         {
             DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
             rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
+debugPrintNextAlarm2(nextPayload);            
         }
 /*
         if (!modeExploitation) 
@@ -1113,10 +1133,9 @@ void copyDS3231TimeToMicro(bool forcer)
         
         if (OLED)
         {
-            char message[21];
-            sprintf(message, "Sync: %02d:%02d:%02d", 
+            sprintf(OLEDbuf, "Sync: %02d:%02d:%02d", 
                     heureDS3231.hour(), heureDS3231.minute(), heureDS3231.second());
-            displayMessageL8(message, false, false);
+            displayMessageL8(OLEDbuf, false, false);
         }
         
         derniereCopie = millis();
@@ -1645,9 +1664,8 @@ void inputListValue(const char *label, const int *liste, uint8_t nbValeurs, int 
         clearOLED();
         drawtext(1,0, 0, label);
         
-        char buffer[20];
-        sprintf(buffer, "Valeur : %d", liste[index]);
-        drawtext(1,1, 0, buffer);
+        sprintf(OLEDbuf, "Valeur : %d", liste[index]);
+        drawtext(1,1, 0, OLEDbuf);
         displayMessageL8("Valider: VALIDE/UP/DOWN", false, false);
         
         key_code_t touche = readKey();
@@ -2001,11 +2019,7 @@ void checkRTCStatus(void)
         {
             DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
             rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
-            
-            debugSerial.print("Prochaine alarme payload: ");
-            debugSerial.print(nextPayload.hour()); debugSerial.print(":");
-            debugSerial.print(nextPayload.minute()); debugSerial.print(":");
-            debugSerial.println(nextPayload.second());
+ debugPrintNextAlarm2(nextPayload);           
         }
     }
     
@@ -2054,9 +2068,8 @@ void executeOperationMode(void)     // pas appelé à la base....
             drawtext(1,1, 0, "Mode: EXPLOITATION");
             drawtext(1,2, 0, "PIN_PE = HIGH");
             
-            char buffer[21];
-            sprintf(buffer, "Reveil: %d min", config.applicatif.wakeupIntervalPayload);
-            drawtext(1,4, 0, buffer);
+            sprintf(OLEDbuf, "Reveil: %d min", config.applicatif.wakeupIntervalPayload);
+            drawtext(1,4, 0, OLEDbuf);
             
             drawScreenTime(0, 0);   // 0, 6 ????
             
@@ -2316,15 +2329,14 @@ void handleDebugMenu(void)
             clearOLED();
             drawtext(1,0, 0, "=== DEBUG ===");
             
-            char ligne[21];
-            sprintf(ligne, "Payload: %s", DEBUG_WAKEUP_PAYLOAD ? "ON" : "OFF");
-            drawtext(1,2, 0, ligne);
+            sprintf(OLEDbuf, "Payload: %s", DEBUG_WAKEUP_PAYLOAD ? "ON" : "OFF");
+            drawtext(1,2, 0, OLEDbuf);
             
-            sprintf(ligne, "1Sec: %s", DEBUG_INTERVAL_1SEC ? "ON" : "OFF");
-            drawtext(1,3, 0, ligne);
+            sprintf(OLEDbuf, "1Sec: %s", DEBUG_INTERVAL_1SEC ? "ON" : "OFF");
+            drawtext(1,3, 0, OLEDbuf);
             
-            sprintf(ligne, "Sleep: %s", DEBUG_LOW_POWER ? "ON" : "OFF");
-            drawtext(1,4, 0, ligne);
+            sprintf(OLEDbuf, "Sleep: %s", DEBUG_LOW_POWER ? "ON" : "OFF");
+            drawtext(1,4, 0, OLEDbuf);
             
             drawtext(1,6, 0, "T1/T2/T3: Toggle");
             drawtext(1,7, 0, "T5: Retour");
@@ -2382,12 +2394,11 @@ void displaySystemInfo(void)
         drawtext(1,1, 0, PROJECT_NAME);
         drawtext(1,2, 0, "Version: " VERSION);
         
-        char ligne[21];
-        sprintf(ligne, "Mode: %s", modeExploitation ? "EXPLOIT" : "PROGRAM");
-        drawtext(1,3, 0, ligne);
+        sprintf(OLEDbuf, "Mode: %s", modeExploitation ? "EXPLOIT" : "PROGRAM");
+        drawtext(1,3, 0, OLEDbuf);
         
-        sprintf(ligne, "Config v: %d.%02d", config.materiel.version/100, config.materiel.version%100);
-        drawtext(1,4, 0, ligne);
+        sprintf(OLEDbuf, "Config v: %d.%02d", config.materiel.version/100, config.materiel.version%100);
+        drawtext(1,4, 0, OLEDbuf);
         
         drawtext(1,6, 0, "Appuyer pour continuer");
     }

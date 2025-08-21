@@ -87,19 +87,28 @@ String readLoRaResponse(int timeoutMs = 1000)
       }
     }
   }
-  
   response.trim();  // Enlever \r\n
   return response;
+}
+
+
+void debugPrintNextAlarm2(DateTime nextPayload)  
+{
+  debugSerial.print("Interruption Alarme 2 activée");
+  debugSerial.print(" Alarme 2 (payload) reprogrammée pour: ");
+  debugSerial.print(nextPayload.hour()); debugSerial.print(":");
+  debugSerial.print(nextPayload.minute()); debugSerial.print(":");
+  debugSerial.println(nextPayload.second());
 }
 
 
 void debugPrintLoRaStatus()  
 {
   debugSerial.println("\n=== STATUS LoRa ===");
-  sprintf(OLEDbuf,"ID. module: %d",Module_ID ); 
-  debugSerial.println(OLEDbuf);
-  sprintf(OLEDbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
-  debugSerial.println(OLEDbuf);
+//  sprintf(OLEDbuf,"ID. module: %s",Module_ID ); 
+//  debugSerial.println(OLEDbuf);
+  sprintf(serialbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
+  debugSerial.println(serialbuf);
   debugSerial.print("DevEUI = ");printOndebugSerial((char *)DevEUI,8);
   debugSerial.print("AppEUI = ");printOndebugSerial((char *)AppEUI,8);
   debugSerial.print("AppKey = ");printOndebugSerial((char *)AppKey,16); 
@@ -110,12 +119,11 @@ void debugPrintLoRaStatus()
 // ---------------------------------------------------------------------------*
 //  out : 0 (OK) / 1 (Error)                          
 // ---------------------------------------------------------------------------*
-uint8_t Init_2483(void)
-{ String response = "";
+uint8_t Init_2483(void)   
+{/* 
+  String response = "";
   unsigned long tmt = millis() + 2000;
 
-  Reset_LoRa();	
-delay(500);
   loraSerial.println("sys get ver"); // RN2483 1.0.5 Oct 31 2018 15:06:52
   delay(100);
   while (millis() < tmt)
@@ -127,15 +135,32 @@ debugSerial.print(response);  // la reponse comprend un retour ligne
     debugSerial.println("✓ Communication série OK");
   else
     debugSerial.println("✗ Pas de réponse du modem");
+
+*/   
+/*
+uint8_t len;
+
+  clearLoRaBuffer();
+  loraSerial.println("sys get ver"); // RN2483 1.0.5 Oct 31 2018 15:06:52
+   delay(100);
+  len = loraSerial.readBytesUntil(0x20, serialBuf, 33); //sizeof(Module_ID));
+// envoi sur moniteur RS résultat getHWEUI()
+debugSerial.print("Version: ");  debugSerial.print(len);
+debugSerial.print(" car. lus: "); debugSerial.println(serialBuf);
+*/
+
+
+ 
 //  clearLoRaBuffer(); // normalement buffer vide.
 // Fin test communic ation avec RN2483A
 
   getHWEUI(&Module_ID[0]);     // get the Hardware DevEUI
 
-  sprintf(OLEDbuf,"ID. module: %d",Module_ID ); 
+  sprintf(serialbuf,"Init_2483() ID. module: %s",Module_ID ); 
+debugSerial.println(serialbuf);
 
-debugSerial.println(OLEDbuf);
-debugDisplayOLED(OLEDbuf);
+
+//debugDisplayOLED(OLEDbuf);
 //debugSerial.println("------------------------------------------------------------------");
  
   for (Ruche.Num_Carte=0;Ruche.Num_Carte<9; Ruche.Num_Carte++)
@@ -144,8 +169,8 @@ debugDisplayOLED(OLEDbuf);
     {
 //    debugSerial.print("Num. module: ");  debugSerial.println(Module_ID);
 //    drawtext(OLEDTEXTSIZE, 0, 6, Module_ID );
-//      sprintf(OLEDbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
-//      debugSerial.println(OLEDbuf);
+//      sprintf(serialbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
+//      debugSerial.println(serialbuf);
 //      debugSerial.println("conversion Module_ID"); 
 // INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
       DevEUI = (uint8_t *)SN2483_List[Ruche.Num_Carte];
@@ -157,12 +182,9 @@ debugDisplayOLED(OLEDbuf);
       AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
 //      debugSerial.print("AppKey = ");printOndebugSerial((char *)AppKey,16); 
 //    debugSerial.println("Fin getHWEUI de LoRa.cpp");
-
-debugPrintLoRaStatus();
-  
        break;  // sortie du for() quand trouvé egalité.... pas terrible!!!	
-	}
- debugSerial.println("HWEUI non trouvé");
+	  }
+ //debugSerial.println("HWEUI non trouvé");
   } 
   return((Ruche.Num_Carte == 9) ? 1 : 0); 
 }
@@ -172,24 +194,8 @@ debugPrintLoRaStatus();
 // Gets and stores the LoRa module's HWEUI                              
 // ---------------------------------------------------------------------------*
 void getHWEUI(char *Module_ID)
-{  uint8_t len;
- String response = "";
-  unsigned long tmt = millis() + 2000;
+{ uint8_t len;
 
-Reset_LoRa(); // supprimer si encore erreur lect ID
-delay(2000);
-  clearLoRaBuffer();
-  loraSerial.println("sys get hweui");
-
-   delay(100);
-  while (millis() < tmt)
-    if (loraSerial.available())
-       response += (char)loraSerial.read(); 
-debugSerial.print("getHWEUI(): ");  debugSerial.print(response.length());
-debugSerial.print(" car. lus: "); debugSerial.println(response);
-
-Reset_LoRa(); // supprimer si encore erreur lect ID
-delay(2000);
   clearLoRaBuffer();
   loraSerial.println("sys get hweui");  
    delay(200);
@@ -201,14 +207,12 @@ debugSerial.print(" car. lus: "); debugSerial.println(Module_ID);
 // testée OK le 12/02/2020
 
 
-
-
 // appelé par Send_Lora_Mess() et setup()
 bool setupLoRa()
 { bool result;
  
   result=setupLoRaOTAA();
-//debugSerial.print("setSpreadingFactor: ");  debugSerial.println(LoRa_Config.SpreadingFactor);
+//debugSerial.print("setupLoRa(): setSpreadingFactor: ");  debugSerial.println(LoRa_Config.SpreadingFactor);
 //  LoRaBee.setSpreadingFactor(LoRa_Config.SpreadingFactor); // 7, 9 et 12 echec freudeneck
   return(result);
 }
@@ -218,21 +222,18 @@ bool setupLoRa()
 //  out : 1 OK, 0 Echec                             
 // ---------------------------------------------------------------------------*
 bool setupLoRaOTAA()
-{ 
+{
 // With using the GetHWEUI() function the HWEUI will be used
-//
-
-  debugPrintLoRaStatus();
-
 // if (LoRaBee.initOTA(loraSerial, SN2483_List[Ruche.Num_Carte], AppEUI_List[Ruche.Num_Carte], AppKey_List[Ruche.Num_Carte], true))
   if (LoRaBee.initOTA(loraSerial, DevEUI, AppEUI, AppKey, true))
   {
-    debugSerial.println("Network connection successful.");
+    debugSerial.println("Network connection successful in setupLoRaOTAA().");
     LoRaBee.setSpreadingFactor(LoRa_Config.SpreadingFactor); // 7, 9 et 12 echec freudeneck
     return(1);
   }
   else  // ordre des lignes changé le 07/04/25, 
   { 
+    debugPrintLoRaStatus();
     debugSerial.println("LoRaBee.initOTA: Network connection failed!");
 //    debugSerial.print("DevEUI = "); printOndebugSerial((char *)SN2483_List[Ruche.Num_Carte],8);
 //    debugSerial.print("AppEUI = ");printOndebugSerial((char *)AppEUI_List[Ruche.Num_Carte],8);
@@ -454,7 +455,8 @@ return(dataString);
 //                               
 // ---------------------------------------------------------------------------*
 void Send_DATA_LoRa()
-{ static char Num_Mess=0;
+{
+  static char Num_Mess=0;
   uint8_t lum=0;
   String readingL ,readingT; 
 //String Local_LoRa_Buffer="";
@@ -536,62 +538,55 @@ char chardata[256]="";
 
 // ---------------------------------------------------------------------------*
 void Send_LoRa_Mess(uint8_t *Datas,uint8_t len)
-{
-//  wake_LoRa();   // LED_RED_OFF
-//  setRgbColor(64,0,0);
+{ 
+//Reset_LoRa(); // supprimer si encore erreur 
 
-Reset_LoRa(); // supprimer si encore erreur 
-
-//debugSerial.println("Datas : ID °C   H%   L%   Vba  P1   P2   P3   P4   Vsol");
 printLoraPayloadOndebugSerial(Datas,len);
 debugSerial.println("appel LoRaBee.send");
 
     switch (LoRaBee.send(1,Datas,len))
     {
     case NoError:
-      debugSerial.println("NOError Successful transmission.");
+      debugSerial.println("NOError Successful transmission in Send_LoRa_Mess().");
       break;
     case NoResponse:
-      debugSerial.println("There was no response from the device.");
+      debugSerial.println("There was no response from the device in Send_LoRa_Mess().");
       break;
     case Timeout:
-      debugSerial.println("Connection timed-out. Check your serial connection to the device! Sleeping for 20sec.");
+      debugSerial.println("Connection timed-out in Send_LoRa_Mess(). Check your serial connection to the device! Sleeping for 20sec.");
       delay(20000);
       break;
     case PayloadSizeError:
-      debugSerial.println("The size of the payload is greater than allowed. Transmission failed!");
+      debugSerial.println("The size of the payload is greater than allowed in Send_LoRa_Mess(). Transmission failed!");
     break;
     case InternalError:
-      debugSerial.print("\nOh No! This shouldn't happen. Something is really wrong! The program will reset the RN module...");
+      debugSerial.print("\nOh No! This shouldn't happen in Send_LoRa_Mess(). Something is really wrong! The program will reset the RN module...");
       setupLoRa();
       // renvoyer MESSAGE
    LoRaBee.send(1,Datas, len);
     break;
     case Busy:
-      debugSerial.println("The device is busy. Sleeping for 10 extra seconds.");
+      debugSerial.println("The device is busy in Send_LoRa_Mess(). Sleeping for 10 extra seconds.");
       delay(10000);
       break;
     case NetworkFatalError:
-      debugSerial.println("\nThere is a non-recoverable error with the network connection. The program will reset the RN module...");
+      debugSerial.println("\nThere is a non-recoverable error with the network connection in Send_LoRa_Mess(). The program will reset the RN module...");
       setupLoRa();
        // renvoyer MESSAGE
    LoRaBee.send(1,Datas, len);
        break;
     case NotConnected:
-      debugSerial.print("\nThe device is not connected to the network. The program will reset the RN module...");
+      debugSerial.print("\nThe device is not connected to the network in Send_LoRa_Mess(). The program will reset the RN module...");
       setupLoRa();
       // renvoyer MESSAGE
   LoRaBee.send(1,Datas, len);
       break;
     case NoAcknowledgment:
-      debugSerial.print("There was no acknowledgment sent back!");
+      debugSerial.print("There was no acknowledgment sent back! in Send_LoRa_Mess()");
       break;
     default:
       break;
     }  // Fin Switch
-
-sleep_LoRa();   // LED_RED_OFF
-  //setRgbColor(0,0,0);
 }
 
 

@@ -119,7 +119,8 @@ void Reset_LoRa(void);
 void BuildLoraPayload(void);
 void sleep_LoRa(void);
 void wake_LoRa(void);
-
+void debugPrintLoRaStatus();
+void debugPrintNextAlarm2(DateTime nextPayload);
 
 
 // Gestion menus

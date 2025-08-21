@@ -78,7 +78,7 @@
 // ===== PINS ET INTERFACES =====
 #define loraSerial Serial2 
 #define debugSerial SerialUSB
-#define SERIALBUFLEN 40
+#define SERIALBUFLEN 128
 #define DEBUG_BAUD 115200
 #define SERIAL_TIMEOUT 5000
 

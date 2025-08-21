@@ -6,6 +6,7 @@ void initDebugSerial(void)
 {
     debugSerial.begin(DEBUG_BAUD);
     while ((!debugSerial) && (millis() < SERIAL_TIMEOUT)) {}
+    delay(1000);
     debugSerial.println("Compiled: " __DATE__ ", " __TIME__ ", " VERSION);
     debugSerial.println(PROJECT_NAME);
 }
@@ -25,7 +26,10 @@ debugSerial.println("INIT 2483...");
   
 //debugSerial.print("LoRaBee.getDefaultBaudRate: ");    debugSerial.println(LoRaBee.getDefaultBaudRate());
 // GETHWEUI
-    if (!Init_2483())
+
+
+/* */
+   if (!Init_2483())
       if (Ruche.Num_Carte)
       {
         debugSerial.print(" Init 2483 done with card : ");
@@ -43,6 +47,8 @@ debugSerial.println("INIT 2483...");
       debugDisplayOLED("2483    Failed");
     }  
 //   blink(LED_BUILTIN,200);
+/* */
+debugPrintLoRaStatus();
 }
 
 
