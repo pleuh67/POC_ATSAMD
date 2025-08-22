@@ -92,21 +92,18 @@ String readLoRaResponse(int timeoutMs = 1000)
 }
 
 
-void debugPrintNextAlarm2(DateTime nextPayload)  
+void debugPrintNextAlarm(DateTime nextPayload, int IRQ)  
 {
-  debugSerial.print("Interruption Alarme 2 activée");
-  debugSerial.print(" Alarme 2 (payload) reprogrammée pour: ");
-  debugSerial.print(nextPayload.hour()); debugSerial.print(":");
-  debugSerial.print(nextPayload.minute()); debugSerial.print(":");
-  debugSerial.println(nextPayload.second());
+  sprintf(serialbuf,"Interruption Alarme %d activée, reprogrammée pour: ",IRQ );
+  debugSerial.print(serialbuf); 
+  sprintf(serialbuf,"%02d:%02d:%02d",nextPayload.hour(),nextPayload.minute(),nextPayload.second());
+  debugSerial.println(serialbuf); 
 }
 
 
 void debugPrintLoRaStatus()  
 {
   debugSerial.println("\n=== STATUS LoRa ===");
-//  sprintf(OLEDbuf,"ID. module: %s",Module_ID ); 
-//  debugSerial.println(OLEDbuf);
   sprintf(serialbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
   debugSerial.println(serialbuf);
   debugSerial.print("DevEUI = ");printOndebugSerial((char *)DevEUI,8);
@@ -120,23 +117,7 @@ void debugPrintLoRaStatus()
 //  out : 0 (OK) / 1 (Error)                          
 // ---------------------------------------------------------------------------*
 uint8_t Init_2483(void)   
-{/* 
-  String response = "";
-  unsigned long tmt = millis() + 2000;
-
-  loraSerial.println("sys get ver"); // RN2483 1.0.5 Oct 31 2018 15:06:52
-  delay(100);
-  while (millis() < tmt)
-    if (loraSerial.available())
-       response += (char)loraSerial.read();
-debugSerial.print("Réponse brute: ");
-debugSerial.print(response);  // la reponse comprend un retour ligne
-  if (response.length() > 0)
-    debugSerial.println("✓ Communication série OK");
-  else
-    debugSerial.println("✗ Pas de réponse du modem");
-
-*/   
+{
 /*
 uint8_t len;
 
@@ -148,8 +129,6 @@ uint8_t len;
 debugSerial.print("Version: ");  debugSerial.print(len);
 debugSerial.print(" car. lus: "); debugSerial.println(serialBuf);
 */
-
-
  
 //  clearLoRaBuffer(); // normalement buffer vide.
 // Fin test communic ation avec RN2483A
@@ -167,21 +146,12 @@ debugSerial.println(serialbuf);
   { 
     if (strncmp(HWEUI_List[Ruche.Num_Carte],Module_ID,16)==0)   // égalité des 2 
     {
-//    debugSerial.print("Num. module: ");  debugSerial.println(Module_ID);
-//    drawtext(OLEDTEXTSIZE, 0, 6, Module_ID );
-//      sprintf(serialbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
-//      debugSerial.println(serialbuf);
-//      debugSerial.println("conversion Module_ID"); 
 // INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
       DevEUI = (uint8_t *)SN2483_List[Ruche.Num_Carte];
-//      debugSerial.print("DevEUI = ");printOndebugSerial((char *)DevEUI,8);
 // Init AppEUI
       AppEUI = (uint8_t *)AppEUI_List[Ruche.Num_Carte];
-//      debugSerial.print("AppEUI = ");printOndebugSerial((char *)AppEUI,8);
 // Init AppKey
       AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
-//      debugSerial.print("AppKey = ");printOndebugSerial((char *)AppKey,16); 
-//    debugSerial.println("Fin getHWEUI de LoRa.cpp");
        break;  // sortie du for() quand trouvé egalité.... pas terrible!!!	
 	  }
  //debugSerial.println("HWEUI non trouvé");
@@ -224,7 +194,6 @@ bool setupLoRa()
 bool setupLoRaOTAA()
 {
 // With using the GetHWEUI() function the HWEUI will be used
-// if (LoRaBee.initOTA(loraSerial, SN2483_List[Ruche.Num_Carte], AppEUI_List[Ruche.Num_Carte], AppKey_List[Ruche.Num_Carte], true))
   if (LoRaBee.initOTA(loraSerial, DevEUI, AppEUI, AppKey, true))
   {
     debugSerial.println("Network connection successful in setupLoRaOTAA().");
@@ -235,11 +204,6 @@ bool setupLoRaOTAA()
   { 
     debugPrintLoRaStatus();
     debugSerial.println("LoRaBee.initOTA: Network connection failed!");
-//    debugSerial.print("DevEUI = "); printOndebugSerial((char *)SN2483_List[Ruche.Num_Carte],8);
-//    debugSerial.print("AppEUI = ");printOndebugSerial((char *)AppEUI_List[Ruche.Num_Carte],8);
-//    debugSerial.print("AppKey = ");printOndebugSerial((char *)AppKey_List[Ruche.Num_Carte],16); 
-
-//    debugSerial.println("\nFin LoRaBee.initOTA de LoRa.cpp");
     return(0);
   }
 }
@@ -341,45 +305,45 @@ String Build_Lora_String(String dataGrafana)
   // INITIALISE LA CHAINE TEXTE A ENVOYER
 
 // N° carte
-    snprintf(buffer, BUFF_MAX,"%2c",'3');
+    sprintf(buffer, "%2c",'3');         // ????? %2c = '3' ?????
     dataGrafana +=buffer; 
     
 // température DHT
-    snprintf(buffer, BUFF_MAX,"%5.1f",Data_LoRa.DHT_Temp);
+    sprintf(buffer, "%5.1f",Data_LoRa.DHT_Temp);
     dataGrafana +=buffer;  
 
 // température Peson
-    snprintf(buffer, BUFF_MAX,"%5.1f",Temp_Peson(2));        // DHT_Hum); sp
+    sprintf(buffer,"%5.1f",Temp_Peson(2));        // DHT_Hum); sp
     dataGrafana +=buffer; 
 
 // Luminance LDR
-    snprintf(buffer, BUFF_MAX,"%5.1f",Data_LoRa.Brightness);        // DHT_Hum);sp
+    sprintf(buffer, "%5.1f",Data_LoRa.Brightness);        // DHT_Hum);sp
     dataGrafana +=buffer;//Data_LoRa.Brightness;  
  
 // Tension BAT
-   snprintf(buffer, BUFF_MAX,"%5.2f",Data_LoRa.Bat_Voltage);  // 2 fois???
+   sprintf(buffer, "%5.2f",Data_LoRa.Bat_Voltage);  // 2 fois???
     dataGrafana +=buffer; 
 // MASSE A
-   snprintf(buffer, BUFF_MAX,"%5.2f",Poids_Peson(4));   // au lieu de 1
+   sprintf(buffer, "%5.2f",Poids_Peson(4));   // au lieu de 1
     dataGrafana +=buffer; 
 
 
 // MASSE B
-   snprintf(buffer, BUFF_MAX,"%5.2f",Poids_Peson(2));   
+   sprintf(buffer, "%5.2f",Poids_Peson(2));   
      dataGrafana +=buffer;  
      
 // MASSE C
-   snprintf(buffer, BUFF_MAX,"%5.2f",Poids_Peson(3));  
+   sprintf(buffer, "%5.2f",Poids_Peson(3));  
    dataGrafana +=buffer; 
    
 // MASSE D   peson 2 brut
-   snprintf(buffer, BUFF_MAX,"%5.2f",Contrainte_List [1]); //Data_LoRa.HX711Weight_4);   
+   sprintf(buffer,"%5.2f",Contrainte_List [1]); //Data_LoRa.HX711Weight_4);   
 
-   snprintf(buffer, BUFF_MAX,"%5.2f",Data_LoRa.Bat_Voltage); // 2 fois???
+   sprintf(buffer,"%5.2f",Data_LoRa.Bat_Voltage); // 2 fois???
     dataGrafana +=buffer;  
 
 // tension panneau solaire
-   snprintf(buffer, BUFF_MAX,"%5.2f",Data_LoRa.Solar_Voltage);
+   sprintf(buffer, "%5.2f",Data_LoRa.Solar_Voltage);
     dataGrafana +=buffer; 
 
 // remplace pour débug
@@ -405,43 +369,43 @@ String Build_CSV_String(String dataString)
 // Date; carte; DHT_T; temp2; LDR; VBat; masse1; masse2; masse3; Contrainte 2; VSol
 
 // N° carte
-    snprintf(buffer, BUFF_MAX,"%2c;",'3');
+    sprintf(buffer, "%2c;",'3');
     dataString +=buffer; 
     
 // température DHT
-    snprintf(buffer, BUFF_MAX,"%5.2f;",Data_LoRa.DHT_Temp);
+    sprintf(buffer,"%5.2f;",Data_LoRa.DHT_Temp);
     dataString +=buffer; 
     
 // température Peson
-    snprintf(buffer, BUFF_MAX,"%5.2f;",Temp_Peson(2));        // DHT_Hum); sp
+    sprintf(buffer,"%5.2f;",Temp_Peson(2));        // DHT_Hum); sp
     dataString +=buffer;
     
 // Luminance LDR
-    snprintf(buffer, BUFF_MAX,"%5.1f;",Data_LoRa.Brightness);        // DHT_Hum);sp
+    sprintf(buffer, "%5.1f;",Data_LoRa.Brightness);        // DHT_Hum);sp
     dataString +=buffer; //Data_LoRa.Brightness; 
  
 // Tension BAT
-   snprintf(buffer, BUFF_MAX,"%5.2f;",Data_LoRa.Bat_Voltage);  // 2 fois???
+   sprintf(buffer, "%5.2f;",Data_LoRa.Bat_Voltage);  // 2 fois???
    dataString +=buffer;
 
 // MASSE A
-   snprintf(buffer, BUFF_MAX,"%5.2f;",Poids_Peson(1));   
+   sprintf(buffer, "%5.2f;",Poids_Peson(1));   
    dataString +=buffer;
 
 // MASSE B
-   snprintf(buffer, BUFF_MAX,"%5.2f;",Poids_Peson(2));   
+   sprintf(buffer, "%5.2f;",Poids_Peson(2));   
    dataString +=buffer;
 
 // MASSE C
-   snprintf(buffer, BUFF_MAX,"%5.2f;",Poids_Peson(3));  
+   sprintf(buffer, "%5.2f;",Poids_Peson(3));  
    dataString +=buffer;  
 
 // MASSE D   peson 2 brut
-   snprintf(buffer, BUFF_MAX,"%5.2f;",Contrainte_List [1]); //Poids(4));   
+   sprintf(buffer, "%5.2f;",Contrainte_List [1]); //Poids(4));   
    dataString +=buffer;
 
 // tension panneau solaire
-   snprintf(buffer, BUFF_MAX,"%5.2f;",Data_LoRa.Solar_Voltage);
+   sprintf(buffer,"%5.2f;",Data_LoRa.Solar_Voltage);
    dataString +=buffer;
 
 // remplace pour débug
@@ -539,8 +503,6 @@ char chardata[256]="";
 // ---------------------------------------------------------------------------*
 void Send_LoRa_Mess(uint8_t *Datas,uint8_t len)
 { 
-//Reset_LoRa(); // supprimer si encore erreur 
-
 printLoraPayloadOndebugSerial(Datas,len);
 debugSerial.println("appel LoRaBee.send");
 
@@ -615,7 +577,7 @@ void sleep_LoRa()
     loraSerial.flush();
     LoRaBee.sleep();
     LoRa_sleeps=true;
- ////   sodaq_wdt_safe_delay(5); // without this, it doesn’t sleep.. don’t know why
+    sodaq_wdt_safe_delay(5); // without this, it doesn’t sleep.. don’t know why
 }
 
 // ---------------------------------------------------------------------------*

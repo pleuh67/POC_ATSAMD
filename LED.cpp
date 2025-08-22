@@ -13,25 +13,23 @@
  */
 void initLEDs(void) 
 {
-    pinMode(LED_RED, OUTPUT);
-    pinMode(LED_GREEN, OUTPUT);
-    pinMode(LED_BLUE, OUTPUT);
-    pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
     
-    digitalWrite(LED_RED, LED_OFF);
-    digitalWrite(LED_GREEN, LED_OFF);
-    digitalWrite(LED_BLUE, LED_OFF);
-    digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_RED, LED_OFF);
+  digitalWrite(LED_GREEN, LED_OFF);
+  digitalWrite(LED_BLUE, LED_OFF);
+  digitalWrite(LED_BUILTIN, LOW);
 
-    blinkRedLED();  // vert
-    delay(500);
-    blinkGreenLED();  // Rouge
-    delay(500);
-    blinkBlueLED();  // bleue
- 
-    debugSerial.println("LEDs initialisées");
+  blinkRedLED();  // vert
+  delay(500);
+  blinkGreenLED();  // Rouge
+  delay(500);
+  blinkBlueLED();  // bleue
+debugSerial.println("LEDs initialisées");
 }
-
 /**
  * @brief Allume la LED rouge
  * @param Aucun
@@ -39,7 +37,7 @@ void initLEDs(void)
  */
 void turnONRedLED(void) 
 {
-    digitalWrite(LED_RED, LED_ON);
+  digitalWrite(LED_RED, LED_ON);
 }
 
 /**
@@ -49,7 +47,7 @@ void turnONRedLED(void)
  */
 void turnOffRedLED(void) 
 {
-    digitalWrite(LED_RED, LED_OFF);
+  digitalWrite(LED_RED, LED_OFF);
 }
 /**
  * @brief Fait clignoter la LED builtin pendant BUILTIN_LED_DURATION ms
@@ -58,9 +56,9 @@ void turnOffRedLED(void)
  */
 void blinkRedLED(void) 
 {
-    turnONRedLED();
-    delay(300);
-    turnOffRedLED();
+  turnONRedLED();
+  delay(300);
+  turnOffRedLED();
 }
 
 /**
@@ -70,9 +68,8 @@ void blinkRedLED(void)
  */
 void turnOnBlueLED(void) 
 {
-    digitalWrite(LED_BLUE, LED_ON);
+  digitalWrite(LED_BLUE, LED_ON);
 }
-
 /**
  * @brief Éteint la LED rouge
  * @param Aucun
@@ -80,7 +77,7 @@ void turnOnBlueLED(void)
  */
 void turnOffBlueLED(void) 
 {
-    digitalWrite(LED_BLUE, LED_OFF);
+  digitalWrite(LED_BLUE, LED_OFF);
 }
 
 /**
@@ -90,9 +87,9 @@ void turnOffBlueLED(void)
  */
 void blinkBlueLED(void) 
 {
-    turnOnBlueLED();
-    delay(300);
-    turnOffBlueLED();
+  turnOnBlueLED();
+  delay(300);
+  turnOffBlueLED();
 }
 /**
  * @brief Allume la LED rouge
@@ -101,7 +98,7 @@ void blinkBlueLED(void)
  */
 void turnOnGreenLED(void) 
 {
-    digitalWrite(LED_GREEN, LED_ON);
+  digitalWrite(LED_GREEN, LED_ON);
 }
 
 /**
@@ -111,7 +108,7 @@ void turnOnGreenLED(void)
  */
 void turnOffGreenLED(void) 
 {
-    digitalWrite(LED_GREEN, LED_OFF);
+  digitalWrite(LED_GREEN, LED_OFF);
 }
 
 /**
@@ -121,9 +118,9 @@ void turnOffGreenLED(void)
  */
 void blinkGreenLED(void) 
 {
-    turnOnGreenLED();
-    delay(300);
-    turnOffGreenLED();
+  turnOnGreenLED();
+  delay(300);
+  turnOffGreenLED();
 }
 
 /**
@@ -133,7 +130,7 @@ void blinkGreenLED(void)
  */
 void turnOnBuiltinLED(void) 
 {
-    digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 /**
@@ -143,7 +140,7 @@ void turnOnBuiltinLED(void)
  */
 void turnOffBuiltinLED(void) 
 {
-    digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
 /**
@@ -153,7 +150,7 @@ void turnOffBuiltinLED(void)
  */
 void blinkBuiltinLED(void) 
 {
-    turnOnBuiltinLED();
-    delay(BUILTIN_LED_DURATION);
-    turnOffBuiltinLED();
+  turnOnBuiltinLED();
+  delay(BUILTIN_LED_DURATION);
+  turnOffBuiltinLED();
 }

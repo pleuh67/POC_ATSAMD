@@ -2,6 +2,7 @@
 //Virer 3 x colonne?0:0 valider sur 0.96"
 // https://claude.ai/chat/75e1ba53-8b90-4f09-97a5-cfc366e36a8e
 // 16:40:59.416 -> Alarme 2 (payload) programmée pour: 16:39:16  afficher a chaque reprogrammation
+//  Compiled: Aug 22 2025, 08:34:58, 1.1.1-PL
 
 
 /**
@@ -26,45 +27,44 @@
 // ===== SETUP =====
 void setup() 
 {
-   initDebugSerial(); 
-    // Initialisation des LEDs
-    initLEDs();
+  initDebugSerial(); 
+  // Initialisation des LEDs
+  initLEDs();
     
-    // Initialisation du mode selon PIN_PE
-    pinMode(PIN_PE, INPUT_PULLUP);
-    modeExploitation = digitalRead(PIN_PE);
+  // Initialisation du mode selon PIN_PE
+  pinMode(PIN_PE, INPUT_PULLUP);
+  modeExploitation = digitalRead(PIN_PE);
     
-    debugSerial.print("Mode détecté: ");
-    debugSerial.println(modeExploitation ? "EXPLOITATION" : "PROGRAMMATION");
+  debugSerial.print("Mode détecté: ");
+  debugSerial.println(modeExploitation ? "EXPLOITATION" : "PROGRAMMATION");
+   
+  // Initialisation I2C
+  Wire.begin();
     
-    // Initialisation I2C
-    Wire.begin();
-    
-    // Initialisation OLED
-    if (OLED) 
-    {
-        initOLED();
-        debugDisplayOLED("initOLED OK"); // scrolling lors du setup(); 
-    }
+  // Initialisation OLED
+  if (OLED) 
+  {
+    initOLED();
+    debugDisplayOLED("initOLED OK"); // scrolling lors du setup(); 
+  }
 
   init2483A();
   initLoRa();
 
-    // Initialisation RTC
-    initRTC();
-    debugDisplayOLED("initRTC OK");
+  // Initialisation RTC
+  initRTC();
+  debugDisplayOLED("initRTC OK");
 
-    // Initialisation configuration
-    initConfig();
-    debugDisplayOLED("initConfig OK");
+  // Initialisation configuration
+  initConfig();
+  debugDisplayOLED("initConfig OK");
         
-    // Configuration des alarmes RTC
-    setRTCAlarms();
-    debugDisplayOLED("setRTCAlarms OK");
+  // Configuration des alarmes RTC
+  setRTCAlarms();
+  debugDisplayOLED("setRTCAlarms OK");
     
-    // Configuration interruption externe
-    pinMode(RTC_INTERRUPT_PIN, INPUT_PULLUP);
-
+  // Configuration interruption externe
+  pinMode(RTC_INTERRUPT_PIN, INPUT_PULLUP);
 // AJOUTÉ: Debug configuration
 debugSerial.print("Configuration interruption sur pin ");
 debugSerial.println(RTC_INTERRUPT_PIN);
@@ -74,11 +74,11 @@ debugSerial.print("État initial pin RTC: ");
 debugSerial.println(digitalRead(RTC_INTERRUPT_PIN) ? "HIGH" : "LOW");
 
 // AJOUTÉ: Configuration DS3231 AVANT interruption
-rtc.writeSqwPinMode(DS3231_OFF);
-rtc.clearAlarm(1);
-rtc.clearAlarm(2);
+  rtc.writeSqwPinMode(DS3231_OFF);
+  rtc.clearAlarm(1);
+  rtc.clearAlarm(2);
     
-    LowPower.attachInterruptWakeup(RTC_INTERRUPT_PIN, onRTCAlarm, FALLING);
+  LowPower.attachInterruptWakeup(RTC_INTERRUPT_PIN, onRTCAlarm, FALLING);
     
  // AJOUTÉ: Tests supplémentaires
 debugSerial.println("Interruption RTC attachée");
@@ -86,21 +86,18 @@ delay(1000);
 debugSerial.print("État pin après config: ");
 debugSerial.println(digitalRead(RTC_INTERRUPT_PIN) ? "HIGH" : "LOW");
 
-
-
 debugSerial.println("Initialisation terminee");
 
-    void forcerSynchronisationDS3231();
+  forcerSynchronisationDS3231();
 
- debugSerial.println("Mise à l'heure\nStart loop(); =====================================");
+debugSerial.println("Mise à l'heure\nStart loop(); =====================================");
     
-    if (OLED) 
-    {
-        debugDisplayOLED("Init terminee");
-        delay(2000);
-        clearOLED();
-    }
-
+  if (OLED) 
+  {
+    debugDisplayOLED("Init terminee");
+    delay(2000);
+    clearOLED();
+  }
 //  vider cache : debugDisplayOLED()  
  debugDisplayOLEDReset();
 }
@@ -112,23 +109,6 @@ debugSerial.println("Initialisation terminee");
 // ===== LOOP PRINCIPAL =====
 void loop() 
 {  
-
-  
-/*
-cnt %10 ? debugSerial.print("b"); : debugSerial.print(cnt);
-if (cnt++ > 120)
-{
-//  sendPayload();
-//  init2483A();
-//  initLoRa();
-  Send_LoRa_Mess((uint8_t*)testPayload,7);
-  cnt =0;
-  debugSerial.println("");
-}
-*/
-
-
-
 /*    
     // *** TRAITEMENT CLAVIER NON-BLOQUANT ***
     processContinuousKeyboard();
@@ -147,50 +127,39 @@ if (cnt++ > 120)
     if (modeExploitation)         // OK, validé, GreenLED => couleur Red
     {
         blinkGreenLED();          // PCB=> RedLED
-        handleOperationMode();
+        handleOperationMode();    // normalement rien à faire dans ce mode.
     } 
     else                          // OK, validé, BlueLED
     {
         blinkBlueLED();
-        handleProgrammingMode();  // fait : drawScreenTime(0, 0);
+        handleProgrammingMode();  // faire gestion Clavier et actions associées
     }
     
-    // Gestion des interruptions
-    if (wakeupPayload) 
+// Gestion des interruptions traitées en dehors de 
+// handleProgrammingMode() et handleOperationMode()
+    if (wakeupPayload)                                    // Envoi LoRa, LED Activité LoRa
     {
         wakeupPayload = false;
-//debugSerial.println("PROG/Réveil payload");
+/*
+ debugSerial.println("PROG/Réveil payload");
         if (OLED) 
         {
             debugDisplayOLED("PROG/Reveil payload");
         }
- // sendPayload();
-//  init2483A();
-//  initLoRa();
-  Send_LoRa_Mess((uint8_t*)testPayload,7);
-        turnONRedLED();
-        delay(RED_LED_DURATION);
+*/
+        turnONRedLED();     // PCB donne GREEN?
+        Send_LoRa_Mess((uint8_t*)testPayload,7);
         turnOffRedLED();
+        drawScreenTime(0, 0); // refresh Time/Date 
     }
-    if (wakeup1Sec && !modeExploitation) 
+    if (wakeup1Sec && !modeExploitation)                  // màj heure, blink LED
     {
         wakeup1Sec = false;
-        debugSerial.println("PROG/Réveil 1 sec");
-/*
-// Debug moins verbeux
-      static int debugCounter = 0;
-      debugCounter++;
-      if (debugCounter % 10 == 0) // ← AFFICHER SEULEMENT TOUTES LES 10 SECONDES
-      {
-          debugSerial.print("Réveil 1 sec - Alarme 1 (#");
-          debugSerial.print(debugCounter);
-          debugSerial.println(")");
-      }
-*/      
+//debugSerial.println("PROG/Réveil 1 sec");
         blinkBuiltinLED();
         if (OLED) 
         {
-            drawScreenTime(0, 0); // refresh Time/Date every second
+            drawScreenRefreshTime(0, 0); // partial refresh Time/Date every second
         }
     }
     
@@ -212,19 +181,18 @@ if (cnt++ > 120)
  */
 void initRTC(void) 
 {
-    if (!rtc.begin()) 
-    {
-        debugSerial.println("Erreur: RTC introuvable");
-        while (1) delay(10);
-    }
-    
-    if (rtc.lostPower()) 
-    {
-        debugSerial.println("RTC a perdu l'heure, mise à jour avec l'heure de compilation");
-        rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    }
-    
-    debugSerial.println("RTC initialisé");
+  if (!rtc.begin()) 
+  {
+    debugSerial.println("Erreur: RTC introuvable");
+    while (1) delay(10);
+  }
+   
+  if (rtc.lostPower()) 
+  {
+    debugSerial.println("RTC a perdu l'heure, mise à jour avec l'heure de compilation");
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+  debugSerial.println("RTC initialisé");
 }
 
 /**
@@ -246,56 +214,27 @@ DateTime getSystemTime(void)
  */
 void setRTCAlarms(void) 
 {
-/*
-Fonctions modifiées :
-
-setRTCAlarms() : Configuration inversée
-
-Alarme 1 → DS3231_A1_PerSecond pour chaque seconde
-Alarme 2 → DS3231_A2_Minute pour payload
- */
-
-  
-    clearRTCAlarms();
-
-     
-     debugSerial.print(DEBUG_INTERVAL_1SEC);
-     debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
-     // ALARME 1 : Toutes les secondes en mode programmation
-     // AJOUTÉ: Commentaires critiques sur interruptions
-    // CRITIQUE: Activer les interruptions dans le registre de contrôle du DS3231
-    // Sans cela, le pin INT/SQW ne changera pas d'état
-   if (DEBUG_INTERVAL_1SEC && !modeExploitation) 
-    {
-        DateTime nextSecond = rtc.now() + TimeSpan(0, 0, 0, 10);
-        rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
-        debugSerial.print("Alarme 1 (1 sec) programmée pour: ");
-        debugSerial.print(nextSecond.hour()); debugSerial.print(":");
-        debugSerial.print(nextSecond.minute()); debugSerial.print(":");
-        debugSerial.println(nextSecond.second());
-        debugSerial.print("Alarme 1 (CHAQUE seconde) programmée...");       
-        debugSerial.println("Interruption Alarme 1 activée");
-      }
-    
-  // ALARME 2 : Payload toutes les X minutes
-    if (DEBUG_WAKEUP_PAYLOAD) 
-    {
-//        DateTime nextPayload = rtc.now() + TimeSpan(0, 0, WAKEUP_INTERVAL_PAYLOAD, 0);
-        DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
-        rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
-debugPrintNextAlarm2(nextPayload);
-     }
-
-    
-    // AJOUTÉ: Test état pin après configuration
-    debugSerial.print("État pin RTC après config alarmes: ");
-    debugSerial.println(digitalRead(RTC_INTERRUPT_PIN) ? "HIGH" : "LOW");
-    
-    debugSerial.println("=== FIN CONFIGURATION ALARMES + INTERRUPTIONS ===");
-
-    
-   // Activer les interruptions
-    rtc.writeSqwPinMode(DS3231_OFF); 
+  clearRTCAlarms();
+debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
+  if (DEBUG_INTERVAL_1SEC && !modeExploitation) 
+  {
+    DateTime nextSecond = rtc.now() + TimeSpan(0, 0, 0, 10);
+    rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
+debugPrintNextAlarm(nextSecond, 1);  
+  }
+// ALARME 2 : Payload toutes les X minutes
+  if (DEBUG_WAKEUP_PAYLOAD) 
+  {
+    DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
+   rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
+debugPrintNextAlarm(nextPayload,2);
+  }
+// AJOUTÉ: Test état pin après configuration
+debugSerial.print("État pin RTC après config alarmes: ");
+debugSerial.println(digitalRead(RTC_INTERRUPT_PIN) ? "HIGH" : "LOW");
+debugSerial.println("=== FIN CONFIGURATION ALARMES + INTERRUPTIONS ===");
+// Activer les interruptions
+  rtc.writeSqwPinMode(DS3231_OFF); 
 }
 
 /**
@@ -305,8 +244,8 @@ debugPrintNextAlarm2(nextPayload);
  */
 void clearRTCAlarms(void) 
 {
-    rtc.clearAlarm(1);
-    rtc.clearAlarm(2);
+  rtc.clearAlarm(1);
+  rtc.clearAlarm(2);
 }
 
 
@@ -317,24 +256,20 @@ void clearRTCAlarms(void)
  * @return key_code_t Code de la touche ou état d'erreur
  */
 key_code_t readKeyOnce(void) 
-{
-    static const int levels[NB_KEYS] = {10, 149, 332, 501, 735};
-    static const key_code_t keycodes[NB_KEYS] = {KEY_1, KEY_2, KEY_3, KEY_4, KEY_5};
-    
-    int val = analogRead(KBD_ANA);
-    
-    if (val > 1000) return KEY_NONE;
-  //  if (val < 5) return KEY_INVALID;
-    
-    for (int i = 0; i < NB_KEYS; i++) 
+{ static const int levels[NB_KEYS] = {10, 149, 332, 501, 735};
+  static const key_code_t keycodes[NB_KEYS] = {KEY_1, KEY_2, KEY_3, KEY_4, KEY_5};
+  int val = analogRead(KBD_ANA);
+
+  if (val > 1000) return KEY_NONE;
+//  if (val < 5) return KEY_INVALID;
+  for (int i = 0; i < NB_KEYS; i++) 
+  {
+    if (val >= levels[i] - TOL && val <= levels[i] + TOL) 
     {
-        if (val >= levels[i] - TOL && val <= levels[i] + TOL) 
-        {
-            return keycodes[i];
-        }
+      return keycodes[i];
     }
-    
-    return KEY_INVALID;
+  }
+  return KEY_INVALID;
 }
 
 /**
@@ -343,29 +278,26 @@ key_code_t readKeyOnce(void)
  * @return key_code_t Code de touche stable après confirmation
  */
 key_code_t readKey(void) 
-{
-    key_code_t key, key2;
-    int stable_count = 0;
+{ key_code_t key, key2;
+  int stable_count = 0;
     
-    key = readKeyOnce();
-    
-    do 
+  key = readKeyOnce();
+  do 
+  {
+    delay(DEBOUNCE_DELAY_MS);
+    key2 = readKeyOnce();
+   
+    if (key == key2) 
     {
-        delay(DEBOUNCE_DELAY_MS);
-        key2 = readKeyOnce();
-        
-        if (key == key2) 
-        {
-            stable_count++;
-        } 
-        else 
-        {
-            stable_count = 0;
-            key = key2;
-        }
-    } while (stable_count < DEBOUNCE_COUNT);
-    
-    return key;
+      stable_count++;
+    } 
+    else 
+    {
+      stable_count = 0;
+      key = key2;
+    }
+  } while (stable_count < DEBOUNCE_COUNT);
+  return key;
 }
 
 /**
@@ -373,19 +305,18 @@ key_code_t readKey(void)
  * @param key Code de la touche
  * @return const char* Nom de la touche
  */
-const char* keyToString(key_code_t key) 
-{
-    switch (key) 
-    {
-        case KEY_NONE: return "NONE";
-        case KEY_1: return "KEY_1";
-        case KEY_2: return "KEY_2";
-        case KEY_3: return "KEY_3";
-        case KEY_4: return "KEY_4";
-        case KEY_5: return "KEY_5";
-        case KEY_INVALID: return "INVALID";
-        default: return "UNKNOWN";
-    }
+const char* non_keyToString(key_code_t key) 
+{ switch (key) 
+  {
+    case KEY_NONE: return "NONE";
+    case KEY_1: return "KEY_1";
+    case KEY_2: return "KEY_2";
+    case KEY_3: return "KEY_3";
+    case KEY_4: return "KEY_4";
+    case KEY_5: return "KEY_5";
+    case KEY_INVALID: return "INVALID";
+    default: return "UNKNOWN";
+  }
 }
 
 /**
@@ -393,45 +324,44 @@ const char* keyToString(key_code_t key)
  * @param Aucun
  * @return void
  */
-void testKbd(void) 
-{
-    key_code_t key = readKey();
+void debugPrintKbdKey(void) 
+{ key_code_t key = readKey();
     
-    switch (key) 
-    {
-        case KEY_NONE:
-            break;
+  switch (key) 
+  {
+    case KEY_NONE:
+        break;
+          
+    case KEY_1:
+        debugSerial.println("Touche 1 pressée");
+        break;
             
-        case KEY_1:
-            debugSerial.println("Touche 1 pressée");
-            break;
+    case KEY_2:
+        debugSerial.println("Touche 2 pressée");
+        break;
             
-        case KEY_2:
-            debugSerial.println("Touche 2 pressée");
-            break;
+    case KEY_3:
+        debugSerial.println("Touche 3 pressée");
+        break;
             
-        case KEY_3:
-            debugSerial.println("Touche 3 pressée");
-            break;
+    case KEY_4:
+        debugSerial.println("Touche 4 pressée");
+        break;
             
-        case KEY_4:
-            debugSerial.println("Touche 4 pressée");
-            break;
+    case KEY_5:
+        debugSerial.println("Touche 5 pressée");
+        break;
+           
+    case KEY_INVALID:
+        debugSerial.print("Erreur de lecture clavier - valeur: ");
+        debugSerial.println(analogRead(KBD_ANA));
+        break;
             
-        case KEY_5:
-            debugSerial.println("Touche 5 pressée");
-            break;
-            
-        case KEY_INVALID:
-            debugSerial.print("Erreur de lecture clavier - valeur: ");
-            debugSerial.println(analogRead(KBD_ANA));
-            break;
-            
-        default:
-            debugSerial.println("Code de touche inconnu");
-            break;
-    }
-    delay(100);
+    default:
+        debugSerial.println("Code de touche inconnu");
+        break;
+  }
+  delay(100);
 }
 
 /**
@@ -661,10 +591,11 @@ void drawScreenRefreshTime(uint8_t ligne, uint8_t colonne)
     if (OLED) 
     {  
         DateTime systemTime = getSystemTime();
+/*
         sprintf(OLEDbuf, "%02d:%02d:%02d - %02d/%02d/%d", 
                 systemTime.hour(), systemTime.minute(), systemTime.second(),
                 systemTime.day(), systemTime.month(), systemTime.year());
-
+*/
 // Check changes and refresh with:
 // printVarOLED(uint8_t ligne, uint8_t col, const void *valeur, char type)
 /* @param ligne Ligne sur l'écran OLED où afficher la variable
@@ -693,6 +624,7 @@ int val;
                { val = systemTime.second();
                  printVarOLED(ligne, 6, &val, 'i');
                }       
+/*               
                if (oldSystemTime.day() != systemTime.day())
                { val = systemTime.day();
    //              printVarOLED(ligne, 11, &val, 'i');
@@ -705,7 +637,7 @@ int val;
                { val = systemTime.year();
      //            printVarOLED(ligne, 17, &val, 'i');
                }               
-               
+ */              
          if (systemTime != oldSystemTime)
          { 
   //          drawtext(1, ligne, colonne, OLEDbuf);
@@ -856,12 +788,9 @@ void handleOperationMode(void)
       drawtext(1, 7, 0, "MODE EXPLOITATION");
       switchToOperationMode = false;
     }  
- //   drawScreenRefreshTime(0, 0);
+//   drawScreenRefreshTime(0, 0);
   }
-
-//  sendPayload();
   Send_LoRa_Mess((uint8_t*)testPayload,7);
-  
 }
 
 /**
@@ -883,6 +812,11 @@ void handleProgrammingMode(void)
     }  
     drawScreenRefreshTime(0, 0);
   }
+
+
+
+
+  
 }
 
 /**
@@ -892,18 +826,18 @@ void handleProgrammingMode(void)
  */
 void onRTCAlarm(void) 
 { static int counter1=0,counter2=0;
-  char buffer[21];
 
- //   debugDisplayOLED("onRTCAlarm()");
-
-    // ALARME 1 : Toutes les secondes (mode programmation)
-    if (rtc.alarmFired(1)) 
-    {
-        wakeup1Sec = true;
-        rtc.clearAlarm(1);
-snprintf(buffer, sizeof(buffer), "IRQ 1s %d =====================================", counter1++);
-debugDisplayOLED(buffer);   
-debugSerial.println(buffer);        
+// ALARME 1 : Toutes les secondes (mode programmation)
+  if (rtc.alarmFired(1)) 
+  {
+    wakeup1Sec = true;
+    rtc.clearAlarm(1);
+/*        
+sprintf(serialbuf,  "IRQ 1s %d =====================================", counter1);
+debugSerial.println(serialbuf); 
+sprintf(OLEDbuf,  "IRQ 1s %d ", counter1++);
+debugDisplayOLED(OLEDbuf);   
+*/       
 /* en mode  DS3231_A1_PerSecond, ne pas reprogrammer l'alarme
 // L'alarme DS3231_A1_PerSecond se répète automatiquement
 // Seulement reprogrammer si le mode change
@@ -917,30 +851,19 @@ debugSerial.println(buffer);
            
         }
 */ 
-//       setRTCAlarms(); // Reprogrammer l'alarme
-    }
-    // ALARME 2 : Payload périodique    
-    if (rtc.alarmFired(2)) 
-    {
-        wakeupPayload = true;
-        rtc.clearAlarm(2);
-snprintf(buffer, sizeof(buffer), "IRQ Payload %d =====================================", counter2++);
-debugDisplayOLED(buffer);  
-debugSerial.println(buffer);  
-        // Reprogrammer l'alarme payload
-        if (DEBUG_WAKEUP_PAYLOAD) 
-        {
-            DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
-            rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
-debugPrintNextAlarm2(nextPayload);            
-        }
+  }
+  // ALARME 2 : Payload périodique    
+  if (rtc.alarmFired(2)) 
+  {
+    wakeupPayload = true;
+    rtc.clearAlarm(2);      
+  }
 /*
         if (!modeExploitation) 
         {
             setRTCAlarms(); // Reprogrammer l'alarme
         }
 */        
-    }
 }
 
 
@@ -1270,23 +1193,23 @@ void printVarOLED(uint8_t ligne, uint8_t col, const void *valeur, char type)
     switch (type) 
     {
         case 'c':
-            snprintf(buffer, sizeof(buffer), "%c", *((char *)valeur));
+            sprintf(buffer, "%c", *((char *)valeur));
   
             break;
         case 's':
-            snprintf(buffer, sizeof(buffer), "%s", (char *)valeur);
+            sprintf(buffer, "%s", (char *)valeur);
             break;
         case 'i':
         case 'I':
-            snprintf(buffer, sizeof(buffer), "%02d", *((int *)valeur));
+            sprintf(buffer, "%02d", *((int *)valeur));
  // %02d arrangement temporaire           
             break;
         case 'f':
         case 'F':
-            snprintf(buffer, sizeof(buffer), "%.2f", *((float *)valeur));
+            sprintf(buffer, "%.2f", *((float *)valeur));
             break;
         default:
-            snprintf(buffer, sizeof(buffer), "<inconnu>");
+            sprintf(buffer, "<inconnu>");
             break;
     }
     drawtext(1,ligne, col, buffer);
@@ -1305,36 +1228,35 @@ void printVarOLED(uint8_t ligne, uint8_t col, const void *valeur, char type)
  */
 void printFormattedOLED(uint8_t ligne, uint8_t col, const void *valeur, char type,
                         const char *unite, int precision, char align) 
-{
-    char buffer[22];
-    char valeurStr[16] = "";
+{ char buffer[22];
+  char valeurStr[16] = "";
     
     switch (type) 
     {
         case 'c':
-            snprintf(valeurStr, sizeof(valeurStr), "%c", *((char *)valeur));
+            sprintf(valeurStr, "%c", *((char *)valeur));
             break;
         case 's':
-            snprintf(valeurStr, sizeof(valeurStr), "%s", (char *)valeur);
+            sprintf(valeurStr, "%s", (char *)valeur);
             break;
         case 'i':
         case 'I':
-            snprintf(valeurStr, sizeof(valeurStr), "%d", *((int *)valeur));
+            sprintf(valeurStr, "%d", *((int *)valeur));
             break;
         case 'f':
         case 'F': 
         {
             char format[8];
-            snprintf(format, sizeof(format), "%%.%df", precision);
-            snprintf(valeurStr, sizeof(valeurStr), format, *((float *)valeur));
+            sprintf(format, "%%.%df", precision);
+            sprintf(valeurStr, format, *((float *)valeur));
             break;
         }
         default:
-            snprintf(valeurStr, sizeof(valeurStr), "<invalide>");
+            sprintf(valeurStr, "<invalide>");
             break;
     }
     
-    snprintf(buffer, sizeof(buffer), "%s %s", valeurStr, unite ? unite : "");
+    sprintf(buffer, "%s %s", valeurStr, unite ? unite : "");
     
     int len = strlen(buffer);
     char ligneFinale[22] = "";
@@ -1342,17 +1264,16 @@ void printFormattedOLED(uint8_t ligne, uint8_t col, const void *valeur, char typ
     switch (align) 
     {
         case 'R':
-            snprintf(ligneFinale, sizeof(ligneFinale), "%*s", 20, buffer);
+            sprintf(ligneFinale, "%*s", 20, buffer);
             break;
         case 'C':
-            snprintf(ligneFinale, sizeof(ligneFinale), "%*s", (20 + len)/2, buffer);
+            sprintf(ligneFinale, "%*s", (20 + len)/2, buffer);
             break;
         default:
-            snprintf(ligneFinale, sizeof(ligneFinale), "%-20s", buffer);
+            sprintf(ligneFinale, "%-20s", buffer);
             break;
-    }
-    
-    drawtext(1,ligne, col, ligneFinale);
+    }   
+  drawtext(1,ligne, col, ligneFinale);
 }
 
 /**
@@ -1710,7 +1631,7 @@ void inputListValueLibelle(const char *label, const int *valeurs, const char **l
         drawtext(1,0, 0, label);
         
         char ligne1[21];
-        snprintf(ligne1, sizeof(ligne1), "%s (%d)", libelles[index], valeurs[index]);
+        sprintf(ligne1, "%s (%d)", libelles[index], valeurs[index]);
         drawtext(1,1, 0, ligne1);
         drawtext(1,3, 0, "T3: ↑  T4: ↓");
         drawtext(1,4, 0, "T5: Valider  T2: Annuler");
@@ -1990,60 +1911,52 @@ void configureLowPowerMode(void)
  */
 void checkRTCStatus(void)
 {
-    // Vérification de l'alarme 1 (1 seconde)
-    if (rtc.alarmFired(1))
-    {
-        debugSerial.println("*** ALARME 1 DÉTECTÉE (1 SECONDE) ***");
-        wakeup1Sec = true;
-        rtc.clearAlarm(1);
+// Vérification de l'alarme 1 (1 seconde)
+  if (rtc.alarmFired(1))
+  {
+    debugSerial.println("*** ALARME 1 DÉTECTÉE (1 SECONDE) ***");
+    wakeup1Sec = true;
+    rtc.clearAlarm(1);
  // même remarque que dans : void onRTCAlarm(void)    
- /*
- // Reprogrammer l'alarme 1 seconde
-        if (DEBUG_INTERVAL_1SEC && !modeExploitation)
-        {
-            DateTime nextSecond = rtc.now() + TimeSpan(0, 0, 0, 1);
-            rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
-        }
-*/        
-    }
+  }
     
     // Vérification de l'alarme 2 (payload)
-    if (rtc.alarmFired(2))
-    {
-        debugSerial.println("*** ALARME 2 DÉTECTÉE (PAYLOAD) ***");
-        wakeupPayload = true;
-        rtc.clearAlarm(2);
+  if (rtc.alarmFired(2))
+  {
+    debugSerial.println("*** ALARME 2 DÉTECTÉE (PAYLOAD) ***");
+    wakeupPayload = true;
+    rtc.clearAlarm(2);
         
-        // Reprogrammer l'alarme payload
-        if (DEBUG_WAKEUP_PAYLOAD)
-        {
-            DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
-            rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
- debugPrintNextAlarm2(nextPayload);           
-        }
+    // Reprogrammer l'alarme payload
+    if (DEBUG_WAKEUP_PAYLOAD)
+    {
+      DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
+      rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
+ debugPrintNextAlarm(nextPayload,2);           
     }
+  }
     
     // Debug périodique de l'état des alarmes (toutes les 60 secondes)
     static unsigned long lastAlarmDebug = 0;
-    if (millis() - lastAlarmDebug > 60000)
-    {
-        lastAlarmDebug = millis();
+  if (millis() - lastAlarmDebug > 60000)
+  {
+    lastAlarmDebug = millis();
         
-        debugSerial.println("=== ÉTAT ALARMES RTC (ÉCHANGÉES) ===");
-        debugSerial.print("Alarme 1 (1 sec) activée: ");
-        debugSerial.println((DEBUG_INTERVAL_1SEC && !modeExploitation) ? "OUI" : "NON");
-        debugSerial.print("Alarme 2 (payload) activée: ");
-        debugSerial.println(DEBUG_WAKEUP_PAYLOAD ? "OUI" : "NON");
-        debugSerial.print("Mode: ");
-        debugSerial.println(modeExploitation ? "EXPLOITATION" : "PROGRAMMATION");
-        
-        // Afficher l'heure actuelle
-        DateTime now = rtc.now();
-        debugSerial.print("Heure actuelle: ");
-        debugSerial.print(now.hour()); debugSerial.print(":");
-        debugSerial.print(now.minute()); debugSerial.print(":");
-        debugSerial.println(now.second());
-    }
+    debugSerial.println("=== ÉTAT ALARMES RTC (ÉCHANGÉES) ===");
+    debugSerial.print("Alarme 1 (1 sec) activée: ");
+    debugSerial.println((DEBUG_INTERVAL_1SEC && !modeExploitation) ? "OUI" : "NON");
+    debugSerial.print("Alarme 2 (payload) activée: ");
+    debugSerial.println(DEBUG_WAKEUP_PAYLOAD ? "OUI" : "NON");
+    debugSerial.print("Mode: ");
+    debugSerial.println(modeExploitation ? "EXPLOITATION" : "PROGRAMMATION");
+       
+    // Afficher l'heure actuelle
+    DateTime now = rtc.now();
+    debugSerial.print("Heure actuelle: ");
+    debugSerial.print(now.hour()); debugSerial.print(":");
+    debugSerial.print(now.minute()); debugSerial.print(":");
+    debugSerial.println(now.second());
+  }
 }
 
 
@@ -2090,76 +2003,73 @@ void executeOperationMode(void)     // pas appelé à la base....
  * @return void
  */
 void executeProgrammingMode(void)
-{
-    static unsigned long lastModeDisplay = 0;
-    static bool menuDisplayed = false;
+{ static unsigned long lastModeDisplay = 0;
+  static bool menuDisplayed = false;
     
-    // Affichage initial du menu
-    if (!menuDisplayed || (millis() - lastModeDisplay > 30000))
+  // Affichage initial du menu
+  if (!menuDisplayed || (millis() - lastModeDisplay > 30000))
+  {
+    lastModeDisplay = millis();
+    menuDisplayed = true;
+        
+    if (OLED)
     {
-        lastModeDisplay = millis();
-        menuDisplayed = true;
-        
-        if (OLED)
-        {
-            clearOLED();
-            drawtext(1,0, 0, "MODE PROGRAMMATION");
-            drawtext(1,1, 0, "PIN_PE = LOW");
-            drawtext(1,3, 0, "T1: Test clavier");
-            drawtext(1,4, 0, "T2: Config");
-            drawtext(1,5, 0, "T3: Heure/Date");
-            drawtext(1,6, 0, "T4: Debug");
-            drawtext(1,7, 0, "T5: Infos");
-        }
-        
-        debugSerial.println("=== MODE PROGRAMMATION ===");
-        debugSerial.println("Menu principal affiché");
+      clearOLED();
+      drawtext(1,0, 0, "MODE PROGRAMMATION");
+      drawtext(1,1, 0, "PIN_PE = LOW");
+      drawtext(1,3, 0, "T1: Test clavier");
+      drawtext(1,4, 0, "T2: Config");
+      drawtext(1,5, 0, "T3: Heure/Date");
+      drawtext(1,6, 0, "T4: Debug");
+      drawtext(1,7, 0, "T5: Infos");
     }
+    debugSerial.println("=== MODE PROGRAMMATION ===");
+    debugSerial.println("Menu principal affiché");
+  }
     
-    // Traitement des touches du menu principal
-    key_code_t touche = readKey();
-    if (touche != KEY_NONE)
+  // Traitement des touches du menu principal    
+  key_code_t touche = readKey();
+  if (touche != KEY_NONE)
+  {
+    menuDisplayed = false; // Forcer le réaffichage du menu après action
+        
+    switch (touche)
     {
-        menuDisplayed = false; // Forcer le réaffichage du menu après action
-        
-        switch (touche)
-        {
-            case KEY_1:
-                debugSerial.println("Test clavier sélectionné");
-                if (OLED)
-                {
-                    displayMessageL8("Test clavier...", false, false);
-                }
-                // La fonction testKbd() sera appelée automatiquement dans la boucle
-                break;
+      case KEY_1:
+          debugSerial.println("Test clavier sélectionné");
+          if (OLED)
+          {
+            displayMessageL8("Test clavier...", false, false);
+          }
+          // La fonction testKbd() sera appelée automatiquement dans la boucle
+          break;
                 
-            case KEY_2:
-                debugSerial.println("Configuration sélectionnée");
-                handleConfigurationMenu();
-                break;
+      case KEY_2:
+          debugSerial.println("Configuration sélectionnée");
+          handleConfigurationMenu();
+          break;
                 
-            case KEY_3:
-                debugSerial.println("Heure/Date sélectionnée");
-                handleTimeDateRegisterMenu();
-                break;
+      case KEY_3:
+          debugSerial.println("Heure/Date sélectionnée");
+          handleTimeDateRegisterMenu();
+          break;
                 
-            case KEY_4:
-                debugSerial.println("Debug sélectionné");
-                handleDebugMenu();
-                break;
+      case KEY_4:
+          debugSerial.println("Debug sélectionné");
+          handleDebugMenu();
+          break;
+              
+      case KEY_5:
+          debugSerial.println("Infos sélectionnées");
+          displaySystemInfo();
+          break;
                 
-            case KEY_5:
-                debugSerial.println("Infos sélectionnées");
-                displaySystemInfo();
-                break;
-                
-            default:
-                break;
-        }
+      default:
+          break;
     }
-    
-    // Test clavier en continu en mode programmation
-    testKbd();
+  }
+  // Test clavier en continu en mode programmation
+  debugPrintKbdKey();
 }
 
 /**

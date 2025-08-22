@@ -48,7 +48,7 @@ void blinkBuiltinLED(void);
 key_code_t readKeyOnce(void);
 key_code_t readKey(void);
 const char* keyToString(key_code_t key);
-void testKbd(void);
+void debugPrintKbdKey(void);
 key_code_t readKeyNonBlocking(void);
 void processContinuousKeyboard(void);
 
@@ -120,7 +120,7 @@ void BuildLoraPayload(void);
 void sleep_LoRa(void);
 void wake_LoRa(void);
 void debugPrintLoRaStatus();
-void debugPrintNextAlarm2(DateTime nextPayload);
+void debugPrintNextAlarm(DateTime nextPayload, int IRQ);
 
 
 // Gestion menus

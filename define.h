@@ -152,6 +152,7 @@
 // LoRa
 // ****************************************************************************
 #include <Sodaq_RN2483.h>   // et pas OrangeForRN2483
+#include <Sodaq_wdt.h>
 //#define LORA_BAUD 57600  // >>>   loraSerial.begin(LoRaBee.getDefaultBaudRate());
 #define LORA_Start_SESSION      // à activer hors phase de developpement.
 
