@@ -78,7 +78,7 @@ void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)
 
 void debugSerialPrintLoRaStatus()  
 {
-  debugSerial.println("\n=== STATUS LoRa ===");
+  debugSerial.println("=== STATUS LoRa ===");
   sprintf(serialbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
   debugSerial.println(serialbuf);
   debugSerial.print("DevEUI = ");printOndebugSerial((char *)DevEUI,8);
@@ -130,4 +130,36 @@ void debugSerialPrintKbdKey(void)
         break;
   }
   delay(100);
+}
+
+
+/**
+ * @brief Affiche les informations système sur debugSerial
+ * @param Aucun
+ * @return void
+ */
+void serialDebugPrintSystemInfo(void)
+{
+    debugSerial.println("=== INFORMATIONS SYSTEME ===");
+    debugSerial.println("Projet: " PROJECT_NAME);
+    debugSerial.println("Version: " VERSION);
+    debugSerial.print("Mode actuel: ");
+    debugSerial.println(modeExploitation ? "EXPLOITATION" : "PROGRAMMATION");
+    debugSerial.print("Configuration version: ");
+    debugSerial.print(config.materiel.version/100);
+    debugSerial.print(".");
+    debugSerial.println(config.materiel.version%100);
+    debugSerial.print("Compilation: ");
+    debugSerial.print(__DATE__);
+    debugSerial.print(" ");
+    debugSerial.println(__TIME__);
+ /*   
+    // Attendre une touche pour continuer
+    while (readKey() == KEY_NONE)
+    {
+        delay(100);
+    }
+    
+    OLEDDisplayMessageL8("Retour menu principal", false, false);
+*/   
 }

@@ -313,30 +313,30 @@ void OLEDPrintChar(uint8_t ligne, uint8_t colonne, char c)
  * @return void
  */
 void OLEDPrintVar(uint8_t ligne, uint8_t col, const void *valeur, char type) 
-{   char buffer[21];
+{   char serialbuf[21];
     switch (type) 
     {
         case 'c':
-            sprintf(buffer, "%c", *((char *)valeur));
+            sprintf(OLEDbuf, "%c", *((char *)valeur));
   
             break;
         case 's':
-            sprintf(buffer, "%s", (char *)valeur);
+            sprintf(OLEDbuf, "%s", (char *)valeur);
             break;
         case 'i':
         case 'I':
-            sprintf(buffer, "%02d", *((int *)valeur));
+            sprintf(OLEDbuf, "%02d", *((int *)valeur));
  // %02d arrangement temporaire           
             break;
         case 'f':
         case 'F':
-            sprintf(buffer, "%.2f", *((float *)valeur));
+            sprintf(OLEDbuf, "%.2f", *((float *)valeur));
             break;
         default:
-            sprintf(buffer, "<inconnu>");
+            sprintf(OLEDbuf, "<inconnu>");
             break;
     }
-    OLEDDrawText(1,ligne, col, buffer);
+    OLEDDrawText(1,ligne, col, OLEDbuf);
 }
 
 /**
@@ -352,8 +352,7 @@ void OLEDPrintVar(uint8_t ligne, uint8_t col, const void *valeur, char type)
  */
 void OLEDPrintFormatted(uint8_t ligne, uint8_t col, const void *valeur, char type,
                         const char *unite, int precision, char align) 
-{ char buffer[22];
-  char valeurStr[16] = "";
+{ char valeurStr[16] = "";
     
     switch (type) 
     {
@@ -380,21 +379,21 @@ void OLEDPrintFormatted(uint8_t ligne, uint8_t col, const void *valeur, char typ
             break;
     }
     
-    sprintf(buffer, "%s %s", valeurStr, unite ? unite : "");
+    sprintf(OLEDbuf, "%s %s", valeurStr, unite ? unite : "");
     
-    int len = strlen(buffer);
+    int len = strlen(OLEDbuf);
     char ligneFinale[22] = "";
     
     switch (align) 
     {
         case 'R':
-            sprintf(ligneFinale, "%*s", 20, buffer);
+            sprintf(ligneFinale, "%*s", 20, OLEDbuf);
             break;
         case 'C':
-            sprintf(ligneFinale, "%*s", (20 + len)/2, buffer);
+            sprintf(ligneFinale, "%*s", (20 + len)/2, OLEDbuf);
             break;
         default:
-            sprintf(ligneFinale, "%-20s", buffer);
+            sprintf(ligneFinale, "%-20s", OLEDbuf);
             break;
     }   
   OLEDDrawText(1,ligne, col, ligneFinale);
@@ -534,4 +533,50 @@ void OLEDDisplayTime(char *h, uint8_t pos)
     OLEDClear();
     OLEDDrawText(1,0, 0, "Saisir l'heure :");
     OLEDDrawText(1,1, 0, ligne);
+}
+
+
+
+/**
+ * @brief Affiche les informations système sur écran
+ * @param Aucun
+ * @return void
+ */
+void OLEDDisplaySystemInfo(void)
+{
+    if (OLED)
+    {
+        OLEDClear();
+        OLEDDrawText(1,0, 0, "=== INFOS SYSTEME ===");
+        OLEDDrawText(1,1, 0, PROJECT_NAME);
+        OLEDDrawText(1,2, 0, "Version: " VERSION);
+        
+        sprintf(OLEDbuf, "Mode: %s", modeExploitation ? "EXPLOIT" : "PROGRAM");
+        OLEDDrawText(1,3, 0, OLEDbuf);
+        
+        sprintf(OLEDbuf, "Config v: %d.%02d", config.materiel.version/100, config.materiel.version%100);
+        OLEDDrawText(1,4, 0, OLEDbuf);
+//      OLEDDrawText(1,6, 0, "Appuyer pour continuer");
+    }
+/*
+     // Attendre une touche pour continuer
+    while (readKey() == KEY_NONE)
+    {
+        delay(100);
+    }
+    
+    OLEDDisplayMessageL8("Retour menu principal", false, false);
+*/
+}
+
+
+
+/**
+ * @brief Active ou désactive l'affichage au boot
+ * @param actif True pour activer, false pour désactiver
+ * @return void
+ */
+void OLEDSetDebug(bool actif) 
+{
+    modeDebugActif = actif;
 }

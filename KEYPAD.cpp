@@ -13,6 +13,8 @@ key_code_t readKeyOnce(void)
   static const key_code_t keycodes[NB_KEYS] = {KEY_1, KEY_2, KEY_3, KEY_4, KEY_5};
   int val = analogRead(KBD_ANA);
 
+// debugSerial.println("O");
+
   if (val > 1000) return KEY_NONE;
 //  if (val < 5) return KEY_INVALID;
   for (int i = 0; i < NB_KEYS; i++) 
@@ -58,7 +60,7 @@ key_code_t readKey(void)
  * @param key Code de la touche
  * @return const char* Nom de la touche
  */
-const char* non_keyToString(key_code_t key) 
+const char* keyToString(key_code_t key) 
 { switch (key) 
   {
     case KEY_NONE: return "NONE";
@@ -99,6 +101,8 @@ key_code_t readKeyNonBlocking(void)
 void processContinuousKeyboard(void)
 {
     unsigned long currentTime = millis();
+
+// debugSerial.println("C");
     
     // Vérifier l'intervalle minimum entre lectures
     if (currentTime - clavierContext.derniereLecture < DEBOUNCE_DELAY_MS)

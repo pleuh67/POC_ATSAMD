@@ -46,9 +46,7 @@ debugSerial.println("INIT 2483...");
       debugSerial.println(" Init 2483 failed");    
       OLEDDebugDisplay("2483    Failed");
     }  
-//   blink(LED_BUILTIN,200);
-/* */
-debugSerialPrintLoRaStatus();
+// debugSerialPrintLoRaStatus();
 }
 
 
@@ -86,4 +84,14 @@ debugSerial.println("Test sending LoRa testPayload (7) (Restart)...");
 delay(1000);
   display.clearDisplay();
   display.display();
+}
+
+// INIT DHT22 ---- INIT DHT22 ---- INIT DHT22 ---- INIT DHT22 ---- 
+void DHTInit(void)
+{
+debugSerial.println("------------------------------------------------------------------");
+debugSerial.println("INIT DHT22...");
+  dht.begin(); // temperature
+  debugSerial.println("done.");
+OLEDDebugDisplay("DHT22   Initialized");
 }

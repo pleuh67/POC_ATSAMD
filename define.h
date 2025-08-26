@@ -1,9 +1,27 @@
 // ===== INCLUDES =====
 #include <Wire.h>
 #include <RTClib.h>
-//#include <DS3231.h>
 #include <ArduinoLowPower.h>
 
+// ===== CONSTANTES PROJET =====
+#define PROJECT_NAME "POC IRQ_Payload IRQ_1s LOW_POWER OLED RN2483 DHT22 KEY5"
+#define VERSION "1.1.1-PL"
+
+// ===== TIMING CONSTANTS =====
+#define RED_LED_DURATION 100     // Durée d'allumage LED rouge 300 ms
+#define GREEN_LED_DURATION 100     // Durée d'allumage LED verte 300 ms
+#define BLUE_LED_DURATION 100     // Durée d'allumage LED bleue 300 ms
+#define BUILTIN_LED_DURATION 100  // Durée d'allumage LED builtin 100 ms
+#define WAKEUP_INTERVAL_PAYLOAD 5 // Intervalle de réveil en minutes (2 minute pour test)
+#define INTERVAL_1SEC 1000        // Intervalle 1 seconde en millisecondes
+
+// I2C Addresses
+#define DS3231_ADDRESS  0x68  // Adresse RTC Module DS3231
+#define OLED_ADDRESS   0x3C   // Adresse écran OLED
+#define EEPROM_ADDRESS 0x57   // Adresse EEPROM Module DS3231
+
+// ===== EEPROM CONFIGURATION =====
+#define CONFIG_VERSION 100   // Version 1.00 * 100
 
 // defines pour raccourcir et clarifier les instructions
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -57,7 +75,25 @@
 // #define BUZZER     7 // non implanté
 
 
+#define LIBRE0  49    // PB09
+#define LIBRE1  50    // PA18 sur DS1820
+#define LIBRE2  51    // PA19 sur SD_CS
+#define LIBRE3  52    // PB22
+#define LIBRE4  53    // PB23
+#define LIBRE5  54    // PA27
+#define LIBRE6  55    // PA28 sur RD_VBAT
+#define LIBRE7  56    // PB12
 
+#define DS1820  LIBRE1    // PA18
+#define SD_CS   LIBRE2    // PA19, testé OK
+#define RD_VBAT LIBRE6    // PA28
+
+
+// Mesures en erreur
+#define DHT_T_ERR 99
+#define DHT_H_ERR 99
+#define TEMP_ERR 99
+#define DS18A20_ERR 99
 
 // Pour OLED selon type sélectionné
 #ifdef OLED096
@@ -65,11 +101,6 @@
 #else
   #include <Adafruit_SH110X.h>
 #endif
-
-// ===== CONSTANTES PROJET =====
-#define PROJECT_NAME "POC IRQ LOW_POWER OLED KEY5 SAISIES EEPROM RN2483"
-#define VERSION "1.1.1-PL"
-
 
 #define BUFF_MAX 256
 #define BUF_LEN 128  
@@ -81,12 +112,6 @@
 #define SERIALBUFLEN 128
 #define DEBUG_BAUD 115200
 #define SERIAL_TIMEOUT 5000
-
-// ===== TIMING CONSTANTS =====
-#define RED_LED_DURATION 5000     // Durée d'allumage LED rouge en millisecondes (5 secondes)
-#define BUILTIN_LED_DURATION 100  // Durée d'allumage LED builtin en millisecondes
-#define WAKEUP_INTERVAL_PAYLOAD 15 // Intervalle de réveil en minutes (2 minute pour test)
-#define INTERVAL_1SEC 10000        // Intervalle 1 seconde en millisecondes
 
 // ===== LED RGB CONFIGURATION =====
 #define LED_OFF HIGH     // État pour éteindre les LEDs RGB (logique inverse)
@@ -101,7 +126,6 @@
 // ===== OLED CONFIGURATION =====
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-#define OLED_ADDRESS   0x3C
 #define OLED_RESET 4
 #define MAX_LIGNES     8  
 #define TAILLE_LIGNE   8
@@ -123,10 +147,6 @@
   #define BLACK SH110X_BLACK
 #endif
 
-// ===== EEPROM CONFIGURATION =====
-#define EEPROM_ADDRESS 0x57  // Adresse EEPROM du DS3231
-#define CONFIG_VERSION 100   // Version 1.00 * 100
-
 // Alias pour les touches selon usage
 #define MOINS KEY_3 //1
 #define PLUS KEY_2
@@ -142,12 +162,6 @@
 #define HEXPAYLOADSIZE 60
 
 
-
-#include ".\struct.h"
-#include ".\var.h"
-#include ".\prototypes.h"
-
-
 // ****************************************************************************
 // LoRa
 // ****************************************************************************
@@ -160,3 +174,29 @@
 // cayenne pour tests gateway
 // ****************************************************************************
 #include <CayenneLPP.h>
+
+// ****************************************************************************
+// HX711 Weight sensors - weastone bridge
+// ****************************************************************************
+#include "HX711.h"      // inclusion de la librairie HX711
+
+// ****************************************************************************
+// DHTxx Temperature and Humidity sensors
+// ****************************************************************************
+#include "DHT.h"
+#define DHT_TYPE DHT22   // DHT 22  (AM2302), AM2321
+
+// ****************************************************************************
+// OneWire DS18S20, DS18B20, DS1822 Temperature Example
+// https://www.pjrc.com/teensy/td_libs_OneWire.html
+//
+// The DallasTemperature library can do all this work for you!
+// https://github.com/milesburton/Arduino-Temperature-Control-Library
+// ****************************************************************************
+#include <OneWire.h> // V2.3.8
+
+
+
+#include ".\struct.h"
+#include ".\var.h"
+#include ".\prototypes.h"

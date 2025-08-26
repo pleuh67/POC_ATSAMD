@@ -2,21 +2,29 @@
 
 // ===== PROTOTYPES DE FONCTIONS DE SETUP.CPP=====
 void initDebugSerial(void);
+void DHTInit(void);
 
 
 // ===== PROTOTYPES DE FONCTIONS DE POC_ATSAMD.INO=====
-// Gestion RTC et temps
-void initRTC(void);
-DateTime getSystemTime(void);
-void setRTCAlarms(void);
-void clearRTCAlarms(void);
-void printTimeComparison(void);
-void printTimeOndebugSerial(void);
-void print2digits(int number);
-void forcerSynchronisationDS3231(void);
-void synchronizeDS3231TimeToMicro(void);
-void copyDS3231TimeToMicro(bool forcer);
+// DS3231, gestion RTC et temps
+void initRTC(void);                       // Initialise le module RTC DS3231
+DateTime getSystemTime(void);             // Retourne l'heure système actuelle
+void setRTCAlarms(void);                  // Configure les alarmes du RTC
+void clearRTCAlarms(void);                // Efface les alarmes du RTC
+void testConnexionDS3231(void);           // Affiche heure et status Alarmes sur SerialDebug
+void forcerSynchronisationDS3231(void);   //  Forcer une synchronisation immédiate
+void synchronizeDS3231TimeToMicro(void);  // Synchro. heure µcontrôleur avec DS3231
+void copyDS3231TimeToMicro(bool forcer);  // Copie heure DS3231 vers µcontrôleur avec option de forçage
+void DS3231hardReset(void); 
+void DS3231CompleteReset(void);
+
+// encore dans POC...cpp, déplacer?
 void checkRTCStatus(void);
+
+// deplacer RS
+void printTimeComparison(void);     // Affiche heure système et heure RTC côte à côte pour comparaison
+void printTimeOndebugSerial(void);  // Affiche heure et date système sur le port serialDebug
+void print2digits(int number);
 
 // Gestion Config et EEPROM
 void initConfig(void);
@@ -27,26 +35,33 @@ uint16_t calculateChecksum(ConfigGenerale_t* cfg);
 void setDefaultConfig(void);
 
 // Gestion LEDs
-void initLEDs(void);
-void turnONRedLED(void);   // sort vert sur PCB
-void turnOffRedLED(void);  // sort vert sur PCB
-void blinkRedLED(void); // 300ms; sort vert sur PCB
-void turnOnGreenLED(void);   // sort rouge sur PCB
-void turnOffGreenLED(void);  // sort rouge sur PCB
-void blinkGreenLED(void); // 300ms; sort rouge sur PCB
-void turnOnBlueLED(void); 
-void turnOffBlueLED(void);
-void blinkBlueLED(void); // 300ms
-void turnOnBuiltinLED(void);
-void turnOffBuiltinLED(void);
-void blinkBuiltinLED(void);
+void initLEDs(void);        // Initialise les LEDs RGB et builtin
+void turnOnRedLED(void);    // Allume la LED rouge (vert)
+void turnOffRedLED(void);   // Éteint la LED rouge (vert)
+void blinkRedLED(void);     // Fait clignoter la LED Rouge pendant 300ms (vert)
+void turnOnGreenLED(void);  // Allume la LED verte (rouge)
+void turnOffGreenLED(void); // Éteint la LED verte (rouge)
+void blinkGreenLED(void);   // Fait clignoter la LED verte pendant 300 ms (rouge)
+void turnOnBlueLED(void);   // Allume la LED bleue
+void turnOffBlueLED(void);  // Éteint la LED bleue
+void blinkBlueLED(void);    // Fait clignoter la LED bleue pendant 300 ms 
+void turnOnBuiltinLED(void);  // Allume la LED builtin (bleue)
+void turnOffBuiltinLED(void); // Éteint la LED builtin (bleue)
+void blinkBuiltinLED(void); //  Fait clignoter la LED builtin pendant BUILTIN_LED_DURATION ms
+// Led non Blocking
+void LEDStartRed(void);
+void LEDStartBlue(void);
+void LEDStartGreen(void);
+void demarrerLEDBuiltin(void);
+void gererLEDsNonBloquant(void);
+
 
 // Gestion clavier
-key_code_t readKeyOnce(void);
-key_code_t readKey(void);
-const char* keyToString(key_code_t key);
-key_code_t readKeyNonBlocking(void);
-void processContinuousKeyboard(void);
+key_code_t readKeyOnce(void);   // Lecture instantanée d'une touche du clavier analogique
+key_code_t readKey(void);       // Lecture avec anti-rebond du clavier analogique
+const char* keyToString(key_code_t key);    //Convertit un code de touche en chaîne de caractères
+key_code_t readKeyNonBlocking(void);    // Version non-bloquante de readKey() - Retourne immédiatement
+void processContinuousKeyboard(void);   // Traite le clavier en continu (à appeler dans loop)
 
 // Gestion OLED
 void OLEDInit(void);
@@ -62,7 +77,6 @@ void OLEDPrintFormatted(uint8_t ligne, uint8_t col, const void *valeur, char typ
 void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse);
 void OLEDDebugDisplay(char* message);
 void OLEDDebugDisplayReset(void);
-void OLEDSetDebug(bool actif);
 void OLEDDrawScreenNextPayload(uint8_t ligne, uint8_t colonne, DateTime nextPayload );
 void OLEDDrawScreenTime(uint8_t ligne, uint8_t colonne);        // sous format: hh:mm:ss - dd/mm/yyyy
 void OLEDDrawScreenRefreshTime(uint8_t ligne, uint8_t colonne); // que les valeurs modifiées
@@ -70,6 +84,7 @@ void OLEDDrawText(int8_t Txt_Size, uint8_t ligne, uint8_t colonne,const char *te
 void OLEDEraseText(int16_t col, int16_t lig, int16_t Ncar);
 void OLEDDisplayDate(char *d, uint8_t pos);
 void OLEDDisplayTime(char *h, uint8_t pos);
+void OLEDSetDebug(bool actif);
 
 // Gestion saisies
 bool isDateValid(const char *d);
@@ -82,20 +97,22 @@ void inputListValue(const char *label, const int *liste, uint8_t nbValeurs, int 
 void inputListValueLibelle(const char *label, const int *valeurs, const char **libelles, uint8_t nbValeurs, int *valeurSelectionnee, bool *valide);
 uint64_t inputHex(const char* variable, uint64_t valeurInitiale);
 uint32_t inputDecimal(const char* variable, uint32_t valeurInitiale);
+char* strToChar(String s);
 
 // Gestion serialDebug 
+void print2digits(int number); 
 void debugSerialPrintLoraPayload(uint8_t *payload, uint8_t len);
 void debugSerialPrintText(char *txt, char len);
 void debugSerialPrintLoRaStatus();
 void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ);
 void debugSerialPrintKbdKey(void);
+void debugSerialPrintSystemInfo(void);
 
 // Gestion modes et interruptions
 void handleOperationMode(void);
 void executeOperationMode(void);
 void handleProgrammingMode(void);
 void executeProgrammingMode(void);
-void testConnexionDS3231(void);
 void forceTestAlarm(void);
 
 void onRTCAlarm(void);
@@ -105,18 +122,26 @@ void sleep(void);
 void configureLowPowerMode(void);
 
 // Gestion RN2483 LoRa
+// RS ?????
+uint8_t RN2483Version(void);    // Lit les infos du modem
+
+
 void init2483A(void);
+uint8_t Init_2483(void);
 void initLoRa(void);
-void clearLoRaBuffer(void);
-String readLoRaResponse(int timeoutMs);
-void getHWEUI(char *); 
-bool setupLoRa(void);
+void getHWEUI(char *);      // Gets and stores the LoRa module's HWEUI    
+void Reset_LoRa(void);
+void clearLoRaBuffer(void); // Vide complètement le buffer série du modem
+String readLoRaResponse(int timeoutMs); // Lit la réponse du modem avec timeout
+ 
+bool setupLoRa(void);   // appelé par Send_Lora_Mess() et setup()
 bool setupLoRaOTAA(void);
 void Send_DATA_LoRa(void);
 void Send_LoRa_Mess(uint8_t *, uint8_t);
-uint8_t Init_2483(void);
-void Reset_LoRa(void);
+
+
 void BuildLoraPayload(void);
+// basse conso.
 void sleep_LoRa(void);
 void wake_LoRa(void);
 
@@ -125,3 +150,26 @@ void displaySystemInfo(void);
 void handleConfigurationMenu(void);
 void handleTimeDateRegisterMenu(void);
 void handleDebugMenu(void);
+
+// DHT22
+// Read temp and Humidity with DHT22      
+void read_DHT(DHT dht);
+
+
+// Gestion mesures
+void take_All_Measure(void);
+// HX711
+float Set_Scale_Bal(char num, float poids_en_grammes);    // N° de jauges des balances 1 à 4
+float GetPoids(int num);    // N° de jauges des balances 1 à 4
+
+// µC
+float getTemperature(void);
+// LDR ANA
+float getLuminance(void);
+// µC ANA
+float getVBatMoy(void);
+float getVSolMoy(void);
+
+
+// DS18B20
+float get_DS(byte *DS18B20);

@@ -2,8 +2,7 @@
 #define __INIT_DONE
 #include "define.h"
 
-
-
+//#define __debugSerial_NonBlockingLED  
 
 
 /**
@@ -30,12 +29,13 @@ void initLEDs(void)
   blinkBlueLED();  // bleue
 debugSerial.println("LEDs initialisées");
 }
+
 /**
  * @brief Allume la LED rouge
  * @param Aucun
  * @return void
  */
-void turnONRedLED(void) 
+void turnOnRedLED(void) 
 {
   digitalWrite(LED_RED, LED_ON);
 }
@@ -50,19 +50,19 @@ void turnOffRedLED(void)
   digitalWrite(LED_RED, LED_OFF);
 }
 /**
- * @brief Fait clignoter la LED builtin pendant BUILTIN_LED_DURATION ms
+ * @brief Fait clignoter la LED Rouge pendant 300 ms
  * @param Aucun
  * @return void
  */
 void blinkRedLED(void) 
 {
-  turnONRedLED();
+  turnOnRedLED();
   delay(300);
   turnOffRedLED();
 }
 
 /**
- * @brief Allume la LED rouge
+ * @brief Allume la LED bleue
  * @param Aucun
  * @return void
  */
@@ -71,7 +71,7 @@ void turnOnBlueLED(void)
   digitalWrite(LED_BLUE, LED_ON);
 }
 /**
- * @brief Éteint la LED rouge
+ * @brief Éteint la LED bleue
  * @param Aucun
  * @return void
  */
@@ -81,7 +81,7 @@ void turnOffBlueLED(void)
 }
 
 /**
- * @brief Fait clignoter la LED builtin pendant BUILTIN_LED_DURATION ms
+ * @brief Fait clignoter la LED bleue pendant 300 ms
  * @param Aucun
  * @return void
  */
@@ -92,7 +92,7 @@ void blinkBlueLED(void)
   turnOffBlueLED();
 }
 /**
- * @brief Allume la LED rouge
+ * @brief Allume la LED verte
  * @param Aucun
  * @return void
  */
@@ -102,7 +102,7 @@ void turnOnGreenLED(void)
 }
 
 /**
- * @brief Éteint la LED rouge
+ * @brief Éteint la LED verte
  * @param Aucun
  * @return void
  */
@@ -112,7 +112,7 @@ void turnOffGreenLED(void)
 }
 
 /**
- * @brief Fait clignoter la LED builtin pendant BUILTIN_LED_DURATION ms
+ * @brief Fait clignoter la LED verte pendant 300 ms
  * @param Aucun
  * @return void
  */
@@ -154,3 +154,140 @@ void blinkBuiltinLED(void)
   delay(BUILTIN_LED_DURATION);
   turnOffBuiltinLED();
 }
+
+
+// ***    gestion LEDs Non Bloquant ***
+
+/**
+ * @brief Démarre le cycle LED rouge (non-bloquant)
+ * @param Aucun
+ * @return void
+ */
+void LEDStartRed(void)
+{
+    redLedActive = true;
+    redLedStartTime = millis();
+    turnOnRedLED();
+#ifdef __debugSerial_NonBlockingLED    
+    debugSerial.print("LED Rouge démarrée pour ");
+    debugSerial.print(config.applicatif.redLedDuration);
+    debugSerial.println("ms");
+#endif
+    
+}
+
+/**
+ * @brief Démarre le cycle LED rouge (non-bloquant)
+ * @param Aucun
+ * @return void
+ */
+void LEDStartGreen(void)
+{
+    greenLedActive = true;
+    greenLedStartTime = millis();
+    turnOnGreenLED();
+#ifdef __debugSerial_NonBlockingLED     
+    debugSerial.print("LED Verte démarrée pour ");
+    debugSerial.print(config.applicatif.redLedDuration);
+    debugSerial.println("ms");
+#endif    
+}
+
+/**
+ * @brief Démarre le cycle LED rouge (non-bloquant)
+ * @param Aucun
+ * @return void
+ */
+void LEDStartBlue(void)
+{
+    blueLedActive = true;
+    blueLedStartTime = millis();
+    turnOnBlueLED();
+#ifdef __debugSerial_NonBlockingLED     
+    debugSerial.print("LED Bleue démarrée pour ");
+    debugSerial.print(config.applicatif.redLedDuration);
+    debugSerial.println("ms");
+#endif    
+}
+
+/**
+ * @brief Démarre le cycle LED builtin (non-bloquant)
+ * @param Aucun
+ * @return void
+ */
+void demarrerLEDBuiltin(void)
+{
+    builtinLedActive = true;
+    builtinLedStartTime = millis();
+    turnOnBuiltinLED();  
+    
+#ifdef __debugSerial_NonBlockingLED 
+    // Debug moins verbeux
+    static int builtinCount = 0;
+    builtinCount++;
+    if (builtinCount % 10 == 0)
+    {
+        debugSerial.print("LED Builtin #");
+        debugSerial.println(builtinCount);
+    }
+#endif    
+}
+
+
+/**
+ * @brief Gère les LEDs de manière non-bloquante
+ * @param Aucun
+ * @return void
+ */
+void gererLEDsNonBloquant(void)
+{
+    unsigned long currentTime = millis();
+    
+    // Gestion LED Rouge
+    if (redLedActive)
+    {
+        if (currentTime - redLedStartTime >= config.applicatif.redLedDuration)
+        {
+            turnOffRedLED();
+            redLedActive = false;      
+#ifdef __debugSerial_NonBlockingLED                
+debugSerial.println("LED Rouge éteinte (fin cycle)");
+#endif
+       }
+    }
+
+      if (greenLedActive)
+    {
+        if (currentTime - greenLedStartTime >= config.applicatif.greenLedDuration)
+        {
+            turnOffGreenLED();
+            greenLedActive = false;
+#ifdef __debugSerial_NonBlockingLED 
+  debugSerial.println("LED verte éteinte (fin cycle)");            
+#endif
+        }
+    }
+    
+     if (blueLedActive)
+    {
+        if (currentTime - blueLedStartTime >= config.applicatif.blueLedDuration)
+        {
+            turnOffBlueLED();
+            blueLedActive = false;    
+#ifdef __debugSerial_NonBlockingLED 
+  debugSerial.println("LED bleue éteinte (fin cycle)");
+#endif        
+        }
+    }
+   // Gestion LED Builtin
+    if (builtinLedActive)
+    {
+        if (currentTime - builtinLedStartTime >= config.applicatif.builtinLedDuration)
+        {
+            turnOffBuiltinLED();
+            builtinLedActive = false;
+        }
+    }
+}
+
+    

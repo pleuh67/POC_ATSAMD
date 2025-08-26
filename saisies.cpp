@@ -423,3 +423,14 @@ uint32_t inputDecimal(const char* variable, uint32_t valeurInitiale)
     debugSerial.print(" => ");debugSerial.println(resultat);
     return resultat;
 }
+
+// ---------------------------------------------------------------------------*
+//  Converts String to char*                             
+// ---------------------------------------------------------------------------*
+char* strToChar(String s) 
+{
+  unsigned int bufSize = s.length() + 1; //String length + null terminator
+  char* ret = new char[bufSize];
+  s.toCharArray(ret, bufSize);
+  return ret;
+}

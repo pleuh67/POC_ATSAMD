@@ -13,7 +13,12 @@ void initRTC(void)
   if (!rtc.begin()) 
   {
     debugSerial.println("Erreur: RTC introuvable");
-    while (1) delay(10);
+    DS3231hardReset();
+    if (!rtc.begin()) 
+    {
+      debugSerial.println("Erreur: RESET RTC pas OK");
+      while (1) delay(10);
+    }
   }
    
   if (rtc.lostPower()) 
@@ -35,7 +40,7 @@ DateTime getSystemTime(void)
 }
 
  /**
- * @brief Configure les alarmes du RTC - ALARMES ÉCHANGÉES
+ * @brief Configure les alarmes du RTC
  * Alarme 1 : Toutes les secondes (mode programmation)
  * Alarme 2 : Payload toutes les X minutes
  * @param Aucun
@@ -45,13 +50,16 @@ void setRTCAlarms(void)
 {
   clearRTCAlarms();
 debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
-  if (DEBUG_INTERVAL_1SEC && !modeExploitation) 
+  if (DEBUG_INTERVAL_1SEC) // && !modeExploitation) 
   {
-    DateTime nextSecond = rtc.now() + TimeSpan(0, 0, 0, 10);
-    rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
-debugSerialPrintNextAlarm(nextSecond, 1);  
+    DateTime nextSecond = rtc.now() + TimeSpan(0, 0, 0, 1);
+debugSerial.println("s"); 
+rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
+//    rtc.setAlarm1(nextSecond, DS3231_A1_Second);
+//debugSerialPrintNextAlarm(nextSecond, 1);  
   }
-// ALARME 2 : Payload toutes les X minutes
+  
+  // ALARME 2 : Payload toutes les X minutes
   if (DEBUG_WAKEUP_PAYLOAD) 
   {
     DateTime nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
@@ -59,6 +67,7 @@ debugSerialPrintNextAlarm(nextSecond, 1);
 debugSerialPrintNextAlarm(nextPayload,2);
 OLEDDrawScreenNextPayload(6, 0, nextPayload );
   }
+  
 debugSerial.print("État pin RTC après config alarmes: ");
 debugSerial.println(digitalRead(RTC_INTERRUPT_PIN) ? "HIGH" : "LOW");
 debugSerial.println("=== FIN CONFIGURATION ALARMES + INTERRUPTIONS ===");
@@ -78,6 +87,60 @@ void clearRTCAlarms(void)
 }
 
 
+/**
+ * @brief Hard Reset du RTC
+ * @param Aucun
+ * @return void
+ */
+void DS3231hardReset() 
+{
+    // Reset des registres de contrôle
+    Wire.beginTransmission(0x68); // Adresse I2C du DS3231
+    Wire.write(0x0E); // Registre de contrôle
+    Wire.write(0x1C); // Valeur de reset par défaut
+    Wire.endTransmission();
+    
+    Wire.beginTransmission(0x68);
+    Wire.write(0x0F); // Registre de status
+    Wire.write(0x00); // Clear tous les flags
+    Wire.endTransmission();
+    
+    // Optionnel : remettre à zero l'heure
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+}
+
+/**
+ * @brief Reset du RTC
+ * @param Aucun
+ * @return void
+ */
+void DS3231CompleteReset() {
+    Wire.beginTransmission(0x68);
+    
+    // Reset de tous les registres principaux
+    for(int i = 0; i <= 0x12; i++) {
+        Wire.write(i);
+        Wire.write(0x00);
+        Wire.endTransmission();
+        Wire.beginTransmission(0x68);
+    }
+    
+    // Registres de contrôle spéciaux
+    Wire.write(0x0E);
+    Wire.write(0x1C); // Control register default
+    Wire.endTransmission();
+    
+    delay(100);
+    
+    // Redémarrer l'oscillateur
+    rtc.begin();
+}
+
+/**
+ * @brief Affiche heure et status Alarmes sur SerialDebug
+ * @param Aucun
+ * @return void
+ */
 void testConnexionDS3231(void)
 {
     debugSerial.println("=== TEST CONNEXION DS3231 ===");

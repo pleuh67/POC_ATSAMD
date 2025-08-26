@@ -37,6 +37,8 @@ typedef struct
 typedef struct 
 {
     uint16_t redLedDuration;
+    uint16_t greenLedDuration;
+    uint16_t blueLedDuration;        
     uint16_t builtinLedDuration;
     uint16_t wakeupIntervalPayload;
     uint16_t interval1Sec;

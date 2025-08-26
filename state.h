@@ -1,31 +1,34 @@
 /*
 
-plante pendant envoi payload, seul IRQ2 actif.
+
+degraisser : 
+
+16:45:37.527 -> IRQ1 1s 270 =====
+16:45:38.556 -> IRQ1 1s 271 =====
+16:45:39.537 -> IRQ1 1s 272 =====
+16:45:40.524 -> IRQ1 1s 273 =====
+16:45:41.562 -> === CONFIGURATION ALARMES RTC + INTERRUPTIONS ===
+16:45:41.562 -> s
+16:45:41.562 -> Interruption Alarme 2 activée, reprogrammée pour: 16:43:00
+16:45:41.562 -> État pin RTC après config alarmes: HIGH
+16:45:41.562 -> === FIN CONFIGURATION ALARMES + INTERRUPTIONS ===
+16:45:41.562 -> IRQ2 15m 0 =====
+16:45:41.562 -> PROG/Réveil payload
+16:45:41.562 -> hexPayload: 52657374617274 len : 7
+16:45:41.562 -> appel LoRaBee.send
+16:45:49.365 -> NOError Successful transmission in Send_LoRa_Mess().
+16:45:49.414 -> IRQ1 1s 274 =====
+16:45:49.554 -> IRQ1 1s 275 =====
+16:45:50.537 -> IRQ1 1s 276 =====
+16:45:51.564 -> IRQ1 1s 277 =====
+
+compteur sur OLED (une ligne par IRQ)
 
 
 
-08:37:06.624 -> PROG/Réveil payload
-08:37:07.792 -> Hardreset the RN module LoRa      => Reset_LoRa(void)
-08:37:08.867 -> hexPayload: 52657374617274 len : 7
-08:37:08.867 -> appel LoRaBee.send                => blocage
-
-suppression de Reset_LoRa(); dans Send_LoRa_Mess(...);
-
-suppression de processContinuousKeyboard();
-
-idem, 
-
-ajout :   initLoRa();
-  Send_LoRa_Mess((uint8_t*)testPayload,7);
-ajout :
-    init2483A();
 
 
-suppression lora_sleep oublié....    
 
-
-ajout #include <Sodaq_wdt.h> et
-    sodaq_wdt_safe_delay(5); // without this, it doesn’t sleep.. don’t know why de sleep_lora()
 
 
 

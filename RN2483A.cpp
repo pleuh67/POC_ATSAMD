@@ -91,6 +91,26 @@ String readLoRaResponse(int timeoutMs = 1000)
   return response;
 }
 
+/**
+ * @brief Lit les infos du modem
+ * @param Aucun
+ *   - timeoutMs (int) : Timeout en millisecondes
+ * @return String - Réponse complète du modem
+ */
+uint8_t RN2483Version(void)   
+{ uint8_t len;
+
+  clearLoRaBuffer();
+  loraSerial.println("sys get ver"); // RN2483 1.0.5 Oct 31 2018 15:06:52
+   delay(100);
+  len = loraSerial.readBytesUntil(0x20, serialbuf, 33); //sizeof(Module_ID));
+// envoi sur moniteur RS résultat getHWEUI()
+debugSerial.print("Version: ");  debugSerial.print(len);
+debugSerial.print(" car. lus: "); debugSerial.println(serialbuf);
+//  clearLoRaBuffer(); // normalement buffer vide.
+// Fin test communic ation avec RN2483A
+}
+
 
 // ---------------------------------------------------------------------------*
 //  out : 0 (OK) / 1 (Error)                          
@@ -103,10 +123,10 @@ uint8_t len;
   clearLoRaBuffer();
   loraSerial.println("sys get ver"); // RN2483 1.0.5 Oct 31 2018 15:06:52
    delay(100);
-  len = loraSerial.readBytesUntil(0x20, serialBuf, 33); //sizeof(Module_ID));
+  len = loraSerial.readBytesUntil(0x20, serialbuf, 33); //sizeof(Module_ID));
 // envoi sur moniteur RS résultat getHWEUI()
 debugSerial.print("Version: ");  debugSerial.print(len);
-debugSerial.print(" car. lus: "); debugSerial.println(serialBuf);
+debugSerial.print(" car. lus: "); debugSerial.println(serialbuf);
 */
  
 //  clearLoRaBuffer(); // normalement buffer vide.
@@ -161,7 +181,6 @@ bool setupLoRa()
 { bool result;
  
   result=setupLoRaOTAA();
-//debugSerial.print("setupLoRa(): setSpreadingFactor: ");  debugSerial.println(LoRa_Config.SpreadingFactor);
 //  LoRaBee.setSpreadingFactor(LoRa_Config.SpreadingFactor); // 7, 9 et 12 echec freudeneck
   return(result);
 }
@@ -171,9 +190,7 @@ bool setupLoRa()
 //  out : 1 OK, 0 Echec                             
 // ---------------------------------------------------------------------------*
 bool setupLoRaOTAA()
-{
-// With using the GetHWEUI() function the HWEUI will be used
-  if (LoRaBee.initOTA(loraSerial, DevEUI, AppEUI, AppKey, true))
+{ if (LoRaBee.initOTA(loraSerial, DevEUI, AppEUI, AppKey, true))
   {
     debugSerial.println("setupLoRaOTAA(), Network connection successfull");
     LoRaBee.setSpreadingFactor(LoRa_Config.SpreadingFactor); // 7, 9 et 12 echec freudeneck
@@ -186,18 +203,6 @@ bool setupLoRaOTAA()
     return(0);
   }
 }
-
-// ---------------------------------------------------------------------------*
-//                               
-// ---------------------------------------------------------------------------*
-char* strToChar(String s) 
-{
-  unsigned int bufSize = s.length() + 1; //String length + null terminator
-  char* ret = new char[bufSize];
-  s.toCharArray(ret, bufSize);
-  return ret;
-}
-
 
 // ---------------------------------------------------------------------------*
 // Construit le message HEXA                              
@@ -279,51 +284,49 @@ debugSerial.print("hexPayload: "); debugSerial.println(hexPayload);
 //                               
 // ---------------------------------------------------------------------------*
 String Build_Lora_String(String dataGrafana)
-{ char buffer[BUF_LEN];
-
-  // INITIALISE LA CHAINE TEXTE A ENVOYER
+{  // INITIALISE LA CHAINE TEXTE A ENVOYER
 
 // N° carte
-    sprintf(buffer, "%2c",'3');         // ????? %2c = '3' ?????
-    dataGrafana +=buffer; 
+    sprintf(serialbuf, "%2c",'3');         // ????? %2c = '3' ?????
+    dataGrafana +=serialbuf; 
     
 // température DHT
-    sprintf(buffer, "%5.1f",Data_LoRa.DHT_Temp);
-    dataGrafana +=buffer;  
+    sprintf(serialbuf, "%5.1f",Data_LoRa.DHT_Temp);
+    dataGrafana +=serialbuf;  
 
 // température Peson
-    sprintf(buffer,"%5.1f",Temp_Peson(2));        // DHT_Hum); sp
-    dataGrafana +=buffer; 
+    sprintf(serialbuf,"%5.1f",Temp_Peson(2));        // DHT_Hum); sp
+    dataGrafana +=serialbuf; 
 
 // Luminance LDR
-    sprintf(buffer, "%5.1f",Data_LoRa.Brightness);        // DHT_Hum);sp
-    dataGrafana +=buffer;//Data_LoRa.Brightness;  
+    sprintf(serialbuf, "%5.1f",Data_LoRa.Brightness);        // DHT_Hum);sp
+    dataGrafana +=serialbuf;//Data_LoRa.Brightness;  
  
 // Tension BAT
-   sprintf(buffer, "%5.2f",Data_LoRa.Bat_Voltage);  // 2 fois???
-    dataGrafana +=buffer; 
+   sprintf(serialbuf, "%5.2f",Data_LoRa.Bat_Voltage);  // 2 fois???
+    dataGrafana +=serialbuf; 
 // MASSE A
-   sprintf(buffer, "%5.2f",Poids_Peson(4));   // au lieu de 1
-    dataGrafana +=buffer; 
+   sprintf(serialbuf, "%5.2f",Poids_Peson(4));   // au lieu de 1
+    dataGrafana +=serialbuf; 
 
 
 // MASSE B
-   sprintf(buffer, "%5.2f",Poids_Peson(2));   
-     dataGrafana +=buffer;  
+   sprintf(serialbuf, "%5.2f",Poids_Peson(2));   
+     dataGrafana +=serialbuf;  
      
 // MASSE C
-   sprintf(buffer, "%5.2f",Poids_Peson(3));  
-   dataGrafana +=buffer; 
+   sprintf(serialbuf, "%5.2f",Poids_Peson(3));  
+   dataGrafana +=serialbuf; 
    
 // MASSE D   peson 2 brut
-   sprintf(buffer,"%5.2f",Contrainte_List [1]); //Data_LoRa.HX711Weight_4);   
+   sprintf(serialbuf,"%5.2f",Contrainte_List [1]); //Data_LoRa.HX711Weight_4);   
 
-   sprintf(buffer,"%5.2f",Data_LoRa.Bat_Voltage); // 2 fois???
-    dataGrafana +=buffer;  
+   sprintf(serialbuf,"%5.2f",Data_LoRa.Bat_Voltage); // 2 fois???
+    dataGrafana +=serialbuf;  
 
 // tension panneau solaire
-   sprintf(buffer, "%5.2f",Data_LoRa.Solar_Voltage);
-    dataGrafana +=buffer; 
+   sprintf(serialbuf, "%5.2f",Data_LoRa.Solar_Voltage);
+    dataGrafana +=serialbuf; 
 
 // remplace pour débug
 // Température
@@ -340,52 +343,51 @@ return(dataGrafana);
 //                               
 // ---------------------------------------------------------------------------*
 String Build_CSV_String(String dataString)
-{ char buffer[BUF_LEN];
-  // INITIALISE LA CHAINE TEXTE A ENVOYER
+{  // INITIALISE LA CHAINE TEXTE A ENVOYER
 
 
 //2021.03.28 19:10:53; 311.90;13.31;  1.9; 4.04;13.36;52.91; 8.03;1222475.25; 0.00;
 // Date; carte; DHT_T; temp2; LDR; VBat; masse1; masse2; masse3; Contrainte 2; VSol
 
 // N° carte
-    sprintf(buffer, "%2c;",'3');
-    dataString +=buffer; 
+    sprintf(serialbuf, "%2c;",'3');
+    dataString +=serialbuf; 
     
 // température DHT
-    sprintf(buffer,"%5.2f;",Data_LoRa.DHT_Temp);
-    dataString +=buffer; 
+    sprintf(serialbuf,"%5.2f;",Data_LoRa.DHT_Temp);
+    dataString +=serialbuf; 
     
 // température Peson
-    sprintf(buffer,"%5.2f;",Temp_Peson(2));        // DHT_Hum); sp
-    dataString +=buffer;
+    sprintf(serialbuf,"%5.2f;",Temp_Peson(2));        // DHT_Hum); sp
+    dataString +=serialbuf;
     
 // Luminance LDR
-    sprintf(buffer, "%5.1f;",Data_LoRa.Brightness);        // DHT_Hum);sp
-    dataString +=buffer; //Data_LoRa.Brightness; 
+    sprintf(serialbuf, "%5.1f;",Data_LoRa.Brightness);        // DHT_Hum);sp
+    dataString +=serialbuf; //Data_LoRa.Brightness; 
  
 // Tension BAT
-   sprintf(buffer, "%5.2f;",Data_LoRa.Bat_Voltage);  // 2 fois???
-   dataString +=buffer;
+   sprintf(serialbuf, "%5.2f;",Data_LoRa.Bat_Voltage);  // 2 fois???
+   dataString +=serialbuf;
 
 // MASSE A
-   sprintf(buffer, "%5.2f;",Poids_Peson(1));   
-   dataString +=buffer;
+   sprintf(serialbuf, "%5.2f;",Poids_Peson(1));   
+   dataString +=serialbuf;
 
 // MASSE B
-   sprintf(buffer, "%5.2f;",Poids_Peson(2));   
-   dataString +=buffer;
+   sprintf(serialbuf, "%5.2f;",Poids_Peson(2));   
+   dataString +=serialbuf;
 
 // MASSE C
-   sprintf(buffer, "%5.2f;",Poids_Peson(3));  
-   dataString +=buffer;  
+   sprintf(serialbuf, "%5.2f;",Poids_Peson(3));  
+   dataString +=serialbuf;  
 
 // MASSE D   peson 2 brut
-   sprintf(buffer, "%5.2f;",Contrainte_List [1]); //Poids(4));   
-   dataString +=buffer;
+   sprintf(serialbuf, "%5.2f;",Contrainte_List [1]); //Poids(4));   
+   dataString +=serialbuf;
 
 // tension panneau solaire
-   sprintf(buffer,"%5.2f;",Data_LoRa.Solar_Voltage);
-   dataString +=buffer;
+   sprintf(serialbuf,"%5.2f;",Data_LoRa.Solar_Voltage);
+   dataString +=serialbuf;
 
 // remplace pour débug
 // Température
