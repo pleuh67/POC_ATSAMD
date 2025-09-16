@@ -19,43 +19,6 @@
 // -------------------------------------------------------------------------------------
 
 /**
- * @brief Démarre la sélection dans une liste de valeurs
- * @param title Titre de la sélection à afficher
- * @param itemList Tableau de pointeurs vers les chaînes de caractères
- * @param numItems Nombre d'éléments dans la liste (maximum 6)
- * @param initialIndex Index initial sélectionné
- * @return void
- */
-void startListInput(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex)
-{
-    if (listInputCtx.state != LIST_INPUT_IDLE)
-    {
-        return; // Sélection déjà en cours
-    }
-    
-    // Validation des paramètres
-    if (numItems > 6) numItems = 6; // Limitation à 6 éléments max
-    if (initialIndex >= numItems) initialIndex = 0;
-    
-    // Initialisation du contexte
-    listInputCtx.state = LIST_INPUT_ACTIVE;
-    listInputCtx.selectedIndex = initialIndex;
-    listInputCtx.maxItems = numItems;
-    listInputCtx.itemList = itemList;
-    strncpy(listInputCtx.title, title, 31);
-    listInputCtx.title[31] = '\0';
-    
-    listInputCtx.displayRefresh = true;
-    listInputCtx.lastUpdate = millis();
-    listInputCtx.cursorBlink = true;
-    listInputCtx.lastBlink = millis();
-    
-    debugSerial.print("Selection dans liste demarree: ");
-    debugSerial.println(title);
-    OLEDDisplayMessageL8("Choisissez une valeur", false, false);
-}
-
-/**
  * @brief Traite la sélection dans la liste (à appeler dans loop)
  * @param void
  * @return État actuel de la sélection
@@ -76,7 +39,8 @@ listInputState_t processListInput(void)
         switch (touche)
         {
             case LEFT:
-            case MOINS:
+                       break;
+            case UP:
                 // Remonter dans la liste
                 if (listInputCtx.selectedIndex > 0)
                 {
@@ -94,7 +58,8 @@ listInputState_t processListInput(void)
                 break;
                 
             case RIGHT:
-            case PLUS:
+                       break;
+            case DOWN:
                 // Descendre dans la liste
                 if (listInputCtx.selectedIndex < listInputCtx.maxItems - 1)
                 {
@@ -138,6 +103,50 @@ listInputState_t processListInput(void)
     
     return listInputCtx.state;
 }
+
+/**
+ * @brief Démarre la sélection dans une liste de valeurs
+ * @param title Titre de la sélection à afficher
+ * @param itemList Tableau de pointeurs vers les chaînes de caractères
+ * @param numItems Nombre d'éléments dans la liste (maximum 6)
+ * @param initialIndex Index initial sélectionné
+ * @return void
+ */
+void startListInput(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex)
+{
+debugSerial.print("Param : ");debugSerial.println(itemList[2]);
+  
+    if (listInputCtx.state != LIST_INPUT_IDLE)
+    {
+        return; // Sélection déjà en cours
+    }
+    
+    // Validation des paramètres
+    if (numItems > 6) numItems = 6; // Limitation à 6 éléments max
+    if (initialIndex >= numItems) initialIndex = 0;
+    
+    // Initialisation du contexte
+    listInputCtx.state = LIST_INPUT_ACTIVE;
+    listInputCtx.selectedIndex = initialIndex;
+    listInputCtx.maxItems = numItems;
+    listInputCtx.itemList = itemList;
+debugSerial.print("struct: ");debugSerial.println(listInputCtx.itemList[2]);
+    strncpy(listInputCtx.title, title, 21);
+    listInputCtx.title[20] = '\0';
+    
+    listInputCtx.displayRefresh = true;
+    listInputCtx.lastUpdate = millis();
+    listInputCtx.cursorBlink = true;
+    listInputCtx.lastBlink = millis();
+    
+    debugSerial.println("Selection dans liste demarree: ");
+//    debugSerial.println(title);
+
+debugSerialListStruct();
+
+    OLEDDisplayMessageL8("Choisissez une valeur", false, false);
+}
+
 
 /**
  * @brief Finalise la sélection et récupère l'index choisi
@@ -198,10 +207,10 @@ bool isListInputActive(void)
 void refreshListDisplay(void)
 {
     // Afficher le titre
-    OLEDDrawText(0, 0, 0, listInputCtx.title);
+    OLEDDrawText(1, 0, 0, listInputCtx.title);
     
     // Afficher les éléments de la liste
-    for (uint8_t i = 0; i < listInputCtx.maxItems && i < 4; i++) // Maximum 4 lignes affichables
+    for (uint8_t i = 0; i < listInputCtx.maxItems && i < 6; i++) // Maximum 6 lignes affichables
     {
   //      char lineBuffer[32];
         
@@ -218,23 +227,28 @@ void refreshListDisplay(void)
         {
             sprintf(OLEDbuf/*lineBuffer*/, "  %s", listInputCtx.itemList[i]);
         }
-        
+//debugSerial.println(listInputCtx.itemList[i]);
+//debugSerial.println(OLEDbuf);        
         // Afficher la ligne
-        OLEDDrawText(i + 1, 0, 0, OLEDbuf/*lineBuffer*/);
+        OLEDDrawText(1, i+1, 0, OLEDbuf/*lineBuffer*/);
     }
-    
+//displayListDebug = true;
+  if (displayListDebug)                       // Afficher infos debug
+  {       
     // Si plus de 4 éléments, afficher un indicateur de scroll
     if (listInputCtx.maxItems > 4)
     {
         char scrollInfo[16];
         sprintf(scrollInfo, "(%d/%d)", listInputCtx.selectedIndex + 1, listInputCtx.maxItems);
-        OLEDDrawText(3, 100, 0, scrollInfo);
+        OLEDDrawText(1, 6, 0, scrollInfo);
     }
-    
+  }   
+// displayListDebug = false;
+
     // Afficher les instructions en bas
     if (listInputCtx.cursorBlink)
     {
-        OLEDDrawText(7, 0, 0, "+/- : Nav  VALIDE : OK");
+        OLEDDrawText(1, 7, 0, "+/- : Nav  VALIDE : OK");
     }
 }
 
@@ -609,6 +623,10 @@ void refreshNumberDisplay(void)
     OLEDbuf/*underline*/[20] = '\0';
     OLEDDrawText(1, 2, 0, OLEDbuf/*underline*/);
     
+
+ //displayNumberDebug = true;
+  if (displayNumberDebug)                       // Afficher infos debug
+  {        
     // Afficher la position et le caractère actuel (ligne 3)
 //    char posCharInfo[21];
     snprintf(OLEDbuf/*posCharInfo*/, 21, "Pos:%02d/%02d Car:'%c'", 
@@ -625,7 +643,8 @@ void refreshNumberDisplay(void)
     {
       OLEDDrawText(1, 4, 0, "Nombre: INVALIDE");
     }
-    
+  }  
+// displayNumberDebug = false;
     // Afficher les instructions (lignes 5 et 6)
     OLEDDrawText(1, 5, 0, "+/- : Modifier nb");
     OLEDDrawText(1, 6, 0, "</> : Pos  V : OK");

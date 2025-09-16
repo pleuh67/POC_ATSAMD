@@ -64,14 +64,28 @@ debugSerial.print("L");   // LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
     listInputState_t state = processListInput();
         
     switch (state)
-    {
+    {               debugSerial.println(exempleListeValeurs[selectedModeIndex]); 
       case LIST_INPUT_COMPLETED:
                 selectedModeIndex = finalizeListInput(); // Récupérer l'index sélectionné
                 debugSerial.print("Mode selectionne: ");
                 debugSerial.print(selectedModeIndex);
                 debugSerial.print(" - ");
                 debugSerial.println(exempleListeValeurs[selectedModeIndex]);
+
+                
+                
                 // Ici vous pouvez traiter la sélection
+
+debugSerial.println("Chaine validée : ");
+sprintf(stringSaisie,(char *)exempleListeValeurs[selectedModeIndex]);    // recopie saisie dans destination
+debugSerial.println(stringSaisie);
+debugSerial.println(Data_LoRa.RucherName);
+debugSerial.println(exempleListeValeurs[selectedModeIndex]);
+
+                OLEDClear();// Effacer écran
+                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet    
+
+                
                 break;
                 
       case LIST_INPUT_CANCELLED:
@@ -142,15 +156,10 @@ debugSerial.print("A");   // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 //stringBuffer contient la chaine à copier dans la destination
 //      sprintf(Data_LoRa.RucherName,stringBuffer);    
 
-                sprintf(stringDest,stringBuffer);    // recopie saisie dans destination
-debugSerial.print("Chaine validée : "); debugSerial.print(stringDest);debugSerial.println(Data_LoRa.RucherName);
-
-
-// Effacer écran
-                OLEDClear();
-// remettre écran par défaut                
+                sprintf(stringSaisie,stringBuffer);    // recopie saisie dans destination
+debugSerial.print("Chaine validée : "); debugSerial.print(stringSaisie);debugSerial.println(Data_LoRa.RucherName);
+                OLEDClear();// Effacer écran
                 OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet     
-                    
                 break;
                 
       case STRING_INPUT_CANCELLED:
@@ -169,10 +178,6 @@ debugSerial.print("Chaine validée : "); debugSerial.print(stringDest);debugSeri
     }
 */
   }
-
-
-
-  
 // ------------------------------------------------
 // Gestion normale des menus quand pas de saisie
 // ------------------------------------------------    
@@ -207,9 +212,8 @@ debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
 // appeler avec chaine a modifier    ex: Data_LoRa.RucherName[20]
 //                        startStringInput("SAISIE TEXTE:", currentString, 20); 
 
-  stringDest=Data_LoRa.RucherName;
-
-                        startStringInput("SAISIE TEXTE:", stringDest, 20);
+                        stringSaisie=Data_LoRa.RucherName;  // Valeur courante traiter
+                        startStringInput("SAISIE TEXTE:", stringSaisie, 20);
 
                     }
                     break;

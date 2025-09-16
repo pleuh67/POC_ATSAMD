@@ -27,11 +27,14 @@ clavier_context_t clavierContext = {KEY_NONE, KEY_NONE, 0, 0, false};
 key_code_t touche; 
 
 // ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
+char stringSaisie[OLEDBUFLEN]="azerty";   // 128/retour de toutes les fonctions de saisie non bloquantes
 listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 6, false, 0, false, 0, "", NULL};
+bool displayListDebug = false;
 numberInputContext_t numberInputCtx = {NUMBER_INPUT_IDLE, 0, "", 10, false, 0, false, 0, "", false};
+bool displayNumberDebug = false;
 stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, "", 20, false, 0, false, 0, ""};
 bool displayStringDebug = false;
-char *stringDest;
+
 
 // Exemple de liste de valeurs alphanumériques
 const char* exempleListeValeurs[] = {
@@ -309,11 +312,14 @@ extern RTC_DS3231 rtc;
 extern DateTime nextPayload;
 
 // ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
+extern char *stringSaisie;
 extern listInputContext_t listInputCtx;
+extern bool displayListDebug;
 extern numberInputContext_t numberInputCtx;
+extern bool displayNumberDebug;
 extern stringInputContext_t stringInputCtx;
 extern bool displayStringDebug;
-extern char *stringDest;
+
 
 
 

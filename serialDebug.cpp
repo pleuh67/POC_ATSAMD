@@ -2,6 +2,42 @@
 #define __INIT_DONE
 #include "define.h"
 
+/**
+ * @brief Affiche la structure de saisir d'une Liste
+ * @param Aucun
+ * @return void
+ */
+// listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 6, false, 0, false, 0, "", NULL};
+/*
+typedef struct 
+{
+    listInputState_t state;     // État actuel
+    uint8_t selectedIndex;      // Index de l'élément sélectionné (0-5)
+    uint8_t maxItems;           // Nombre maximum d'éléments dans la liste
+    bool displayRefresh;        // Flag pour rafraîchir l'affichage
+    unsigned long lastUpdate;   // Dernier rafraîchissement affichage
+    bool cursorBlink;           // État du clignotement curseur
+    unsigned long lastBlink;    // Dernier clignotement
+    char title[21];             // Titre de la sélection
+    const char** itemList;      // Pointeur vers la liste des éléments
+} listInputContext_t;
+*/
+void debugSerialListStruct(void)
+{ // cas d'une saisie dans Liste:
+  sprintf(serialbuf,"state %d / selectedIndex : %d / maxItems %d / displayRefresh %d / lastUpdate %d\ncursorBlink %d / lastBlink %d / title %s / itemList[2] %s ",
+                    listInputCtx.state,
+                    listInputCtx.selectedIndex,
+                    listInputCtx.maxItems,
+                    listInputCtx.displayRefresh,
+                    listInputCtx.lastUpdate,
+                    listInputCtx.cursorBlink,
+                    listInputCtx.lastBlink,
+                    listInputCtx.title,
+                    listInputCtx.itemList[2]                    
+                    );
+  debugSerial.println(serialbuf); 
+}
+
 
 /**
  * @brief Affiche la structure de saisir d'un Nombre
@@ -26,7 +62,7 @@ typedef struct
 */
 void debugSerialPrintNumberStruct(void)
 { // cas d'une saisie numérique:
-  sprintf(serialbuf,"state %d / position : %d / workingNumber %s / maxLength %d / displayRefresh %d / lastUpdate %d / cursorBlink %d / lastBlink %d / title %s / allowNegative %d ",
+  sprintf(serialbuf,"state %d / position : %d / workingNumber %s / maxLength %d / displayRefresh %d\nlastUpdate %d / cursorBlink %d / lastBlink %d / title %s / allowNegative %d ",
                     numberInputCtx.state,
                     numberInputCtx.position,
                     numberInputCtx.workingNumber,
@@ -62,7 +98,7 @@ typedef struct
 */
 void debugSerialPrintStringStruct(void)
 { // cas d'une saisie numérique:
-  sprintf(serialbuf,"state %d / position : %d / workingNumber %s / maxLength %d / displayRefresh %d / lastUpdate %d / cursorBlink %d / lastBlink %d / title %s ",
+  sprintf(serialbuf,"state %d / position : %d / workingNumber %s / maxLength %d / displayRefresh %d\nlastUpdate %d / cursorBlink %d / lastBlink %d / title %s ",
                     stringInputCtx.state,
                     stringInputCtx.position,
                     stringInputCtx.workingString,

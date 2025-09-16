@@ -124,6 +124,7 @@ void OLEDDisplaySystemInfo(void);
 char* strToChar(String s);
 
 // Gestion serialDebug 
+void debugSerialListStruct(void);
 void debugSerialPrintNumberStruct(void);
 void debugSerialPrintStringStruct(void);
 void debugSerialTestConnexionDS3231(void);
