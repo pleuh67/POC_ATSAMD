@@ -131,7 +131,7 @@ void processContinuousKeyboard(void)
                 if (toucheActuelle != KEY_NONE)
                 {
                     clavierContext.toucheDisponible = true;
-                    
+/*                    
                     // Debug optionnel
                     static int toucheCount = 0;
                     toucheCount++;
@@ -142,6 +142,7 @@ void processContinuousKeyboard(void)
                         debugSerial.print(": ");
                         debugSerial.println(keyToString(toucheActuelle));
                     }
+*/                    
                 }
             }
         }

@@ -3,6 +3,18 @@
 #include "define.h"
 
 
+bool isDateValid(const char *d);
+void modifyDateDigit(char *d, uint8_t pos, int delta);
+void inputDate(char *d);
+bool isTimeValid(const char *h);
+void modifyTimeDigit(char *h, uint8_t pos, int delta);
+void inputTime(char *h);
+void inputListValue(const char *label, const int *liste, uint8_t nbValeurs, int *valeurSelectionnee);
+void inputListValueLibelle(const char *label, const int *valeurs, const char **libelles, uint8_t nbValeurs, int *valeurSelectionnee, bool *valide);
+uint64_t inputHex(const char* variable, uint64_t valeurInitiale);
+uint32_t inputDecimal(const char* variable, uint32_t valeurInitiale);
+
+
 /**
  * @brief Vérifie si une date est valide
  * @param d Chaîne de caractères représentant la date (format jj/mm/aaaa)

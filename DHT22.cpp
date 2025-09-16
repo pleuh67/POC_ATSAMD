@@ -1,4 +1,3 @@
-
 #define __INIT_DONE
 #include "define.h"
 

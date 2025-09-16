@@ -1,0 +1,227 @@
+#define __INIT_DONE
+#include "define.h"
+
+
+//#define __SerialDebugPoc      // decommenter pour afficher messages debug
+
+// ---------------------------------------------------------------------------
+// MODE EXPLOITATION
+// ---------------------------------------------------------------------------
+/**
+ * @brief Gestion du mode exploitation
+ * @param Aucun
+ * @return void
+ */
+void handleOperationMode(void) // Mode exploitation : que réveil payload
+{ 
+  if (switchToOperationMode)    // affiche qu'une fois
+  { 
+    switchToProgrammingMode = true;
+    OLEDClear(); 
+    OLEDDrawText(1, 7, 0, "MODE EXPLOITATION");
+    switchToOperationMode = false;
+  }  
+#ifdef __SerialDebugPoc    
+debugSerial.print("E");   // EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+#endif
+}
+
+
+
+// ---------------------------------------------------------------------------
+// MODE PROGRAMMATION
+// ---------------------------------------------------------------------------
+/**
+ * @brief Gestion du mode programmation avec saisie non-bloquante
+ * @param Aucun
+ * @return void
+ */
+ // serial : PL (Liste) ou PN (Numerique) ou PA (Alphanumérique) ou PK (Pas de saisie, attente touche)
+void handleProgrammingMode(void) 
+{    // Mode programmation : réveil payload + 1 sec + interface utilisateur
+  if (switchToProgrammingMode)    // affiche qu'une fois
+  {  
+    switchToOperationMode = true;
+    OLEDClear();
+    OLEDDrawScreenTime(0,0);
+//    OLEDDrawText(1, 7, 0, "MODE PROGRAMMATION");
+    switchToProgrammingMode = false;
+    } 
+#ifdef __SerialDebugPoc    
+//debugSerial.print("P");   // PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+#endif
+// ------------------------------------------------
+// Vérifier si une sélection de liste est en cours
+// ------------------------------------------------
+  if (isListInputActive())
+  {
+    static uint8_t selectedModeIndex = 0; // Index du mode sélectionné
+        
+#ifdef __SerialDebugPoc    
+debugSerial.print("L");   // LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+#endif
+
+    listInputState_t state = processListInput();
+        
+    switch (state)
+    {
+      case LIST_INPUT_COMPLETED:
+                selectedModeIndex = finalizeListInput(); // Récupérer l'index sélectionné
+                debugSerial.print("Mode selectionne: ");
+                debugSerial.print(selectedModeIndex);
+                debugSerial.print(" - ");
+                debugSerial.println(exempleListeValeurs[selectedModeIndex]);
+                // Ici vous pouvez traiter la sélection
+                break;
+                
+      case LIST_INPUT_CANCELLED:
+                debugSerial.println("Selection mode annulee");
+                break;
+                
+      default:
+                // Sélection toujours en cours, ne rien faire d'autre
+              return;
+    }
+  }
+// ------------------------------------------------    
+// Vérifier si une saisie numérique est en cours
+// ------------------------------------------------
+  else if (isNumberInputActive())   // numberInputCtx.state == NUMBER_INPUT_ACTIVE
+  {
+    static char numberBuffer[11] = ""; // Buffer pour le nombre
+      
+#ifdef __SerialDebugPoc    
+  debugSerial.print("N");   // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+#endif
+
+    numberInputState_t state = processNumberInput();
+      
+    switch (state)
+    {
+      case NUMBER_INPUT_COMPLETED:
+          finalizeNumberInput(numberBuffer); // Récupérer le nombre final
+          debugSerial.print("Nouveau nombre: ");
+          debugSerial.println(numberBuffer);
+          // Ici vous pouvez traiter le nombre
+          break;
+          
+      case NUMBER_INPUT_CANCELLED:
+          debugSerial.println("Saisie numerique annulee");
+          break;
+          
+      default:
+          // Saisie toujours en cours, ne rien faire d'autre
+          return;
+    }
+#ifdef __SerialDebugPoc    
+debugSerial.print("N");   // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+#endif
+
+  }
+// ------------------------------------------------
+// Vérifier si une saisie alphanumérique est en cours
+// ------------------------------------------------
+  else if (isStringInputActive())
+  {
+    static char stringBuffer[21] = ""; // Buffer pour la chaîne
+        
+#ifdef __SerialDebugPoc    
+debugSerial.print("A");   // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+#endif    
+
+    stringInputState_t state = processStringInput();   // traite la touche lors de la saisie
+        
+    switch (state)
+    {
+      case STRING_INPUT_COMPLETED:
+                finalizeStringInput(stringBuffer); // Récupérer la chaîne finale
+                debugSerial.print("Nouvelle chaine: ");
+                debugSerial.println(stringBuffer);
+                // Ici vous pouvez traiter la chaîne 
+
+//stringBuffer contient la chaine à copier dans la destination
+//      sprintf(Data_LoRa.RucherName,stringBuffer);    
+
+                sprintf(stringDest,stringBuffer);    // recopie saisie dans destination
+debugSerial.print("Chaine validée : "); debugSerial.print(stringDest);debugSerial.println(Data_LoRa.RucherName);
+
+
+// Effacer écran
+                OLEDClear();
+// remettre écran par défaut                
+                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet     
+                    
+                break;
+                
+      case STRING_INPUT_CANCELLED:
+                debugSerial.println("Saisie alphanumérique annulee");
+                break;
+                
+      default:
+                // Saisie toujours en cours, ne rien faire d'autre
+                return;
+    }
+/*    
+    if (stringInputCtx.state != STRING_INPUT_IDLE)  // Fin de saisie String
+    {
+      sprintf(Data_LoRa.RucherName,stringBuffer);    
+      debugSerial.println("copie dans destination");
+    }
+*/
+  }
+
+
+
+  
+// ------------------------------------------------
+// Gestion normale des menus quand pas de saisie
+// ------------------------------------------------    
+  else
+  {
+#ifdef __SerialDebugPoc    
+debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+#endif    
+    if (touche != KEY_NONE)
+    {
+      switch (touche)
+      {
+        case KEY_1: // Touche 1 - Fonction libre
+                    debugSerial.println("Touche 1 - Fonction libre");
+                    break;
+                    
+        case KEY_2: // Touche 2 - Test sélection dans une liste
+                    {
+                        static uint8_t currentModeIndex = 0; // Index actuel (peut être sauvegardé)
+                        startListInput("CHOIX MODE:", exempleListeValeurs, 6, currentModeIndex);
+                    }
+                    break;
+                    
+        case KEY_3: // Touche 3 - Test saisie numérique
+  static char currentNumber[11] = "12345";
+  startNumberInput("SAISIE NOMBRE:", currentNumber, 8, false);
+                    break;
+                    
+        case KEY_4: // Touche 4 - Test saisie alphanumérique
+                    {
+                        static char currentString[21] = "MBVSB0CBJTPOT0WJUF";
+// appeler avec chaine a modifier    ex: Data_LoRa.RucherName[20]
+//                        startStringInput("SAISIE TEXTE:", currentString, 20); 
+
+  stringDest=Data_LoRa.RucherName;
+
+                        startStringInput("SAISIE TEXTE:", stringDest, 20);
+
+                    }
+                    break;
+                    
+        case KEY_5: // Touche 5 - Reset soft
+                    debugSerial.println("Touche 5 - Reset soft");
+                    break;
+                    
+              default:
+                    break;
+      }
+      touche = KEY_NONE; // Reset de la touche
+    }
+  }
+}

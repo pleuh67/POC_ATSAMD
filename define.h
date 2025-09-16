@@ -4,7 +4,7 @@
 #include <ArduinoLowPower.h>
 
 // ===== CONSTANTES PROJET =====
-#define PROJECT_NAME "POC IRQ_Payload IRQ_1s LOW_POWER OLED RN2483 DHT22 KEY5"
+#define PROJECT_NAME "POC IRQ_Payload IRQ_1s LOW_POWER OLED RN2483 DHT22 KEY5"  // len = 55
 #define VERSION "1.1.1-PL"
 
 // ===== TIMING CONSTANTS =====
@@ -16,8 +16,7 @@
 #define INTERVAL_1SEC 1000          // Intervalle 1 seconde en millisecondes
 
 // I2C Addresses
-#define DS3231_ADDRESS  0x68  // Adresse RTC Module DS3231
-#define OLED_ADDRESS   0x3C   // Adresse écran OLED
+#define DS3231_ADDRESS 0x68   // Adresse RTC Module DS3231
 #define EEPROM_ADDRESS 0x57   // Adresse EEPROM Module DS3231
 
 // ===== EEPROM CONFIGURATION =====
@@ -65,13 +64,8 @@
 
 #define PIN_PE BUTTON
 #define RTC_INTERRUPT_PIN 2
-#define HX711_SENSOR_SCK    3
-#define HX711_ASENSOR_DOUT  4       // pull up sur Dout
-#define DHT_SENSOR          5       // Temp/Hum
-#define HX711_BSENSOR_DOUT  6
-#define HX711_CSENSOR_DOUT  8
+
 #define TARE_BUTTON         9
-#define HX711_DSENSOR_DOUT  10
 // #define BUZZER     7 // non implanté
 
 
@@ -88,27 +82,13 @@
 #define RD_VBAT LIBRE6    // PA28
 
 
-// Mesures en erreur
-#define DHT_T_ERR 99
-#define DHT_H_ERR 99
-#define TEMP_ERR 99
-
-// Pour OLED selon type sélectionné
-#ifdef OLED096
-  #include <Adafruit_SSD1306.h>
-#else
-  #include <Adafruit_SH110X.h>
-#endif
-
-#define BUFF_MAX 256
-#define BUF_LEN  128  
-
+#define TEMP_ERR 99   // Mesures en erreur
 
 // ===== PINS ET INTERFACES =====
 #define loraSerial     Serial2 
 #define debugSerial    SerialUSB
-#define SERIALBUFLEN   128
-#define OLEDBUFLEN     100 // 21
+#define SERIALBUFLEN   256
+#define OLEDBUFLEN     128 // 21
 #define DEBUG_BAUD     115200
 #define SERIAL_TIMEOUT 5000
 
@@ -117,48 +97,62 @@
 #define LED_ON  LOW       // État pour allumer les LEDs RGB (logique inverse)
 
 // ===== CLAVIER ANALOGIQUE =====
-#define NB_KEYS 5
-#define TOL 20                    // Tolérance pour la détection
-#define DEBOUNCE_COUNT 5          // Nombre de lectures identiques requises
+#define NB_KEYS           5
+#define TOL               20      // Tolérance pour la détection
+#define DEBOUNCE_COUNT    5       // Nombre de lectures identiques requises
 #define DEBOUNCE_DELAY_MS 1       // Délai entre les lectures
 
-// ===== OLED CONFIGURATION =====
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define OLED_RESET 4
-#define MAX_LIGNES     8  
-#define TAILLE_LIGNE   8
-#define pixelLine 57 // ligne 8
+// Alias pour les touches selon usage
+#define MOINS     KEY_3   
+#define PLUS      KEY_2
+#define LEFT      KEY_1    
+#define RIGHT     KEY_4
+#define VALIDE    KEY_5
+#define UP        KEY_2      
+#define DOWN      KEY_3    
+#define ANNULER_4 KEY_4   
 
+
+// ===== OLED CONFIGURATION =====
+
+
+//#define OLED096  // Sélection du type d'écran
 #define OLED130  // Sélection du type d'écran
+//#define OLED154  // Sélection du type d'écran
+#define OLED_ADDRESS   0x3C   // Adresse écran OLED
+
+// Pour OLED selon type sélectionné
+#ifdef OLED096
+  #include <Adafruit_SSD1306.h>
+#else
+  #include <Adafruit_SH110X.h>
+#endif
+
+#define SCREEN_WIDTH    128
+#define SCREEN_HEIGHT   64
+#define OLED_RESET      4
+#define MAX_LIGNES      8  
+#define TAILLE_LIGNE    8
+#define pixelLine       57 // ligne 8
 
 #ifdef OLED096
   #define OLEDTEXTSIZE  1
-  #define OLED_Col  6
-  #define OLED_Max_Col 20
-  #define OLED_L1 8
+  #define OLED_Col      6
+  #define OLED_Max_Col  20
+  #define OLED_L1       8
 #else
   #define OLEDTEXTSIZE  1
-  #define OLED_Col  6
-  #define OLED_Max_Col 20
-  #define OLED_L1 8
-  #define WHITE SH110X_WHITE
-  #define BLACK SH110X_BLACK
+  #define OLED_Col      6
+  #define OLED_Max_Col  20
+  #define OLED_L1       8
+  #define WHITE         SH110X_WHITE
+  #define BLACK         SH110X_BLACK
 #endif
 
-// Alias pour les touches selon usage
-#define MOINS KEY_3 //1
-#define PLUS KEY_2
-#define LEFT KEY_1    //3
-#define RIGHT KEY_4
-#define VALIDE KEY_5
-#define UP KEY_2    //3
-#define DOWN KEY_3    //4
-#define ANNULER_4 KEY_4   //
 
 // RN2483A
-#define PAYLOADSIZE 19
-#define HEXPAYLOADSIZE 38
+#define PAYLOADSIZE     19
+#define HEXPAYLOADSIZE  38
 
 
 // ****************************************************************************
@@ -177,14 +171,21 @@
 // ****************************************************************************
 // HX711 Weight sensors - weastone bridge
 // ****************************************************************************
-#include "HX711.h"      // inclusion de la librairie HX711
+#include "HX711.h"              // inclusion de la librairie HX711
+#define HX711_SENSOR_SCK    3
+#define HX711_ASENSOR_DOUT  4   // pull up sur Dout
+#define HX711_BSENSOR_DOUT  6
+#define HX711_CSENSOR_DOUT  8
+#define HX711_DSENSOR_DOUT  10
 
 // ****************************************************************************
-// DHTxx Temperature and Humidity sensors
+// DHTxx Temperature and Humidity sensors            DTHT22 CONFIGURATION =====
 // ****************************************************************************
 #include "DHT.h"
-#define DHT_TYPE DHT22   // DHT 22  (AM2302), AM2321
-
+#define DHT_TYPE      DHT22   // DHT 22  (AM2302), AM2321
+#define DHT_SENSOR    5       // Temp/Hum
+#define DHT_T_ERR     99      // Mesures en erreur
+#define DHT_H_ERR     99      // Mesures en erreur
 
 #include ".\struct.h"
 #include ".\var.h"

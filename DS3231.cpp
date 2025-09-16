@@ -65,6 +65,9 @@ DateTime getSystemTime(void)
  */
 void DS3231setRTCAlarm1(void) 
 {
+  return; 
+
+  
 // Configuration DS3231 AVANT interruption
 //  rtc.writeSqwPinMode(DS3231_OFF);
   rtc.clearAlarm(1);
@@ -72,7 +75,7 @@ debugSerial.print("=== CONFIGURATION ALARME1 ");
   if (DEBUG_INTERVAL_1SEC) // && !modeExploitation) 
   {
     DateTime nextSecond = rtc.now() + TimeSpan(0, 0, 0, 1);
-    rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
+ //   rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
   }
 debugSerial.println("=== 1s DONE ===");
 }
@@ -92,11 +95,11 @@ void DS3231setRTCAlarm2(void)
 // Configuration DS3231 AVANT interruption
 //      rtc.writeSqwPinMode(DS3231_OFF);
 //      rtc.clearAlarm(1);
-      rtc.clearAlarm(2);
+// déjà fait dans fonction appelante:      rtc.clearAlarm(2);
 
    // AJOUTEZ ceci pour être sûr :
   //  rtc.alarmFired(1);  // Lit et efface le flag alarme 1
- //   rtc.alarmFired(2);  // Lit et efface le flag alarme 2
+ //  rtc.alarmFired(2);  // Lit et efface le flag alarme 2
    
     // Reprogrammer A2
 //debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
@@ -105,8 +108,8 @@ void DS3231setRTCAlarm2(void)
   {
     nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
     rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
-debugSerialPrintNextAlarm(nextPayload,2);
-OLEDDrawScreenNextPayload(7, 0, nextPayload );  // Status message
+//debugSerialPrintNextAlarm(nextPayload,2);
+//OLEDDrawScreenNextPayload(7, 0, nextPayload );  // Status message
   }
 //debugSerial.println("=== FIN CONFIGURATION ALARMES + INTERRUPTIONS ===");
 
@@ -156,11 +159,13 @@ void DS3231hardReset()
  * @param Aucun
  * @return void
  */
-void DS3231CompleteReset() {
+void DS3231CompleteReset() 
+{
     Wire.beginTransmission(0x68);
     
     // Reset de tous les registres principaux
-    for(int i = 0; i <= 0x12; i++) {
+    for(int i = 0; i <= 0x12; i++) 
+    {
         Wire.write(i);
         Wire.write(0x00);
         Wire.endTransmission();
@@ -186,30 +191,26 @@ void DS3231CompleteReset() {
  */
 void synchronizeDS3231TimeToMicro(void)
 {
-    debugSerial.println("=== SYNCHRONISATION DS3231 -> MICRO ===");
+  debugSerial.println("=== SYNCHRONISATION DS3231 -> MICRO ===");
     
     // Lecture de l'heure du DS3231
-    DateTime heureDS3231 = rtc.now();
+  DateTime heureDS3231 = rtc.now();
     
     // Affichage de l'heure lue
-    debugSerial.print("Heure DS3231: ");
-    debugSerial.print(heureDS3231.day()); debugSerial.print("/");
-    debugSerial.print(heureDS3231.month()); debugSerial.print("/");
-    debugSerial.print(heureDS3231.year()); debugSerial.print(" ");
-    debugSerial.print(heureDS3231.hour()); debugSerial.print(":");
-    debugSerial.print(heureDS3231.minute()); debugSerial.print(":");
-    debugSerial.println(heureDS3231.second());
+  debugSerial.print("Heure DS3231: ");
+  debugSerial.print(heureDS3231.day()); debugSerial.print("/");
+  debugSerial.print(heureDS3231.month()); debugSerial.print("/");
+  debugSerial.print(heureDS3231.year()); debugSerial.print(" ");
+  debugSerial.print(heureDS3231.hour()); debugSerial.print(":");
+  debugSerial.print(heureDS3231.minute()); debugSerial.print(":");
+  debugSerial.println(heureDS3231.second());
     
     // Note: Sur ATSAMD21, il n'y a pas de RTC interne séparée
     // L'heure système est déjà synchronisée avec le DS3231
     // Cette fonction sert principalement pour le debug et la vérification
     
-    debugSerial.println("Synchronisation terminée");
-    
-    if (OLED)
-    {
-        OLEDDisplayMessageL8("Heure synchronisee", false, false);
-    }
+  debugSerial.println("Synchronisation terminée");
+  OLEDDisplayMessageL8("Heure synchronisee", false, false);
 }
 
 /**
@@ -267,12 +268,9 @@ void copyDS3231TimeToMicro(bool forcer)
         
         debugSerial.println("Heure copiée du DS3231 vers micro");
         
-        if (OLED)
-        {
-            sprintf(OLEDbuf, "Sync: %02d:%02d:%02d", 
-                    heureDS3231.hour(), heureDS3231.minute(), heureDS3231.second());
-            OLEDDisplayMessageL8(OLEDbuf, false, false);
-        }
+        sprintf(OLEDbuf, "Sync: %02d:%02d:%02d", 
+                heureDS3231.hour(), heureDS3231.minute(), heureDS3231.second());
+        OLEDDisplayMessageL8(OLEDbuf, false, false);
         derniereCopie = millis();
     }
     else

@@ -85,15 +85,15 @@ Poids_Peson(2) = Poids_Peson(2)-0.5 - (Temp_Peson(2)-TareTemp(2))*CompTemp(2); /
 if (oldpoids2 ==0)
   oldpoids2 = Poids_Peson(2);
   float delta = abs(Poids_Peson(2)-oldpoids2);
-  snprintf(serialbuf, BUFF_MAX,"%6.3f",Poids_Peson(2) );
+  sprintf(serialbuf, "%6.3f",Poids_Peson(2) );
 debugSerial.println(serialbuf); 
-  snprintf(serialbuf, BUFF_MAX,"%6.3f",oldpoids2);
+  sprintf(serialbuf, "%6.3f",oldpoids2);
 debugSerial.println(serialbuf); 
-  snprintf(serialbuf, BUFF_MAX,"%6.3f",delta);
+  sprintf(serialbuf, "%6.3f",delta);
 debugSerial.println(serialbuf); 
   if ( delta < 0.1) // moyennage si variation inf à 100g
     Poids_Peson(2)=(oldpoids2 + Poids_Peson(2)) / 2;  // moyenné sur moyenne(2points) + nlle mesure.
-  snprintf(serialbuf, BUFF_MAX,"%6.3f",Poids_Peson(2) );
+  sprintf(serialbuf, "%6.3f",Poids_Peson(2) );
 debugSerial.println(serialbuf); 
   oldpoids2 = Poids_Peson(2);  // memorise poids
   Poids_Peson(3) = Poids_Peson(1) - (Temp_Peson(1)-TareTemp(1))*CompTemp(1); 

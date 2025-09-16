@@ -1,7 +1,41 @@
 /*
 
 
+1 false; 2 true; LP false
+IRQ2 sans build et send pendant saisie = PB
+loop nok, IRQ continue
+suppression wakeupPayload = true  => idem remis
+suppression:
+//debugSerialPrintNextAlarm(nextPayload,2);
+//OLEDDrawScreenNextPayload(7, 0, nextPayload );  // Status message
 
+Géré dans main():
+debugSerialPrintNextAlarm(nextPayload,2);
+
+
+pas de config IRQ1
+void DS3231setRTCAlarm1(void) 
+{
+  return; 
+
+
+
+
+
+
+significations dans serialDebug:
+
+// handle : 
+E : mode Exploitation
+P : Mode Programmation
+PL (Liste) ou PN (Numerique) ou PA (Alphanumérique) ou PK (Pas de saisie, attente touche)
+
+
+
+
+
+
+11/09/2025: pas de build et send lora payload à tester
 
 
 

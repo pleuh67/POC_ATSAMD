@@ -1,7 +1,5 @@
-
 #define __INIT_DONE
 #include "define.h"
-
 
 /**
  * @brief Initialise l'écran OLED selon le type sélectionné
@@ -32,17 +30,12 @@ void OLEDInit(void)
  */
 void OLEDInit096(void) 
 {
-    if (OLED) 
-    {
-        debugSerial.println("INIT OLED096");
+  debugSerial.println("INIT OLED096");
 #define SSD1306_SWITCHCAPVCC 0x02
-        display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS);
-
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-        
-        display.display();
-    }
+  display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS);
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.display();
 }
 
 /**
@@ -52,16 +45,11 @@ void OLEDInit096(void)
  */
 void OLEDInit130(void) 
 {
-    if (OLED) 
-    {
-        debugSerial.println("INIT OLED130");
-        display.begin(OLED_ADDRESS, true);
-
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-       
-        display.display();
-    }
+  debugSerial.println("INIT OLED130");
+  display.begin(OLED_ADDRESS, true);
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.display();
 }
 
 /**
@@ -71,16 +59,11 @@ void OLEDInit130(void)
  */
 void OLEDInit154(void) 
 {
-    if (OLED) 
-    {
-        debugSerial.println("INIT OLED154");
-        display.begin(OLED_ADDRESS, true);
-
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-        
-        display.display();
-    }
+  debugSerial.println("INIT OLED154");
+  display.begin(OLED_ADDRESS, true);
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.display();
 }
 
 /**
@@ -105,14 +88,11 @@ void OLEDClear(void)
  */
 void OLEDEraseText(int16_t colonne, int16_t lig, int16_t Ncar)
 {
-    char TL_ColPixel = (colonne*OLED_Col)-(colonne?0:0); // 1:0
-    char TL_LigPixel = lig * OLED_L1;
+  char TL_ColPixel = (colonne*OLED_Col)-(colonne?0:0); // 1:0
+  char TL_LigPixel = lig * OLED_L1;
     
-    if (OLED)
-    {
-      display.fillRect(TL_ColPixel, TL_LigPixel, OLED_Col * Ncar, OLED_L1, 0);
-      display.display(); // Ajoutez ceci pour forcer l'affichage
-    }
+  display.fillRect(TL_ColPixel, TL_LigPixel, OLED_Col * Ncar, OLED_L1, 0);
+  display.display(); // Ajoutez ceci pour forcer l'affichage
 }
 
 /**
@@ -123,13 +103,9 @@ void OLEDEraseText(int16_t colonne, int16_t lig, int16_t Ncar)
  */
 void OLEDDrawScreenNextPayload(uint8_t ligne, uint8_t colonne, DateTime nextPayload )
 {
-    if (OLED) 
-    {  
-        sprintf(OLEDbuf, "PayLoad: %02d:%02d:%02d", 
+  sprintf(OLEDbuf, "PayLoad: %02d:%02d:%02d", 
                 nextPayload.hour(), nextPayload.minute(), nextPayload.second());
-        OLEDDrawText(1, ligne, colonne, OLEDbuf);
-                
-    }
+  OLEDDrawText(1, ligne, colonne, OLEDbuf);
 }
 
 /**
@@ -141,19 +117,16 @@ void OLEDDrawScreenNextPayload(uint8_t ligne, uint8_t colonne, DateTime nextPayl
 void OLEDDrawScreenTime(uint8_t ligne, uint8_t colonne)
 { static DateTime oldSystemTime(1692712245);  //1692712245);  // timestamp Unix
 
-    if (OLED) 
-    {  
-        DateTime systemTime = getSystemTime();
-        sprintf(OLEDbuf, "%02d:%02d:%02d - %02d/%02d/%d", 
-                systemTime.hour(), systemTime.minute(), systemTime.second(),
-                systemTime.day(), systemTime.month(), systemTime.year());
+  DateTime systemTime = getSystemTime();
+  sprintf(OLEDbuf, "%02d:%02d:%02d    %02d/%02d/%02d", 
+          systemTime.hour(), systemTime.minute(), systemTime.second(),
+          systemTime.day(), systemTime.month(), systemTime.year()-2000);
               
-         if (systemTime != oldSystemTime)
-         { 
-            OLEDDrawText(1, ligne, colonne, OLEDbuf);
-            oldSystemTime = systemTime;
-         }
-    }
+  if (systemTime != oldSystemTime)
+  { 
+    OLEDDrawText(1, ligne, colonne, OLEDbuf);
+    oldSystemTime = systemTime;
+  }
 }
 
 /**
@@ -164,43 +137,21 @@ void OLEDDrawScreenTime(uint8_t ligne, uint8_t colonne)
  */
 void OLEDDrawScreenRefreshTime(uint8_t ligne, uint8_t colonne)
 { static DateTime oldSystemTime(1692712245);  //1692712245);  // timestamp Unix
-
-    if (OLED) 
-    {  
-        DateTime systemTime = getSystemTime();
-/*
-        sprintf(OLEDbuf, "%02d:%02d:%02d - %02d/%02d/%d", 
-                systemTime.hour(), systemTime.minute(), systemTime.second(),
-                systemTime.day(), systemTime.month(), systemTime.year());
-*/
-// Check changes and refresh with:
-// OLEDPrintVar(uint8_t ligne, uint8_t col, const void *valeur, char type)
-/* @param ligne Ligne sur l'écran OLED où afficher la variable
- * @param col Colonne sur l'écran OLED où commencer l'affichage
- * @param valeur Pointeur vers la valeur à afficher
- * @param type Type de la variable ('c', 's', 'i', 'I', 'f', 'F')
-*/
-
-/*
-Police par défaut (built-in font)
-Taille fixe : 6x8 pixels par caractère (incluant 1 pixel d'espacement)
-Monospace : chaque caractère occupe exactement la même largeur
-Positionnement prévisible : le curseur avance de 6 pixels horizontalement pour chaque caractère
-*/
-
-int val;
-               if (oldSystemTime.hour() != systemTime.hour())
-               { val = systemTime.hour();
-                 OLEDPrintVar(ligne, 0, &val, 'i');
-               }
-               if (oldSystemTime.minute() != systemTime.minute())
-               { val = systemTime.minute();
-                 OLEDPrintVar(ligne, 3, &val, 'i');
-               }
-               if (oldSystemTime.second() != systemTime.second())
-               { val = systemTime.second();
-                 OLEDPrintVar(ligne, 6, &val, 'i');
-               }       
+  DateTime systemTime = getSystemTime();
+  int val;
+  
+  if (oldSystemTime.hour() != systemTime.hour())
+  { val = systemTime.hour();
+    OLEDPrintVar(ligne, 0, &val, 'i');
+  }
+  if (oldSystemTime.minute() != systemTime.minute())
+  { val = systemTime.minute();
+    OLEDPrintVar(ligne, 3, &val, 'i');
+  }
+  if (oldSystemTime.second() != systemTime.second())
+  { val = systemTime.second();
+    OLEDPrintVar(ligne, 6, &val, 'i');
+  }       
 /*               
                if (oldSystemTime.day() != systemTime.day())
                { val = systemTime.day();
@@ -215,12 +166,8 @@ int val;
      //            OLEDPrintVar(ligne, 17, &val, 'i');
                }               
  */              
-         if (systemTime != oldSystemTime)
-         { 
-  //          OLEDDrawText(1, ligne, colonne, OLEDbuf);
-            oldSystemTime = systemTime;
-         }
-    }
+  if (systemTime != oldSystemTime)
+    oldSystemTime = systemTime;
 }
 
 
@@ -231,22 +178,27 @@ int val;
  */
 void OLEDDebugDisplay(char* message) 
 {
-  if (!modeDebugActif) return;
-    
-  for (int i = 0; i < MAX_LIGNES - 1; i++) 
+  if (!OLEDModeDebugActif)
+  {
+    debugSerial.println("OLEDModeDebugActif:non");
+    return;
+  }
+// remplissage du bas vers le haut    
+  for (int i = 0; i < MAX_LIGNES - 1; i++) // rappel MAX_LIGNES = 8
   {
     strcpy(lignesDebug[i], lignesDebug[i+1]);
   }
   strcpy(lignesDebug[MAX_LIGNES - 1], message);
-    
+// réaffiche tout l'écran    
   display.clearDisplay();
   for (uint8_t i = 1; i < MAX_LIGNES; i++) // uint8_t i = 0 => reserve L0 pour Time/Date
   {
-    display.setCursor(0, i * TAILLE_LIGNE);
+//    display.setCursor(0, i * TAILLE_LIGNE);
     OLEDDrawText(1,i, 0, lignesDebug[i]);
   }
   display.display();
   delay(delaiAffichage);
+//  debugSerial.print("OLEDDebugDisplay => "); debugSerial.println(message);
 }
 
 
@@ -257,23 +209,24 @@ void OLEDDebugDisplay(char* message)
  */
 void OLEDDebugDisplayReset(void) 
 {    
-  if (!modeDebugActif) return;
+  if (!OLEDModeDebugActif) return;
     
-  for (int i = 1; i < MAX_LIGNES; i++) // int i = 0, on garde time/date dispo
-  {
- 
+  for (int i = 0; i < MAX_LIGNES; i++) // int i = 0, on garde time/date dispo
+  { 
  //           sprintf(OLEDbuf, " --- %02d --- ",i);     
     strcpy(lignesDebug[i], "                    ");
   }
-    
-  display.clearDisplay();
+OLEDClear(); 
+//  display.clearDisplay();
+/* 
   for (uint8_t i = 0; i < MAX_LIGNES; i++) 
   {
-    display.setCursor(0, i * TAILLE_LIGNE);
+  //  display.setCursor(0, i * TAILLE_LIGNE);
     OLEDDrawText(1,i, 0, lignesDebug[i]);
   }
   display.display();
   delay(delaiAffichage);
+*/  
 }
 
 
@@ -412,7 +365,7 @@ void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse)
   display.clearDisplay();
   display.setTextSize(1);
     
-  if (inverse) 
+  if (inverse)
   {
     display.setTextColor(BLACK, WHITE);
   }
@@ -456,28 +409,32 @@ void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse)
  */
 void OLEDDrawText(int8_t Txt_Size, uint8_t ligne, uint8_t colonne, const char *text)
 {
-  if (OLED)
+  if (strlen(text) > 20-colonne )   // controler la longueur du texte à afficher  
   {
-    display.setTextSize(Txt_Size);
-    OLEDEraseText(colonne, ligne, strlen(text));
-//   debugOLEDDrawText =1;     
-    if (debugOLEDDrawText)
-    {
-      debugSerial.print("txt: "); debugSerial.println(text);
-      debugSerial.print("NB Car: "); debugSerial.print(strlen(text));
-      debugSerial.print("dColonne: "); debugSerial.print(colonne); 
-      debugSerial.print("/"); debugSerial.println((colonne*OLED_Col)-(colonne?0:0));
-    }
-//   debugOLEDDrawText=0;     
-    display.setTextColor(WHITE); 
-    display.setCursor((colonne*OLED_Col)-(colonne?0:0), (ligne*OLED_L1));
-        
-    for (uint8_t i = 0; i < strlen(text); i++)
-    {
-      display.write(text[i]);
-    }      
-    display.display();
+// erreur, texte dépasse colonne 20
   }
+  
+  display.setTextSize(Txt_Size);
+  OLEDEraseText(colonne, ligne, strlen(text));
+//debugOLEDDrawText = true;     
+  if (debugOLEDDrawText)
+  {
+    debugSerial.print("txt: "); debugSerial.print(text);
+    debugSerial.print(" NB Car: "); debugSerial.print(strlen(text));
+    debugSerial.print(" Ligne: "); debugSerial.print(ligne); 
+    debugSerial.print(" Colonne: "); debugSerial.print(colonne); 
+    debugSerial.print("/"); debugSerial.println((colonne*OLED_Col)); //-(colonne?0:0)); // WTF
+ 
+  }
+//debugOLEDDrawText = false; 
+  display.setTextColor(WHITE); 
+  display.setCursor((colonne*OLED_Col)-(colonne?0:0), (ligne*OLED_L1));
+        
+  for (uint8_t i = 0; i < strlen(text); i++)
+  {
+    display.write(text[i]);
+  }      
+  display.display();
 }
 
 
@@ -571,23 +528,21 @@ void OLEDDisplayTime(char *h, uint8_t pos)
  */
 void OLEDDisplayHivesDatas(void)
 {
-  if (OLED)
-  {
-    OLEDClear();
-    OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet
+  OLEDClear();
+  OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet
 
     //OLEDDrawText(1,0, 0, );  // conserver rafraichissement Heure/Date
 
-    OLEDDrawText(1,1, 0, "=== INFOS Ruches ===");
-       
-    sprintf(OLEDbuf, "Tem: %4.1f - Hum: %4.1f", Data_LoRa.DHT_Temp , Data_LoRa.DHT_Hum);
-    OLEDDrawText(1,2, 0, OLEDbuf );
+  OLEDDrawText(1,1, 0, "=== INFOS Ruches ===");
+      
+  sprintf(OLEDbuf, "Tem: %4.1f - Hum: %4.1f", Data_LoRa.DHT_Temp , Data_LoRa.DHT_Hum);
+  OLEDDrawText(1,2, 0, OLEDbuf );
         
-    sprintf(OLEDbuf, "LDR: %4.1f -  VB: %4.1f", Data_LoRa.Brightness, Data_LoRa.Bat_Voltage);
-    OLEDDrawText(1,3, 0, OLEDbuf);
+  sprintf(OLEDbuf, "LDR: %4.1f -  VB: %4.1f", Data_LoRa.Brightness, Data_LoRa.Bat_Voltage);
+  OLEDDrawText(1,3, 0, OLEDbuf);
         
-    sprintf(OLEDbuf, "VSo: %4.1f -  mT: %4.1f", Data_LoRa.Solar_Voltage, readingT);
-    OLEDDrawText(1,4, 0, OLEDbuf);
+  sprintf(OLEDbuf, "VSo: %4.1f -  mT: %4.1f", Data_LoRa.Solar_Voltage, readingT);
+  OLEDDrawText(1,4, 0, OLEDbuf);
 
 //#define Poids_Peson(num)      Data_LoRa.HX711Weight[num]   //  Data_LoRa de type LoRa_Var (ligne 38)
 
@@ -599,17 +554,16 @@ void OLEDDisplayHivesDatas(void)
        poids = poids/1000;
 //Data_LoRa.HX711Weight[0]=123456;
        
-    sprintf(OLEDbuf, "Ba1: %4.1f - Ba2: %4.1f", Data_LoRa.HX711Weight[0]/1000, 15.22); //Poids_Peson(1));
-    OLEDDrawText(1,5, 0, OLEDbuf);
+  sprintf(OLEDbuf, "Ba1: %4.1f - Ba2: %4.1f", Data_LoRa.HX711Weight[0]/1000, 15.22); //Poids_Peson(1));
+  OLEDDrawText(1,5, 0, OLEDbuf);
 
-    sprintf(OLEDbuf, "Ba3: %4.1f - Ba4: %4.1f", Poids_Peson(2), Poids_Peson(3));
-    OLEDDrawText(1,6, 0, OLEDbuf);
+  sprintf(OLEDbuf, "Ba3: %4.1f - Ba4: %4.1f", Poids_Peson(2), Poids_Peson(3));
+  OLEDDrawText(1,6, 0, OLEDbuf);
 
 // Eviter, Status Line
 //        sprintf(OLEDbuf, "Next PL:  %02d", , );
 //        OLEDDrawText(1,7, 0, OLEDbuf);
-    OLEDDrawScreenNextPayload(7, 0, nextPayload );
-  }
+  OLEDDrawScreenNextPayload(7, 0, nextPayload );
 /*
      // Attendre une touche pour continuer
     while (readKey() == KEY_NONE)
@@ -629,29 +583,27 @@ void OLEDDisplayHivesDatas(void)
  */
 void OLEDDisplaySystemInfo(void)
 {
-  if (OLED)
-  {
-    OLEDClear();
-    OLEDDrawText(1,0, 0, "=== INFOS SYSTEME ===");
-    OLEDDrawText(1,1, 0, PROJECT_NAME);
-    OLEDDrawText(1,2, 0, "Version: " VERSION);
+  OLEDClear();
+  OLEDDrawText(1,0, 0, "=== INFOS SYSTEME ==");
+  OLEDDrawText(1,1, 0, "     POC ATSAMD     ");
+  OLEDDrawText(1,2, 0, "Version: " VERSION);
         
-    sprintf(OLEDbuf, "Mode: %s", modeExploitation ? "EXPLOIT" : "PROGRAM");
-    OLEDDrawText(1,3, 0, OLEDbuf);
+  sprintf(OLEDbuf, "Mode: %s", modeExploitation ? "EXPLOIT" : "PROGRAM");
+  OLEDDrawText(1,3, 0, OLEDbuf);
         
-    sprintf(OLEDbuf, "Config v: %d.%02d", config.materiel.version/100, config.materiel.version%100);
-    OLEDDrawText(1,4, 0, OLEDbuf);
-//   OLEDDrawText(1,6, 0, "Appuyer pour continuer");
-  }
+ // sprintf(OLEDbuf, "Config v: %d.%02d", config.materiel.version/100, config.materiel.version%100);  // verifier longueur
+ // OLEDDrawText(1,4, 0, OLEDbuf);
+        
+  OLEDDrawText(1,6, 0, "Appuyer => continuer");
+  
 /*
      // Attendre une touche pour continuer
   while (readKey() == KEY_NONE)
   {
     delay(100);
   }
-    
-  OLEDDisplayMessageL8("Retour menu principal", false, false);
-*/
+*/    
+  OLEDDisplayMessageL8("Retour menu princ.", false, false);
 }
 
 
@@ -663,5 +615,5 @@ void OLEDDisplaySystemInfo(void)
  */
 void OLEDSetDebug(bool actif) 
 {
-  modeDebugActif = actif;
+  OLEDModeDebugActif = actif;
 }

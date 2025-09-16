@@ -234,7 +234,7 @@ debugSerial.println("buildLoraPayload, datas:");
   payload[indice++] = ((uint8_t*)&humidity)[1];
 //debugSerial.println(humidity);
 
-  sprintf(serialbuf,"Rucher: %d temp: %d, Hum.: %d",Data_LoRa.rucher_ID, temperature, humidity);
+  sprintf(serialbuf,"Rucher: %d  [RucherName: %s] temp: %d, Hum.: %d",Data_LoRa.rucher_ID, Data_LoRa.RucherName, temperature, humidity);
   debugSerial.println(serialbuf);
   
   int Brightness = (int)Data_LoRa.Brightness;
@@ -262,7 +262,7 @@ debugSerial.println("buildLoraPayload, datas:");
   {
 //debugSerial.print(i);  debugSerial.print("/");debugSerial.println(indice);
     int Masse = Data_LoRa.HX711Weight[i] *100; //(int)(Data_LoRa.HX711Weight[i] * 100); 
-    payload[indice++] = ((uint8_t*)&Masse)[0];	// Hive1 to 4 Weigth
+    payload[indice++] = ((uint8_t*)&Masse)[0];	// Hive1 to 4 Weight
     payload[indice++] = ((uint8_t*)&Masse)[1];
 //debugSerial.println(Masse);
 
@@ -288,7 +288,7 @@ debugSerial.println("");
   }
   hexPayload[hexPayloadSize - 1] = '\0'; // Null terminate
 //debugSerial.print("final hexpayload[i]"); debugSerial.println(i); 
-debugSerial.print("hexPayload: "); debugSerial.println(hexPayload); // chaine de caractère HEXA de Payload
+debugSerial.print("(fin buildLoraPayload) hexPayload: "); debugSerial.println(hexPayload); // chaine de caractère HEXA de Payload
 }
 
 
@@ -303,17 +303,17 @@ debugSerial.println("appel LoRaBee.send");
     switch (LoRaBee.send(1,Datas,len))
     {
     case NoError:
-      debugSerial.println("NOError Successful transmission in Send_LoRa_Mess().");
+      debugSerial.println("\nSuccessful transmission in Send_LoRa_Mess().");
       break;
     case NoResponse:
-      debugSerial.println("There was no response from the device in Send_LoRa_Mess().");
+      debugSerial.println("\nThere was no response from the device in Send_LoRa_Mess().");
       break;
     case Timeout:
-      debugSerial.println("Connection timed-out in Send_LoRa_Mess(). Check your serial connection to the device! Sleeping for 20sec.");
+      debugSerial.println("\nConnection timed-out in Send_LoRa_Mess(). Check your serial connection to the device! Sleeping for 20sec.");
       delay(20000);
       break;
     case PayloadSizeError:
-      debugSerial.println("The size of the payload is greater than allowed in Send_LoRa_Mess(). Transmission failed!");
+      debugSerial.println("\nThe size of the payload is greater than allowed in Send_LoRa_Mess(). Transmission failed!");
     break;
     case InternalError:
       debugSerial.print("\nOh No! This shouldn't happen in Send_LoRa_Mess(). Something is really wrong! The program will reset the RN module...");
@@ -322,7 +322,7 @@ debugSerial.println("appel LoRaBee.send");
    LoRaBee.send(1,Datas, len);
     break;
     case Busy:
-      debugSerial.println("The device is busy in Send_LoRa_Mess(). Sleeping for 10 extra seconds.");
+      debugSerial.println("\nThe device is busy in Send_LoRa_Mess(). Sleeping for 10 extra seconds.");
       delay(10000);
       break;
     case NetworkFatalError:
@@ -338,7 +338,7 @@ debugSerial.println("appel LoRaBee.send");
   LoRaBee.send(1,Datas, len);
       break;
     case NoAcknowledgment:
-      debugSerial.print("There was no acknowledgment sent back! in Send_LoRa_Mess()");
+      debugSerial.print("\nThere was no acknowledgment sent back! in Send_LoRa_Mess()");
       break;
     default:
       break;

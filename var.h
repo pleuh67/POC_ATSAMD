@@ -1,15 +1,22 @@
 #ifdef __MAIN__
 
-// ===== FLAGS DEBUG =====
-bool DEBUG_WAKEUP_PAYLOAD = true;    // Activer/désactiver réveil payload
-//bool DEBUG_WAKEUP_PAYLOAD = false;    // Activer/désactiver réveil payload
+// Cas typiques nécessitant volatile
 
-bool DEBUG_INTERVAL_1SEC = true;     // Activer/désactiver réveil 1 seconde
-//bool DEBUG_INTERVAL_1SEC = false;     // Activer/désactiver réveil 1 seconde
+// Variables modifiées par interruptions : controler rtc,nextPayload passé volatile pour test compile pas
+// Variables liées au hardware (registres) : pas modifiés par moi (lib)
+// Variables partagées entre threads : pas de threads
+// Flags de communication ISR ↔ loop() : controler wakeup1Sec, alarm1_enabled, wakeupPayload
+
+// ===== FLAGS DEBUG =====
+//bool DEBUG_WAKEUP_PAYLOAD = true;    // Activer/désactiver réveil payload
+bool DEBUG_WAKEUP_PAYLOAD = false;    // Activer/désactiver réveil payload
+
+//bool DEBUG_INTERVAL_1SEC = true;     // Activer/désactiver réveil 1 seconde
+bool DEBUG_INTERVAL_1SEC = false;     // Activer/désactiver réveil 1 seconde
 
 //bool DEBUG_LOW_POWER = true;         // Activer/désactiver basse consommation
 bool DEBUG_LOW_POWER = false;         // Activer/désactiver basse consommation
-bool OLED = true;                    // Activer/désactiver OLED
+
 
 // ===== VARIABLES GLOBALES =====
 RTC_DS3231 rtc;
@@ -19,6 +26,24 @@ DateTime nextPayload;
 clavier_context_t clavierContext = {KEY_NONE, KEY_NONE, 0, 0, false};
 key_code_t touche; 
 
+// ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
+listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 6, false, 0, false, 0, "", NULL};
+numberInputContext_t numberInputCtx = {NUMBER_INPUT_IDLE, 0, "", 10, false, 0, false, 0, "", false};
+stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, "", 20, false, 0, false, 0, ""};
+bool displayStringDebug = false;
+char *stringDest;
+
+// Exemple de liste de valeurs alphanumériques
+const char* exempleListeValeurs[] = {
+    "MODE_AUTO",
+    "MODE_MANUEL", 
+    "MODE_TEST",
+    "MODE_MAINTENANCE",
+    "MODE_CALIBRATION",
+    "MODE_STANDBY"
+};
+
+
 
 #ifdef OLED096
   Adafruit_SSD1306 display(OLED_RESET);
@@ -26,16 +51,17 @@ key_code_t touche;
   Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #endif
 
-char OLEDbuf[OLEDBUFLEN] = "12345678901234567890";
-char serialbuf[SERIALBUFLEN];
+char OLEDbuf[OLEDBUFLEN] = "12345678901234567890";  // 128
+char serialbuf[SERIALBUFLEN];                       // 256
 bool debugOLEDDrawText = false;
 
 // Variables pour gestion des interruptions
 volatile bool alarm1_enabled = true;
 volatile bool wakeupPayload = false;
+volatile bool displayNextPayload = false;
 volatile bool wakeup1Sec = false;
 volatile bool modeExploitation = true;
-int switchToProgrammingMode = true;
+int switchToProgrammingMode= true;
 int switchToOperationMode = true;
 
 // gestion des leds non bloquantes
@@ -50,7 +76,7 @@ volatile unsigned long builtinLedStartTime = 0; // Moment du démarrage
 
 
 // Variables pour OLED scrolling
-bool modeDebugActif = true;
+bool OLEDModeDebugActif = true;   // par defaut defilement messages au setup();
 unsigned long delaiAffichage = 1000;
 char lignesDebug[MAX_LIGNES][21];
 
@@ -67,7 +93,7 @@ bool COM_DebugSerial = true;
 
 // Variable RN2483A et LoRa
 
-uint8_t payloadSize = PAYLOADSIZE; 
+uint8_t payloadSize = PAYLOADSIZE; // 27
 uint8_t payload[PAYLOADSIZE];
 
 int hexPayloadSize = HEXPAYLOADSIZE; // 45 characters counting from 0 + 2 for termination. 23 bytes is required by Kineis. Padding needs to be done if the payload is smaller.
@@ -150,7 +176,7 @@ float Jauge[21][4] = {                // Tare , Echelle , TareTemp , CompTemp
       {34134.50,103.77,20,0},    // J18 proto1  20kg (OK à 1 et 5kg)
       {7929.70,97.49,20,0},    // J19 proto1  20kg (OK à 1 et 5kg) + DHT22
       {22005.70,97.49,20,0},    // J20
-};
+    };
 
 // paramètres et données des dispositif de pesée A,B,C,D
 // Clk_PIN, Dta_PIN, Poids
@@ -200,18 +226,18 @@ float VBatScale_List [10] = {
         0.0032252,    // Module LoRa pas Lu
         0.0032252, // masse/6k2/mesure/3k3/VSOL
         0.0032252,   //
-         0.0032252,   0.0032252,  
-         0.003222,  0.0032252,  0.0032252,  0.0032252,  0.0032252
+        0.0032252,   0.0032252,  
+        0.003222,  0.0032252,  0.0032252,  0.0032252,  0.0032252
       };
 
 // lectures ANA tension panneau solaire
 float VSol[11] = {0,0,0,0,0,0,0,0,0,0,0}; // 10 dernières lectures + moyenne
 float VSolScale_List [10] = {
-     0.0032555, // Module LoRa pas Lu
+        0.0032555, // Module LoRa pas Lu
         0.0032555, // masse/5k6/mesure/3k3/VSOL
-         0.0032555, //
-         0.0032555,  0.0032555, 
-         0.0032555,  0.0032555, 0.0032555, 0.0032555,  0.0032555
+        0.0032555, //
+        0.0032555,  0.0032555, 
+        0.0032555,  0.0032555, 0.0032555, 0.0032555,  0.0032555
       };
 
 // lectures ANA LDR
@@ -245,6 +271,7 @@ extern bool OLED;                    // Activer/désactiver OLED
 // Variables pour gestion des interruptions
 extern volatile bool alarm1_enabled;
 extern volatile bool wakeupPayload;
+extern volatile bool displayNextPayload;
 extern volatile bool wakeup1Sec;
 extern volatile bool modeExploitation;
 extern int switchToProgrammingMode;
@@ -267,7 +294,7 @@ extern volatile unsigned long builtinLedStartTime; // Moment du démarrage
 
 
 // Variables pour OLED scrolling
-extern bool modeDebugActif;
+extern bool OLEDModeDebugActif;
 extern unsigned long delaiAffichage;
 extern char lignesDebug[][21];
 
@@ -280,6 +307,19 @@ extern bool debugOLEDDrawText;
 
 extern RTC_DS3231 rtc;
 extern DateTime nextPayload;
+
+// ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
+extern listInputContext_t listInputCtx;
+extern numberInputContext_t numberInputCtx;
+extern stringInputContext_t stringInputCtx;
+extern bool displayStringDebug;
+extern char *stringDest;
+
+
+
+// Exemple de liste de valeurs alphanumériques
+extern const char* exempleListeValeurs[];
+
 
 #ifdef OLED096
   extern Adafruit_SSD1306 display; //(OLED_RESET);

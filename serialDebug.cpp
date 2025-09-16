@@ -2,6 +2,80 @@
 #define __INIT_DONE
 #include "define.h"
 
+
+/**
+ * @brief Affiche la structure de saisir d'un Nombre
+ * @param Aucun
+ * @return void
+ */
+// numberInputContext_t numberInputCtx = {NUMBER_INPUT_IDLE, 0, "", 10, false, 0, false, 0, "", false};
+/*
+typedef struct 
+{
+  numberInputState_t state;   // État actuel
+  uint8_t position;           // Position du curseur (0-maxLength-1)
+  char workingNumber[11];     // Chaîne numérique de travail (10 digits + '\0')
+  uint8_t maxLength;          // Longueur maximum de la chaîne
+  bool displayRefresh;        // Flag pour rafraîchir l'affichage
+  unsigned long lastUpdate;   // Dernier rafraîchissement affichage
+  bool cursorBlink;           // État du clignotement curseur
+  unsigned long lastBlink;    // Dernier clignotement
+  char title[21];             // Titre de la saisie
+  bool allowNegative;         // Autoriser les nombres négatifs
+} numberInputContext_t;
+*/
+void debugSerialPrintNumberStruct(void)
+{ // cas d'une saisie numérique:
+  sprintf(serialbuf,"state %d / position : %d / workingNumber %s / maxLength %d / displayRefresh %d / lastUpdate %d / cursorBlink %d / lastBlink %d / title %s / allowNegative %d ",
+                    numberInputCtx.state,
+                    numberInputCtx.position,
+                    numberInputCtx.workingNumber,
+                    numberInputCtx.maxLength,
+                    numberInputCtx.displayRefresh,
+                    numberInputCtx.lastUpdate,
+                    numberInputCtx.cursorBlink,
+                    numberInputCtx.lastBlink,
+                    numberInputCtx.title,                    
+                    numberInputCtx.allowNegative );
+  debugSerial.println(serialbuf); 
+}
+
+/**
+ * @brief Affiche la structure de saisir d'un Alphnumerique
+ * @param Aucun
+ * @return void
+ */
+// stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, "", 20, false, 0, false, 0, ""};
+/* 
+typedef struct 
+{
+    stringInputState_t state;   // État actuel
+    uint8_t position;           // Position du curseur (0-maxLength-1)
+    char workingString[21];     // Chaîne de travail (20 chars + '\0')
+    uint8_t maxLength;          // Longueur maximum de la chaîne
+    bool displayRefresh;        // Flag pour rafraîchir l'affichage
+    unsigned long lastUpdate;   // Dernier rafraîchissement affichage
+    bool cursorBlink;           // État du clignotement curseur
+    unsigned long lastBlink;    // Dernier clignotement
+    char title[21];             // Titre de la saisie
+} stringInputContext_t;
+*/
+void debugSerialPrintStringStruct(void)
+{ // cas d'une saisie numérique:
+  sprintf(serialbuf,"state %d / position : %d / workingNumber %s / maxLength %d / displayRefresh %d / lastUpdate %d / cursorBlink %d / lastBlink %d / title %s ",
+                    stringInputCtx.state,
+                    stringInputCtx.position,
+                    stringInputCtx.workingString,
+                    stringInputCtx.maxLength,
+                    stringInputCtx.displayRefresh,
+                    stringInputCtx.lastUpdate,
+                    stringInputCtx.cursorBlink,
+                    stringInputCtx.lastBlink,
+                    stringInputCtx.title);
+  debugSerial.println(serialbuf); 
+}
+
+
 /**
  * @brief Affiche heure et status Alarmes sur SerialDebug
  * @param Aucun
@@ -146,7 +220,7 @@ void debugSerialPrintLoraPayload(uint8_t *payload, uint8_t len)
  * @param len Longueur des données
  * @return void
  */
-void printOndebugSerial(char *txt, char len)
+void debugSerialPrintHEXA(char *txt, char len)
 { int i;
   char buf[256];
     
@@ -168,7 +242,7 @@ void printOndebugSerial(char *txt, char len)
 
 void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)  
 {
-  sprintf(serialbuf,"Interruption Alarme %d activée, reprogrammée pour: %02d:%02d:%02d",
+  sprintf(serialbuf,"\nInterruption Alarme %d activée, reprogrammée pour: %02d:%02d:%02d",
           IRQ, nextPayload.hour(),nextPayload.minute(),nextPayload.second());
   debugSerial.println(serialbuf); 
 }
@@ -251,13 +325,4 @@ void serialDebugPrintSystemInfo(void)
     debugSerial.print(__DATE__);
     debugSerial.print(" ");
     debugSerial.println(__TIME__);
- /*   
-    // Attendre une touche pour continuer
-    while (readKey() == KEY_NONE)
-    {
-        delay(100);
-    }
-    
-    OLEDDisplayMessageL8("Retour menu principal", false, false);
-*/   
 }

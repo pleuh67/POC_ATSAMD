@@ -30,6 +30,41 @@ void saveConfigToEEPROM(void);
 uint16_t calculateChecksum(ConfigGenerale_t* cfg);
 
 
+// Fonctions de sélection dans une liste
+void startListInput(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex);
+listInputState_t processListInput(void);
+uint8_t finalizeListInput(void);
+void cancelListInput(void);
+bool isListInputActive(void);
+void refreshListDisplay(void);
+void updateListInputCursorBlink(void);
+
+
+// Fonctions de saisie numérique
+void startNumberInput(const char* title, const char* initialNumber, uint8_t maxLength, bool allowNegative);
+numberInputState_t processNumberInput(void);
+void finalizeNumberInput(char* outputNumber);
+void cancelNumberInput(void);
+bool isNumberInputActive(void);
+void refreshNumberDisplay(void);
+void updateNumberInputCursorBlink(void);
+char getNextNumericChar(char current, int delta, bool allowNegative, uint8_t position);
+void modifyNumberChar(char* str, uint8_t pos, int delta);
+bool isValidNumber(const char* number);
+
+
+// Fonctions de saisie alphanumérique
+void startStringInput(const char* title, const char* initialString, uint8_t maxLength);
+stringInputState_t processStringInput(void);
+void finalizeStringInput(char* outputString);
+void cancelStringInput(void);
+bool isStringInputActive(void);
+void refreshStringDisplay(void);
+void updateStringInputCursorBlink(void);
+char getNextAlphaNumChar(char current, int delta);
+void modifyStringChar(char* str, uint8_t pos, int delta);
+
+
 // Gestion LEDs
 void initLEDs(void);        // Initialise les LEDs RGB et builtin
 void turnOnRedLED(void);    // Allume la LED rouge                        (vert)
@@ -85,19 +120,12 @@ void OLEDDisplayHivesDatas(void);
 void OLEDDisplaySystemInfo(void);
 
 // Gestion saisies
-bool isDateValid(const char *d);
-void modifyDateDigit(char *d, uint8_t pos, int delta);
-void inputDate(char *d);
-bool isTimeValid(const char *h);
-void modifyTimeDigit(char *h, uint8_t pos, int delta);
-void inputTime(char *h);
-void inputListValue(const char *label, const int *liste, uint8_t nbValeurs, int *valeurSelectionnee);
-void inputListValueLibelle(const char *label, const int *valeurs, const char **libelles, uint8_t nbValeurs, int *valeurSelectionnee, bool *valide);
-uint64_t inputHex(const char* variable, uint64_t valeurInitiale);
-uint32_t inputDecimal(const char* variable, uint32_t valeurInitiale);
+
 char* strToChar(String s);
 
 // Gestion serialDebug 
+void debugSerialPrintNumberStruct(void);
+void debugSerialPrintStringStruct(void);
 void debugSerialTestConnexionDS3231(void);
 void debugSerialPrintTimeComparison(void);     // Affiche heure système et heure RTC côte à côte pour comparaison
 void debugSerialPrintTime(void); // Affiche heure et date système sur le port serialDebug
@@ -107,14 +135,15 @@ void debugSerialPrintText(char *txt, char len);
 void debugSerialPrintLoRaStatus();
 void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ);
 void debugSerialPrintKbdKey(void);
-void debugSerialPrintSystemInfo(void);
+void debugSerialPrintSystemInfo(void); 
+void debugSerialPrintHEXA(void);  // non appelée ???
 
 // Gestion modes et interruptions
 void handleOperationMode(void);
 void executeOperationMode(void);
 void handleProgrammingMode(void);
 void executeProgrammingMode(void);
-void forceTestAlarm(void);
+
 
 void onRTCAlarm(void);
 
@@ -167,8 +196,10 @@ float GetPoids(int num,int sample);    // N° de jauges des balances 1 à 4
 
 // µC
 float getTemperature(void);
-// LDR ANA
-float getLuminance(void);
+
 // µC ANA
 float getVBatMoy(void);
 float getVSolMoy(void);
+
+// LDR ANA
+float getLuminance(void);
