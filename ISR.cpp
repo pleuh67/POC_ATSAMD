@@ -8,14 +8,16 @@
  */
 void onRTCAlarm(void) // $ ou £
 {
+//debugSerial.println("\n€");  // €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+  
 // ALARME 1 : Toutes les secondes (mode programmation)
-  if (0) //(rtc.alarmFired(1)) 
+  if (rtc.alarmFired(1)) 
   {
     rtc.clearAlarm(1);
-//    if (!alarm1_enabled) 
-//      return;     // interruption execution code de IRQ1 pendant IRQ2
+    if (!alarm1_enabled) 
+      return;     // interruption execution code de IRQ1 pendant IRQ2
     wakeup1Sec = alarm1_enabled;  // True si autorisé par IRQ2
-debugSerial.print("\n$\n");   // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+debugSerial.print("\n$irq\n");   // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
   }
   
 // ALARME 2 : Payload périodique    

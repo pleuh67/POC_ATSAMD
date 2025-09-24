@@ -75,7 +75,7 @@ debugSerial.print("=== CONFIGURATION ALARME1 ");
   if (DEBUG_INTERVAL_1SEC) // && !modeExploitation) 
   {
     DateTime nextSecond = rtc.now() + TimeSpan(0, 0, 0, 1);
- //   rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
+    rtc.setAlarm1(nextSecond, DS3231_A1_PerSecond);
   }
 debugSerial.println("=== 1s DONE ===");
 }
@@ -88,7 +88,7 @@ debugSerial.println("=== 1s DONE ===");
  */
 void DS3231setRTCAlarm2(void) 
 {
-    // Désactiver TOUTES les interruptions temporairement
+// Désactiver TOUTES les interruptions temporairement
 //    noInterrupts();
     
     // Effacer les flags
@@ -102,13 +102,14 @@ void DS3231setRTCAlarm2(void)
  //  rtc.alarmFired(2);  // Lit et efface le flag alarme 2
    
     // Reprogrammer A2
-//debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
+debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
   // ALARME 2 : Payload toutes les X minutes
   if (DEBUG_WAKEUP_PAYLOAD) 
   {
     nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
     rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
-//debugSerialPrintNextAlarm(nextPayload,2);
+    debugSerialPrintReprogNextAlarm(2);
+    debugSerialPrintNextAlarm(nextPayload,2);
 //OLEDDrawScreenNextPayload(7, 0, nextPayload );  // Status message
   }
 //debugSerial.println("=== FIN CONFIGURATION ALARMES + INTERRUPTIONS ===");

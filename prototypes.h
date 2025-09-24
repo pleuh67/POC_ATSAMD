@@ -134,6 +134,7 @@ void debugSerialPrint2digits(int number);
 void debugSerialPrintLoraPayload(uint8_t *payload, uint8_t len);
 void debugSerialPrintText(char *txt, char len);
 void debugSerialPrintLoRaStatus();
+void debugSerialPrintReprogNextAlarm(int IRQ);
 void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ);
 void debugSerialPrintKbdKey(void);
 void debugSerialPrintSystemInfo(void); 

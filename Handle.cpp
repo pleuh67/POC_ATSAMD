@@ -50,6 +50,13 @@ void handleProgrammingMode(void)
 #ifdef __SerialDebugPoc    
 //debugSerial.print("P");   // PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
 #endif
+
+
+
+
+
+
+
 // ------------------------------------------------
 // Vérifier si une sélection de liste est en cours
 // ------------------------------------------------
@@ -117,6 +124,18 @@ debugSerial.println(exempleListeValeurs[selectedModeIndex]);
           debugSerial.print("Nouveau nombre: ");
           debugSerial.println(numberBuffer);
           // Ici vous pouvez traiter le nombre
+
+
+debugSerial.println("Chaine validée : ");
+sprintf(stringSaisie,(char *)numberBuffer);    // recopie saisie dans destination !!!!!  attentin LISTE
+debugSerial.println(stringSaisie);
+debugSerial.println(Data_LoRa.RucherName);
+
+
+                OLEDClear();// Effacer écran
+                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet    
+
+         
           break;
           
       case NUMBER_INPUT_CANCELLED:
@@ -197,7 +216,7 @@ debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
         case KEY_2: // Touche 2 - Test sélection dans une liste
                     {
                         static uint8_t currentModeIndex = 0; // Index actuel (peut être sauvegardé)
-                        startListInput("CHOIX MODE:", exempleListeValeurs, 6, currentModeIndex);
+                        startListInput("CHOIX MODE:", exempleListeValeurs, 10, currentModeIndex);
                     }
                     break;
                     
@@ -207,15 +226,16 @@ debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
                     break;
                     
         case KEY_4: // Touche 4 - Test saisie alphanumérique
-                    {
+ 
                         static char currentString[21] = "MBVSB0CBJTPOT0WJUF";
 // appeler avec chaine a modifier    ex: Data_LoRa.RucherName[20]
 //                        startStringInput("SAISIE TEXTE:", currentString, 20); 
 
-                        stringSaisie=Data_LoRa.RucherName;  // Valeur courante traiter
-                        startStringInput("SAISIE TEXTE:", stringSaisie, 20);
+                        stringSaisie=Data_LoRa.RucherName;  // pointeur sur valeur courante traiter
+// attention si existe "CANCEL", proceder par variable tampon
 
-                    }
+                        
+                        startStringInput("SAISIE TEXTE:", stringSaisie, 20);
                     break;
                     
         case KEY_5: // Touche 5 - Reset soft

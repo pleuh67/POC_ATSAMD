@@ -12,7 +12,7 @@
 #define GREEN_LED_DURATION 100      // Durée d'allumage LED verte 300 ms
 #define BLUE_LED_DURATION 100       // Durée d'allumage LED bleue 300 ms
 #define BUILTIN_LED_DURATION 100    // Durée d'allumage LED builtin 100 ms
-#define WAKEUP_INTERVAL_PAYLOAD 15  // Intervalle de réveil en minutes (2 minute pour test)
+#define WAKEUP_INTERVAL_PAYLOAD 5  // Intervalle de réveil en minutes (2 minute pour test)
 #define INTERVAL_1SEC 1000          // Intervalle 1 seconde en millisecondes
 
 // I2C Addresses

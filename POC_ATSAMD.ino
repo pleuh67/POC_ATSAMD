@@ -22,7 +22,7 @@
 // ===== INCLUDES PROJET =====
 #include ".\define.h"
 
-//#define __SendLoRa
+#define __SendLoRa
 //#define __SerialDebugPoc      // decommenter pour afficher messages debug
 
 // =====  PROGRAMME =====
@@ -178,6 +178,7 @@ getVSolMoy();   // calcul moyenne de 10 lectures
  debugSerial.println("Start loop(); =====================================");
 
 buildLoraPayload();
+sendLoRaPayload((uint8_t*)payload,sizeof(payload)); //19);   // hex
 setupDone = true;
 }
 
@@ -257,6 +258,12 @@ debugSerial.print("I1$");   //   I1$ I1$ I1$ I1$ I1$ I1$ I1$ I1$
 #endif
     wakeup1Sec = false;   
     counter1s++;
+    if (!(counter1s %60)) 
+    {     
+//      debugSerialPrintReprogNextAlarm(2);
+      debugSerialPrintNextAlarm(nextPayload,2);
+      debugSerial.println("M");    
+    }
     switch (counter1s %10)
     {
       case 0 :    // Rafraichir OLED
@@ -291,28 +298,10 @@ debugSerial.print("I1$");   //   I1$ I1$ I1$ I1$ I1$ I1$ I1$ I1$
 
               break;
       case 9 :      // Alive: '.' sur OLED
-
-/*
-numberInputCtx.displayRefresh
-
-
- numberInputState_t state;   // État actuel
-  uint8_t position;           // Position du curseur (0-maxLength-1)
-  char workingNumber[11];     // Chaîne numérique de travail (10 digits + '\0')
-  uint8_t maxLength;          // Longueur maximum de la chaîne
-  bool displayRefresh;        // Flag pour rafraîchir l'affichage
-  unsigned long lastUpdate;   // Dernier rafraîchissement affichage
-  bool cursorBlink;           // État du clignotement curseur
-  unsigned long lastBlink;    // Dernier clignotement
-  char title[21];             // Titre de la saisie
-  bool allowNegative;         // Autoriser
-*/
-
-      
-//debugSerial.print(".");
+              debugSerial.print(".");
               break;
       default : // WTF
-debugSerial.print("WTF");  
+               debugSerial.print("WTF");  
                break;
     }
 
@@ -330,12 +319,12 @@ debugSerial.print("6");   // 666666666666666666666666666666666666666666666
   {
     wakeupPayload = false;
     counter15m++;
-#ifdef __SerialDebugPoc    
+//#ifdef __SerialDebugPoc    
 sprintf(serialbuf, "I2£%d ", counter15m);  // I2£n I2£n I2£n I2£n I2£n I2£n I2£n 
 debugSerial.println(serialbuf); 
-#endif
+//#endif
     turnOnRedLED();     // PCB donne GREEN?
-//    buildLoraPayload();
+    buildLoraPayload();
 #ifdef __SendLoRa
   sendLoRaPayload((uint8_t*)payload,19);   // hex
 #endif    
@@ -346,6 +335,11 @@ debugSerial.println("Fin Payload, Reactive IRQ1");
 #ifdef __SerialDebugPoc  
 debugSerial.print("7");   // 777777777777777777777777777777777777
 #endif
+
+//tentative d'appel partout pour saisie d'une variable.... bloque, voir pourquoi
+/*
+startStringInput("SAISIE TEXTE:", Data_LoRa.RucherName, 20);
+*/
   }
 #ifdef __SerialDebugPoc    
 debugSerial.print("8");   // 888888888888888888888888888888888888

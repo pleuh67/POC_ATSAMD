@@ -8,8 +8,8 @@
 // Flags de communication ISR ↔ loop() : controler wakeup1Sec, alarm1_enabled, wakeupPayload
 
 // ===== FLAGS DEBUG =====
-//bool DEBUG_WAKEUP_PAYLOAD = true;    // Activer/désactiver réveil payload
-bool DEBUG_WAKEUP_PAYLOAD = false;    // Activer/désactiver réveil payload
+bool DEBUG_WAKEUP_PAYLOAD = true;    // Activer/désactiver réveil payload
+//bool DEBUG_WAKEUP_PAYLOAD = false;    // Activer/désactiver réveil payload
 
 //bool DEBUG_INTERVAL_1SEC = true;     // Activer/désactiver réveil 1 seconde
 bool DEBUG_INTERVAL_1SEC = false;     // Activer/désactiver réveil 1 seconde
@@ -36,16 +36,68 @@ stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, "", 20, false, 0, f
 bool displayStringDebug = false;
 
 
+
 // Exemple de liste de valeurs alphanumériques
 const char* exempleListeValeurs[] = {
     "MODE_AUTO",
     "MODE_MANUEL", 
     "MODE_TEST",
     "MODE_MAINTENANCE",
-    "MODE_CALIBRATION",
+    "MODE_CALIBRATION0",
+    "MODE_CALIBRATION1",
+    "MODE_CALIBRATION2",
+    "MODE_CALIBRATION3",
+    "MODE_CALIBRATION4",
     "MODE_STANDBY"
 };
 
+// Exemple de liste 
+
+const char* menu00ListeValeurs[] = {
+    " ",              // deroule nouveau MENU11 pour Calibrations Balances
+    " ",              // deroule nouveau MENU21
+    "SYSTEME",        // Configuration système (Heure, date, IRQ1/2,  
+    "CONNEXION",      // Configuration LoRa (=> menu21ListeValeurs)
+    "CALIBRATIONS"    // Facteurs linéarité (tensions (vBat, , balances), tare balances
+    "INFOS"           // ICI PAS DE SENS
+};
+
+const char* menu0ListeValeurs[] = {
+    "TARE",         // deroule nouveau MENU11 pour Calibrations Balances
+    "MENU2",        // deroule nouveau MENU21
+    "HEURE",        // Saisie et Maj de l'heure
+    "DATE",         // Saisie et Maj de la date
+    "NOM RUCHER"    // Saisie du Rucher
+    "RETOUR"        // ICI PAS DE SENS
+};
+
+// Exemple de liste 
+/*
+extern uint8_t SN2483_List [][9];
+extern uint8_t AppEUI_List [][9];
+extern uint8_t AppKey_List [][17];
+extern uint8_t *DevEUI;    // Orange : kit SodaQ RUCHE 0: 00 04 A3 0B 00 20 30 0A
+extern uint8_t *AppEUI;    // Orange : kit SodaQ RUCHE 0 
+extern uint8_t *AppKey;    // Orange : kit SodaQ RUCHE 0 
+*/
+const char* menu21ListeValeurs[] = {
+    "AppKey",        // {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00} 
+                     // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
+    "DevEUI",        // ex: 0004A30B0020300A  (N° du Module LoRa)
+    "AppEUI",        // {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x35, 0x00} = ABEILLE5
+    "SF",            // affecter selon liste: 7, 9, 12
+    "PayloadTiming"    // Periode Payload : 15 min (default)
+    "RETOUR"        // Retour MENU0
+};
+
+// Exemple de liste 
+const char* menu11ListeValeurs[] = {
+    "Calibration 1",        //
+    "Calibration 2",        // 
+    "Calibration 3",        // 
+    "Calibration 4",        // 
+    "RETOUR"        // Retour MENU0
+};
 
 
 #ifdef OLED096
@@ -321,10 +373,14 @@ extern stringInputContext_t stringInputCtx;
 extern bool displayStringDebug;
 
 
-
-
 // Exemple de liste de valeurs alphanumériques
 extern const char* exempleListeValeurs[];
+
+// Exemple de Menus
+extern const char* menu00ListeValeurs[];
+extern const char* menu0ListeValeurs[];
+extern const char* menu11ListeValeurs[];
+extern const char* menu21ListeValeurs[];
 
 
 #ifdef OLED096

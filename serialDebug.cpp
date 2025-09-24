@@ -275,10 +275,18 @@ void debugSerialPrintHEXA(char *txt, char len)
 }
 
 
+void debugSerialPrintReprogNextAlarm(int IRQ)  
+{ DateTime systemTime = getSystemTime();
+  
+  sprintf(serialbuf,"\nIRQ%d Reprogrammée à %02d:%02d:%02d",
+          IRQ, systemTime.hour(),systemTime.minute(),systemTime.second());
+  debugSerial.println(serialbuf); 
+}
+
 
 void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)  
-{
-  sprintf(serialbuf,"\nInterruption Alarme %d activée, reprogrammée pour: %02d:%02d:%02d",
+{   
+  sprintf(serialbuf,"IRQ%d prévue pour: %02d:%02d:%02d",
           IRQ, nextPayload.hour(),nextPayload.minute(),nextPayload.second());
   debugSerial.println(serialbuf); 
 }
@@ -289,9 +297,10 @@ void debugSerialPrintLoRaStatus()
   debugSerial.println("\n=== STATUS LoRa ===");
   sprintf(serialbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
   debugSerial.println(serialbuf);
-//  debugSerial.print("DevEUI = ");printOndebugSerial((char *)DevEUI,8);
-//  debugSerial.print("AppEUI = ");printOndebugSerial((char *)AppEUI,8);
-//  debugSerial.print("AppKey = ");printOndebugSerial((char *)AppKey,16); 
+//debugSerial.print("DevEUI = ");debugSerial.println((char *)DevEUI,8);
+//debugSerial.print("AppEUI = ");debugSerial.println((char *)AppEUI,8);
+//debugSerial.print("AppKey = ");debugSerial.println((char *)AppKey,16); 
+// print...()
   debugSerial.println("=====================");
 }  
 

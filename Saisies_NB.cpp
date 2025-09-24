@@ -1,7 +1,15 @@
 #define __INIT_DONE
 #include "define.h"
 
-// s'assurer que stringInputCtx.title[31] et autres ne sont pas pour OLED!!!!!
+// toutes les machines à état de saisie retournent le résultat de la saisie dans 
+// char stringSaisie[OLEDBUFLEN]="azerty";   // 128/retour de toutes les saisies
+// initialisé quand XXXXXX_INPUT_COMPLETED = true
+
+// voir pour tenter d'utilise LISTE comme MENU
+// a la sélection d'une option:
+//    - soit execution fonction
+//    - soit propose Selection d'une nlle Liste (menus déroulants)
+//    - mémorisation du menu actif pour naviguer
 
 
 // ===== FONCTIONS DE SÉLECTION DANS UNE LISTE ===== 12
