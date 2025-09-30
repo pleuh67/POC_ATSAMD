@@ -362,18 +362,16 @@ void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse)
   debugSerial.print("OLEDDisplayMessageL8() => "); 
   debugSerial.println(message);
     
-  display.clearDisplay();
-  display.setTextSize(1);
+//  display.clearDisplay();
+//  display.setTextSize(1);
     
   if (inverse)
-  {
     display.setTextColor(BLACK, WHITE);
-  }
   else 
-  {
     display.setTextColor(WHITE);
-  }
-    
+   
+  OLEDDrawText(1, 7, 0, message);
+/*  
   int len = strlen(message);
     
   if (defilant && len > (SCREEN_WIDTH / 6)) 
@@ -396,6 +394,8 @@ void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse)
     delay(1000);
   }
   display.setTextColor(WHITE);
+*/
+    delay(500);
 }
 
 
@@ -411,24 +411,33 @@ void OLEDDrawText(int8_t Txt_Size, uint8_t ligne, uint8_t colonne, const char *t
 {
   if (strlen(text) > 20-colonne )   // controler la longueur du texte à afficher  
   {
+    debugSerial.println("OLEDDrawText: Txt dépasse colonne 20");
 // erreur, texte dépasse colonne 20
   }
   
   display.setTextSize(Txt_Size);
+  display.setTextColor(WHITE); 
+
+  
   OLEDEraseText(colonne, ligne, strlen(text));
 //debugOLEDDrawText = true;     
   if (debugOLEDDrawText)
   {
-    debugSerial.print("txt: "); debugSerial.print(text);
+    debugSerial.print("txt: <"); debugSerial.print(text);debugSerial.print(">");
     debugSerial.print(" NB Car: "); debugSerial.print(strlen(text));
     debugSerial.print(" Ligne: "); debugSerial.print(ligne); 
     debugSerial.print(" Colonne: "); debugSerial.print(colonne); 
     debugSerial.print("/"); debugSerial.println((colonne*OLED_Col)); //-(colonne?0:0)); // WTF
- 
   }
 //debugOLEDDrawText = false; 
-  display.setTextColor(WHITE); 
-  display.setCursor((colonne*OLED_Col)-(colonne?0:0), (ligne*OLED_L1));
+
+/* rappel
+ *    #define OLED_Col      6
+  #define OLED_Max_Col  20
+  #define OLED_L1       8
+ */
+// coordonnées en PIXELS
+  display.setCursor((colonne*OLED_Col)/* -(colonne?0:0)*/ , (ligne*OLED_L1));
         
   for (uint8_t i = 0; i < strlen(text); i++)
   {
@@ -564,8 +573,8 @@ void OLEDDisplayHivesDatas(void)
 //        sprintf(OLEDbuf, "Next PL:  %02d", , );
 //        OLEDDrawText(1,7, 0, OLEDbuf);
   OLEDDrawScreenNextPayload(7, 0, nextPayload );
-/*
-     // Attendre une touche pour continuer
+// Attendre une touche pour continuer
+/*     
     while (readKey() == KEY_NONE)
     {
         delay(100);
@@ -605,6 +614,42 @@ void OLEDDisplaySystemInfo(void)
 */    
   OLEDDisplayMessageL8("Retour menu princ.", false, false);
 }
+
+
+/*
+      // Revenir au menu principal
+      menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+      startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex);
+ */
+
+ 
+/**
+ * @brief Affiche l'écran d'informations (non-bloquant)
+ * @param void
+ * @return void
+ */
+void OLEDdisplayInfoScreen(void)
+{
+  debugSerial.print("displayInfoScreen - currentMenuDepth: ");
+  debugSerial.println(currentMenuDepth);
+  
+  OLEDClear();
+  OLEDDrawText(1, 0, 0, "=== INFOS SYSTEME ==");
+  OLEDDrawText(1, 1, 0, "     POC ATSAMD     ");
+  OLEDDrawText(1, 2, 0, "Version: " VERSION);
+  OLEDDrawText(1, 3, 0, "Build: 20250924");
+
+  sprintf(OLEDbuf, "Mode: %s", modeExploitation ? "EXPLOIT" : "PROGRAM");
+  OLEDDrawText(1, 4, 0, OLEDbuf);
+//  sprintf(OLEDbuf, "Config v: %d.%02d", config.materiel.version/100, config.materiel.version%100);  // verifier longueur
+//  OLEDDrawText(1, 5, 0, OLEDbuf);
+        
+  OLEDDrawText(1, 7, 0, "VALIDE pour retour");
+  
+  infoScreenState = INFO_SCREEN_ACTIVE;
+  debugSerial.println("Ecran infos affiche");
+}
+
 
 
 

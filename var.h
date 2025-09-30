@@ -26,33 +26,61 @@ DateTime nextPayload;
 clavier_context_t clavierContext = {KEY_NONE, KEY_NONE, 0, 0, false};
 key_code_t touche; 
 
+// ===== VARIABLES GLOBALES MACHINE A ETAT MENUS=====
+menuLevel_t menuStack[MAX_MENU_DEPTH];
+uint8_t currentMenuDepth = 0;
+
+
 // ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
 bool startupListActivated = false;    // Flag pour activer la liste au démarrage
 char stringSaisie[OLEDBUFLEN]="azerty";   // 128/retour de toutes les fonctions de saisie non bloquantes
-listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 0, 10, false, 0, false, 0, "", NULL};
+//listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 0, 10, false, 0, false, 0, 0, 0, "", NULL};
 bool displayListDebug = false;
+
+listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 0, 10, 0, 0, false, false, 0, false, 0, 0, 0, "", NULL};
+
 numberInputContext_t numberInputCtx = {NUMBER_INPUT_IDLE, 0, "", 10, false, 0, false, 0, "", false};
 bool displayNumberDebug = false;
 stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, "", 20, false, 0, false, 0, ""};
 bool displayStringDebug = false;
 
+// État de l'écran d'information
+infoScreenState_t infoScreenState = INFO_SCREEN_IDLE;
 
 
 // Exemple de liste de valeurs alphanumériques
-const char* exempleListeValeurs[] = {
-  "LISTE_MENU1 ",
-  "LISTE_MENU2 ", 
-  "LISTE_MENU3 ",
-  "LISTE_MENU4 ",
-  "LISTE_MENU5 ",
-  "LISTE_MENU6 ",
-  "LISTE_MENU7 ",
-  "LISTE_MENU8 ",
-  "MODE_STANDBY"
+// Définition des menus
+const char* menu000Demarrage[] = {
+  "LISTE_MENU0       ",    // 0 : Libre
+  "Page INFOS     (P)",    // 1 : Infos produit => OLEDdisplayInfoScreen();
+  "CONFIG. SYSTEME(F)",    // 2 : Date, Time, N° LoRa
+  "CONNEX. RESEAU (F)",    // 3 : Lora: DevEUI, AppEUI, SF, Délai Payload
+  "CALIB. Volt (M040)",    // 4 : VBat, Vsol, Lum => menu040CalibTensions
+  "CALIB. BALANCES(F)",    // 5 : Bal1, Bal2, Bal3, Bal4    puis sous menu ou fonction Tare, Echelle, Comp T° par Bal
+  "SAISIE DATE    (S)",    // 6 : test rapide date
+  "SAISIE HEURE   (S)",    // 7 : Test rapide Time
+  "LISTE_MENU8    (F)"     // 8 : Libre
+};
+
+const char* menu040CalibTensions[] = {
+  "Calib. VBAT    (F)",      // Mise à Echelle VBat
+  "Calib. VSOL    (F)",      // Mise à Echelle VSol
+  "Calib. LUM     (F)",      // Mise à Echelle VLum
+  "Reserve     (M043)",    // Libre
+  "RET  popMenu(M000)"     // Rertour menu principal
+};
+
+
+const char* menu043Reserve040[] = {
+  "menu043-0       (F)",      // Mise à Echelle VBat
+  "menu043-1       (F)",      // Mise à Echelle VSol
+  "menu043-2       (F)",      // Mise à Echelle VLum
+  "menu043-3       (F)",    // Libre
+  "RET   popMenu(M040)"     // Rertour menu principal
 };
 
 // Exemple de liste 
-
+/*
 const char* menu00ListeValeurs[] = {
     " ",              // deroule nouveau MENU11 pour Calibrations Balances
     " ",              // deroule nouveau MENU21
@@ -72,14 +100,14 @@ const char* menu0ListeValeurs[] = {
 };
 
 // Exemple de liste 
-/*
-extern uint8_t SN2483_List [][9];
-extern uint8_t AppEUI_List [][9];
-extern uint8_t AppKey_List [][17];
-extern uint8_t *DevEUI;    // Orange : kit SodaQ RUCHE 0: 00 04 A3 0B 00 20 30 0A
-extern uint8_t *AppEUI;    // Orange : kit SodaQ RUCHE 0 
-extern uint8_t *AppKey;    // Orange : kit SodaQ RUCHE 0 
-*/
+
+// extern uint8_t SN2483_List [][9];
+// extern uint8_t AppEUI_List [][9];
+// extern uint8_t AppKey_List [][17];
+// extern uint8_t *DevEUI;    // Orange : kit SodaQ RUCHE 0: 00 04 A3 0B 00 20 30 0A
+// extern uint8_t *AppEUI;    // Orange : kit SodaQ RUCHE 0 
+// extern uint8_t *AppKey;    // Orange : kit SodaQ RUCHE 0 
+
 const char* menu21ListeValeurs[] = {
     "AppKey",        // {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00} 
                      // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
@@ -98,7 +126,7 @@ const char* menu11ListeValeurs[] = {
     "Calibration 4",        // 
     "RETOUR"        // Retour MENU0
 };
-
+*/
 
 #ifdef OLED096
   Adafruit_SSD1306 display(OLED_RESET);
@@ -363,6 +391,10 @@ extern bool debugOLEDDrawText;
 extern RTC_DS3231 rtc;
 extern DateTime nextPayload;
 
+// ===== VARIABLES GLOBALES MACHINE A ETAT MENUS=====
+extern menuLevel_t menuStack[];
+extern uint8_t currentMenuDepth;
+
 // ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
 extern bool startupListActivated;
 extern char *stringSaisie;
@@ -373,16 +405,21 @@ extern bool displayNumberDebug;
 extern stringInputContext_t stringInputCtx;
 extern bool displayStringDebug;
 
+// État de l'écran d'information
+extern infoScreenState_t infoScreenState;
 
 // Exemple de liste de valeurs alphanumériques
-extern const char* exempleListeValeurs[];
+extern const char* menu000Demarrage[];
+extern const char* menu040CalibTensions[];
+extern const char* menu043Reserve040[];
 
 // Exemple de Menus
+/*
 extern const char* menu00ListeValeurs[];
 extern const char* menu0ListeValeurs[];
 extern const char* menu11ListeValeurs[];
 extern const char* menu21ListeValeurs[];
-
+*/
 
 #ifdef OLED096
   extern Adafruit_SSD1306 display; //(OLED_RESET);

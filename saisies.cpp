@@ -2,13 +2,17 @@
 #define __INIT_DONE
 #include "define.h"
 
-
-bool isDateValid(const char *d);
-void modifyDateDigit(char *d, uint8_t pos, int delta);
 void inputDate(char *d);
-bool isTimeValid(const char *h);
-void modifyTimeDigit(char *h, uint8_t pos, int delta);
+void modifyDateDigit(char *d, uint8_t pos, int delta);
+bool isDateValid(const char *d);
+
+
+
 void inputTime(char *h);
+void modifyTimeDigit(char *h, uint8_t pos, int delta);
+bool isTimeValid(const char *h);
+
+
 void inputListValue(const char *label, const int *liste, uint8_t nbValeurs, int *valeurSelectionnee);
 void inputListValueLibelle(const char *label, const int *valeurs, const char **libelles, uint8_t nbValeurs, int *valeurSelectionnee, bool *valide);
 uint64_t inputHex(const char* variable, uint64_t valeurInitiale);
@@ -202,6 +206,10 @@ void inputListValue(const char *label, const int *liste, uint8_t nbValeurs, int 
                 break;
             case DOWN:
                 if (index < nbValeurs - 1) index++;
+
+
+    debugSerial.println("Down de inputListValue");  
+                
                 break;
             case VALIDE:
                 *valeurSelectionnee = liste[index];
@@ -285,8 +293,8 @@ uint64_t inputHex(const char* variable, uint64_t valeurInitiale)
     }
     digits[16] = '\0';
     
-    debugSerial.print(digits);
-    
+    debugSerial.print(digits);    
+
     bool valide = false;
     while (!valide) 
     {

@@ -8,7 +8,7 @@
  */
 void onRTCAlarm(void) // $ ou £
 {
-//debugSerial.println("\n€");  // €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+debugSerial.println("\n€");  // €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
   
 // ALARME 1 : Toutes les secondes (mode programmation)
   if (rtc.alarmFired(1)) 

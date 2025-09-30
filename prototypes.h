@@ -30,11 +30,21 @@ void saveConfigToEEPROM(void);
 uint16_t calculateChecksum(ConfigGenerale_t* cfg);
 
 
+// Fonctions de gestion des menus
+void pushMenu(const char* title, const char** menuList, uint8_t menuSize, uint8_t initialIndex);
+void popMenu(void);
+void processMenuSelection(uint8_t selectedIndex);
+
+// Fonctions de gestion des ecrans infos
+void displayInfoScreen(void);
+infoScreenState_t processInfoScreen(void);
+bool isInfoScreenActive(void);
+
 // Fonctions de sélection dans une liste
 void initStartupList(void);      // Fonction d'initialisation
-void startListInput(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex);
+void startListInputWithTimeout(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex, unsigned long timeoutMs);
 listInputState_t processListInput(void);
-uint8_t finalizeListInput(void);
+uint8_t finalizeListInput(void);   // Timeout de 30 s sans actions Kbd lors de la saisie
 void cancelListInput(void);
 bool isListInputActive(void);
 void refreshListDisplay(void);
@@ -43,6 +53,9 @@ void updateListInputCursorBlink(void);
 
 // Fonctions de saisie numérique
 void startNumberInput(const char* title, const char* initialNumber, uint8_t maxLength, bool allowNegative);
+
+// WithTimeout
+void startNumberInputWithTimeout(const char* title, const char* initialNumber, uint8_t maxLength, bool allowNegative, unsigned long timeoutMs);
 numberInputState_t processNumberInput(void);
 void finalizeNumberInput(char* outputNumber);
 void cancelNumberInput(void);
@@ -56,6 +69,9 @@ bool isValidNumber(const char* number);
 
 // Fonctions de saisie alphanumérique
 void startStringInput(const char* title, const char* initialString, uint8_t maxLength);
+// WithTimeout
+void startStringInputWithTimeout(const char* title, const char* initialString, uint8_t maxLength, unsigned long timeoutMs);
+
 stringInputState_t processStringInput(void);
 void finalizeStringInput(char* outputString);
 void cancelStringInput(void);
@@ -64,6 +80,29 @@ void refreshStringDisplay(void);
 void updateStringInputCursorBlink(void);
 char getNextAlphaNumChar(char current, int delta);
 void modifyStringChar(char* str, uint8_t pos, int delta);
+
+// Fonctions de saisie (à importer dans le projet)
+// Fonctions de saisie Date
+void startDateInput(const char* initialDate);
+// WithTimeout
+//void startDateInputWithTimeout(const char* title, const char* initialNumber, unsigned long timeoutMs);
+
+// Fonctions de saisie Time
+void startTimeInput(const char* initialTime);
+// WithTimeout
+//void startTimeInputWithTimeout(const char* title, const char* initialNumber, unsigned long timeoutMs);
+
+// Fonctions de saisie HEX
+// HEXA
+
+// Fonctions de saisie Email
+// Email
+
+// Fonctions de saisie IP
+// IP
+
+// Fonctions de saisie à definir
+// 
 
 
 // Gestion LEDs
@@ -118,7 +157,9 @@ void OLEDDisplayDate(char *d, uint8_t pos);
 void OLEDDisplayTime(char *h, uint8_t pos);
 void OLEDSetDebug(bool actif);
 void OLEDDisplayHivesDatas(void);
-void OLEDDisplaySystemInfo(void);
+
+//void OLEDDisplaySystemInfo(void);  // voir si pas remplacée par suivante.
+void OLEDdisplayInfoScreen(void);
 
 // Gestion saisies
 
@@ -126,6 +167,7 @@ char* strToChar(String s);
 
 // Gestion serialDebug 
 void debugSerialListStruct(void);
+void debugSerialPrintMenuStruct(menuLevel_t* menu);
 void debugSerialPrintNumberStruct(void);
 void debugSerialPrintStringStruct(void);
 void debugSerialTestConnexionDS3231(void);
@@ -179,12 +221,6 @@ void sendLoRaPayload(uint8_t *, uint8_t);
 // basse conso.
 void sleep_LoRa(void);
 void wake_LoRa(void);
-
-// Gestion menus
-void displaySystemInfo(void);
-void handleConfigurationMenu(void);
-void handleTimeDateRegisterMenu(void);
-void handleDebugMenu(void);
 
 // DHT22
 // Read temp and Humidity with DHT22      

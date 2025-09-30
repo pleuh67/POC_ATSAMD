@@ -190,18 +190,31 @@ void loop()
 {  static int index=0; 
    static int counter1s=0,counter15m=0;   
 
-//debugSerial.println("M");
+//debugSerial.println("M");  // MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+
+// Utilisable dans les 2 Modes
+// *** APPEL OBLIGATOIRE À CHAQUE CYCLE ***
+  gererLEDsNonBloquant(); 
+
+
+// seulement en PROG  
+// *** UTILISATION DES TOUCHES ***
 // *** TRAITEMENT CLAVIER NON-BLOQUANT ***
   processContinuousKeyboard();
-#ifdef __SerialDebugPoc
-debugSerial.print("1");  // 111111111111111111111111111
-#endif
-// *** UTILISATION DES TOUCHES ***
-  touche = readKeyNonBlocking();
+  touche = readKeyNonBlocking();      // lecture du clavier
+  if (touche != KEY_NONE)               // Affiche la touche pressée  (KEY 1 à 5)
+  {
+    // Traiter la touche
+    sprintf(serialbuf,"Touche pressée: %s",keyToString(touche));
+    debugSerial.println(serialbuf);
+  }
+ 
+  
 #ifdef __SerialDebugPoc
 debugSerial.print("2");   // 22222222222222222222222
 #endif  
 
+// Affiche l'heure du prochain PayLoad si displayNextPayload == true     
  if (displayNextPayload)
  {
    displayNextPayload = false;
@@ -210,22 +223,12 @@ debugSerial.print("2");   // 22222222222222222222222
  }
 
 
-  if (touche != KEY_NONE)
-  {
-    // Traiter la touche
-    sprintf(serialbuf,"Touche pressée: %s",keyToString(touche));
-    debugSerial.println(serialbuf);
-
-static char saisieDate[20]="08/09/2025";
-
-//inputDate(saisieDate);
-  }
-
-// *** APPEL OBLIGATOIRE À CHAQUE CYCLE ***
-    gererLEDsNonBloquant(); 
+    
 #ifdef __SerialDebugPoc
 debugSerial.print("3");   // 333333333333333333333333333
 #endif  
+
+
 // Vérification du mode
   modeExploitation = digitalRead(PIN_PE);
   if (modeExploitation)         // OK, validé, GreenLED => couleur Red
@@ -236,6 +239,8 @@ debugSerial.print("3");   // 333333333333333333333333333
   {
     handleProgrammingMode();  // faire gestion Clavier et actions associées
   }
+
+  
 #ifdef __SerialDebugPoc  
 debugSerial.print("4");   // 444444444444444444444444444444
 #endif
@@ -262,7 +267,8 @@ debugSerial.print("I1$");   //   I1$ I1$ I1$ I1$ I1$ I1$ I1$ I1$
     {     
 //      debugSerialPrintReprogNextAlarm(2);
       debugSerialPrintNextAlarm(nextPayload,2);
-      debugSerial.println("M");    
+      debugSerial.print("Min/ menuDeep: ");    // MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+      debugSerial.println(currentMenuDepth);
     }
     switch (counter1s %10)
     {
@@ -310,7 +316,7 @@ debugSerial.print("I1$");   //   I1$ I1$ I1$ I1$ I1$ I1$ I1$ I1$
 #endif 
     config.applicatif.blueLedDuration = 100;  // Clignotement Blue = 100 ms
     LEDStartBlue();                           //Clignotement 100ms
-    OLEDDrawScreenRefreshTime(0, 0); // partial refresh Time/Date every second
+//    OLEDDrawScreenRefreshTime(0, 0); // partial refresh Time/Date every second
   }
 #ifdef __SerialDebugPoc  
 debugSerial.print("6");   // 666666666666666666666666666666666666666666666

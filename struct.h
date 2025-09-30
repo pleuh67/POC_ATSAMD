@@ -44,6 +44,16 @@ typedef enum
     STRING_INPUT_CANCELLED  // 3 : Saisie annulée
 } stringInputState_t;
 
+/**
+ * États possibles de l'affichage d'écran d'info
+ */
+ typedef enum 
+{
+  INFO_SCREEN_IDLE,       // Pas d'écran actif
+  INFO_SCREEN_ACTIVE,     // Écran affiché
+  INFO_SCREEN_CLOSED      // Écran fermé
+} infoScreenState_t;
+
 
 // ===== STRUCTURES =====
 
@@ -66,13 +76,30 @@ typedef struct
   uint8_t selectedIndex;      // Index de l'élément sélectionné
   uint8_t scrollOffset;       // Décalage de défilement pour l'affichage
   uint8_t maxItems;           // Nombre maximum d'éléments dans la liste
+  uint8_t lastScrollOffset;   // Dernier décalage affiché (pour détecter changement)
+  uint8_t lastSelectedIndex;  // Dernier index sélectionné (pour détecter changement)
+  bool lastCursorBlink;       // Dernier état du clignotement
   bool displayRefresh;        // Flag pour rafraîchir l'affichage
   unsigned long lastUpdate;   // Dernier rafraîchissement affichage
   bool cursorBlink;           // État du clignotement curseur
   unsigned long lastBlink;    // Dernier clignotement
-  char title[21];             // Titre de la sélection
+  unsigned long lastActivity;    // Dernière activité utilisateur
+  unsigned long timeoutDuration;  // Durée du timeout en ms
+  char title[21];             // Titre de la sélection (20 caractères + \0)
   const char** itemList;      // Pointeur vers la liste des éléments
 } listInputContext_t;
+
+/**
+ * Structure pour gérer la pile de menus
+ */
+typedef struct 
+{
+  const char** menuList;    // Pointeur vers le menu
+  uint8_t menuSize;         // Nombre d'éléments du menu
+  uint8_t selectedIndex;    // Index sélectionné dans ce menu
+  char title[21];           // Titre du menu (20 caractères + \0)
+} menuLevel_t;
+
 
 /**
  * Contexte de saisie numérique

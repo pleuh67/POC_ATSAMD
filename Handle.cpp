@@ -2,7 +2,7 @@
 #include "define.h"
 
 
-//#define __SerialDebugPoc      // decommenter pour afficher messages debug
+#define __SerialDebugPoc      // decommenter pour afficher messages debug
 
 // ---------------------------------------------------------------------------
 // MODE EXPLOITATION
@@ -43,59 +43,91 @@ void handleProgrammingMode(void)
   {  
     switchToOperationMode = true;
     OLEDClear();
-    OLEDDrawScreenTime(0,0);
+ //   OLEDDrawScreenTime(0,0);
 //    OLEDDrawText(1, 7, 0, "MODE PROGRAMMATION");
     switchToProgrammingMode = false;
+// Activer la liste au démarrage si pas encore fait
+    if (!startupListActivated)
+    {
+// afficher structure gestion menu avant 1er menu
+debugSerial.println("Lancement Menu principal");
+      initStartupList();
+    }
   }
 
- // Activer la liste au démarrage si pas encore fait
-  if (!startupListActivated)
-  {
-    initStartupList();
-  }
+// Traite l'écran d'informations (à appeler dans loop)
+infoScreenState_t processInfoScreen();
+
+
    
 #ifdef __SerialDebugPoc    
 //debugSerial.print("P");   // PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
 #endif
 
 // ------------------------------------------------
-// Vérifier si une sélection de liste est en cours
+// Vérifier si une sélection de liste est en cours 
 // ------------------------------------------------
   if (isListInputActive())
   {
     static uint8_t selectedModeIndex = 0; // Index du mode sélectionné
         
 #ifdef __SerialDebugPoc    
-debugSerial.print("L");   // LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+//debugSerial.print("L");   // LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
 #endif
 
     listInputState_t state = processListInput();
         
     switch (state)
-    {               debugSerial.println(exempleListeValeurs[selectedModeIndex]); 
+    {               debugSerial.println(menu000Demarrage[selectedModeIndex]); 
       case LIST_INPUT_COMPLETED:
                 selectedModeIndex = finalizeListInput(); // Récupérer l'index sélectionné
+
+ // Gestion navigation dans les menus               
                 debugSerial.print("Mode selectionne: ");
                 debugSerial.print(selectedModeIndex);
-                debugSerial.print(" - ");
-                debugSerial.println(exempleListeValeurs[selectedModeIndex]);
+                 debugSerial.print(" - Depth: ");
+                debugSerial.print(currentMenuDepth);
+                debugSerial.print(" - Val: ");
+                debugSerial.println(menu000Demarrage[selectedModeIndex]);
 
-                
+          if (currentMenuDepth > 0)
+        {
+          menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+          debugSerial.println(currentMenu->menuList[selectedModeIndex]);
+              
                 
                 // Ici vous pouvez traiter la sélection
 
-debugSerial.println("Chaine validée : ");
-sprintf(stringSaisie,(char *)exempleListeValeurs[selectedModeIndex]);    // recopie saisie dans destination
-debugSerial.println(stringSaisie);
-debugSerial.println(Data_LoRa.RucherName);
-debugSerial.println(exempleListeValeurs[selectedModeIndex]);
+debugSerial.print("Chaine validée : ");
+//sprintf(stringSaisie,(char *)menu000Demarrage[selectedModeIndex]);    // recopie saisie dans destination
+//debugSerial.println(stringSaisie);
+//debugSerial.println(Data_LoRa.RucherName);
+debugSerial.println(menu000Demarrage[selectedModeIndex]);
 
                 OLEDClear();// Effacer écran
-                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet    
+//                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet    
+           processMenuSelection(selectedModeIndex);
+        }
+        else
+        {
+          debugSerial.println("Cas ELSE");  
+         processMenuSelection(selectedModeIndex);
+        }
+                
                 break;
                 
       case LIST_INPUT_CANCELLED:
-                debugSerial.println("Selection mode annulee");
+                debugSerial.println("Selection mode annulee par timeout");
+       // Si on était dans un sous-menu, revenir au menu précédent
+        if (currentMenuDepth > 1)
+        {
+          popMenu();
+        }
+        else
+        {
+          // Sinon réinitialiser complètement
+          currentMenuDepth = 0;
+        }
                 break;
                 
       default:
@@ -103,6 +135,29 @@ debugSerial.println(exempleListeValeurs[selectedModeIndex]);
               return;
     }
   }
+// ------------------------------------------------    
+// Vérifier si un écran d'info est actif                >> doit retourner dans LISTE menu
+// ------------------------------------------------    
+  else if (isInfoScreenActive())
+  {
+    infoScreenState_t state = processInfoScreen();
+    
+    switch (state)
+    {
+      case INFO_SCREEN_CLOSED:
+        debugSerial.println("Ecran info ferme");
+        infoScreenState = INFO_SCREEN_IDLE; // Reset
+
+listInputCtx.state = LIST_INPUT_ACTIVE;
+
+        
+        break;
+        
+      default:
+        // Écran toujours actif, ne rien faire d'autre
+        return;
+    }
+  }  
 // ------------------------------------------------    
 // Vérifier si une saisie numérique est en cours
 // ------------------------------------------------
@@ -124,17 +179,14 @@ debugSerial.println(exempleListeValeurs[selectedModeIndex]);
           debugSerial.println(numberBuffer);
           // Ici vous pouvez traiter le nombre
 
-
 debugSerial.println("Chaine validée : ");
 sprintf(stringSaisie,(char *)numberBuffer);    // recopie saisie dans destination !!!!!  attentin LISTE
 debugSerial.println(stringSaisie);
 debugSerial.println(Data_LoRa.RucherName);
 
-
                 OLEDClear();// Effacer écran
-                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet    
+//                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet    
 
-         
           break;
           
       case NUMBER_INPUT_CANCELLED:
@@ -148,7 +200,6 @@ debugSerial.println(Data_LoRa.RucherName);
 #ifdef __SerialDebugPoc    
 debugSerial.print("N");   // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 #endif
-
   }
 // ------------------------------------------------
 // Vérifier si une saisie alphanumérique est en cours
@@ -177,7 +228,7 @@ debugSerial.print("A");   // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
                 sprintf(stringSaisie,stringBuffer);    // recopie saisie dans destination
 debugSerial.print("Chaine validée : "); debugSerial.print(stringSaisie);debugSerial.println(Data_LoRa.RucherName);
                 OLEDClear();// Effacer écran
-                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet     
+ //               OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet     
                 break;
                 
       case STRING_INPUT_CANCELLED:
@@ -214,8 +265,18 @@ debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
                     
         case KEY_2: // Touche 2 - Test sélection dans une liste
                     {
-                        static uint8_t currentModeIndex = 0; // Index actuel (peut être sauvegardé)
-                        startListInput("CHOIX MODE:", exempleListeValeurs, 9, currentModeIndex);
+//                        static uint8_t currentModeIndex = 0; // Index actuel (peut être sauvegardé)
+//                        startListInput("CHOIX MODE:", menu000Demarrage, 9, currentModeIndex);
+// Si on était dans un sous-menu, revenir au menu précédent
+        if (currentMenuDepth > 1)
+        {
+          popMenu();
+        }
+        else
+        {
+          // Sinon réinitialiser complètement
+          currentMenuDepth = 0;
+        }
                     }
                     break;
                     
@@ -247,4 +308,50 @@ debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
       touche = KEY_NONE; // Reset de la touche
     }
   }
+}
+
+// repositionner ?????
+
+/**
+ * @brief Traite l'écran d'informations (à appeler dans loop)
+ * @param void
+ * @return État actuel de l'écran
+ */
+infoScreenState_t processInfoScreen(void)
+{
+  if (infoScreenState != INFO_SCREEN_ACTIVE)
+  {
+    return infoScreenState;
+  }
+  
+  // Traitement de la touche VALIDE pour revenir
+  if (touche == VALIDE)
+  {
+    touche = KEY_NONE;
+    infoScreenState = INFO_SCREEN_CLOSED;
+    
+    // Revenir au menu principal
+    if (currentMenuDepth > 0)
+    {
+      menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+      startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+      debugSerial.println("Retour du menu infos");
+    }
+    else
+    {
+      debugSerial.println("ERREUR: currentMenuDepth = 0 dans processInfoScreen");
+    }
+  }
+  
+  return infoScreenState;
+}
+
+/**
+ * @brief Vérifie si un écran d'info est actif
+ * @param void
+ * @return true si écran actif
+ */
+bool isInfoScreenActive(void)
+{
+  return (infoScreenState == INFO_SCREEN_ACTIVE);
 }

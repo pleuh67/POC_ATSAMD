@@ -80,6 +80,12 @@ debugSerial.print("=== CONFIGURATION ALARME1 ");
 debugSerial.println("=== 1s DONE ===");
 }
 
+
+
+// L'appel à partir d'ici parfois beugue et loop ne s'execute plus...
+// IRQ 1 et lowpower false
+// les IRQ2 suivantes restent opérationnelles
+// remis le 29/06: no interrupt et 
  /**
  * @brief Configure alarme du RTC
  * Alarme 2 : Payload toutes les X minutes
@@ -89,7 +95,7 @@ debugSerial.println("=== 1s DONE ===");
 void DS3231setRTCAlarm2(void) 
 {
 // Désactiver TOUTES les interruptions temporairement
-//    noInterrupts();
+    noInterrupts();
     
     // Effacer les flags
 // Configuration DS3231 AVANT interruption
@@ -118,7 +124,7 @@ debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
   rtc.writeSqwPinMode(DS3231_OFF); 
   
 // Réactiver les interruptions
-//    interrupts();
+    interrupts();
 }
 
 /**
