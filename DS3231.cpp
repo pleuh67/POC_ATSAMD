@@ -102,7 +102,7 @@ debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
   // ALARME 2 : Payload toutes les X minutes
   if (DEBUG_WAKEUP_PAYLOAD) 
   {
-    nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.wakeupIntervalPayload, 0);
+    nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.SendingPeriod, 0);
     rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
     debugSerialPrintReprogNextAlarm(2);
     debugSerialPrintNextAlarm(nextPayload,2);

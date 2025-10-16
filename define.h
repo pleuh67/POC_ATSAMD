@@ -8,12 +8,12 @@
 #define VERSION "1.1.1-PL"
 
 // ===== TIMING CONSTANTS =====
-#define RED_LED_DURATION 100        // Durée d'allumage LED rouge 300 ms
-#define GREEN_LED_DURATION 100      // Durée d'allumage LED verte 300 ms
-#define BLUE_LED_DURATION 100       // Durée d'allumage LED bleue 300 ms
-#define BUILTIN_LED_DURATION 100    // Durée d'allumage LED builtin 100 ms
-#define WAKEUP_INTERVAL_PAYLOAD 5  // Intervalle de réveil en minutes (2 minute pour test)
-#define INTERVAL_1SEC 1000          // Intervalle 1 seconde en millisecondes
+#define RED_LED_DURATION 100          // Durée d'allumage LED rouge 300 ms
+#define GREEN_LED_DURATION 100        // Durée d'allumage LED verte 300 ms
+#define BLUE_LED_DURATION 100         // Durée d'allumage LED bleue 300 ms
+#define BUILTIN_LED_DURATION 100      // Durée d'allumage LED builtin 100 ms
+#define WAKEUP_INTERVAL_PAYLOAD 5     // Intervalle de réveil en minutes 
+#define INTERVAL_1SEC 1000            // Intervalle 1 seconde en millisecondes
 
 // I2C Addresses
 #define DS3231_ADDRESS 0x68   // Adresse RTC Module DS3231

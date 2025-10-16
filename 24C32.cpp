@@ -18,8 +18,8 @@ void setDefaultConfig(void)
     config.applicatif.greenLedDuration = GREEN_LED_DURATION;
     config.applicatif.blueLedDuration = BLUE_LED_DURATION;
     config.applicatif.builtinLedDuration = BUILTIN_LED_DURATION;
-    config.applicatif.wakeupIntervalPayload = WAKEUP_INTERVAL_PAYLOAD;
-    config.applicatif.interval1Sec = INTERVAL_1SEC;
+    config.applicatif.SendingPeriod = WAKEUP_INTERVAL_PAYLOAD;    // mieux: wakeupIntervalPayload
+    config.applicatif.OLEDRefreshPeriod = INTERVAL_1SEC;               //
     
     config.checksum = calculateChecksum(&config);
 }

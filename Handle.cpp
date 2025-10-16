@@ -86,7 +86,6 @@ void handleProgrammingMode(void)
   {  
     switchToOperationMode = true;
     OLEDClear();
-//    OLEDDrawText(1, 7, 0, "MODE PROGRAMMATION");
     switchToProgrammingMode = false;
 // Activer la liste au démarrage si pas encore fait
     if (!startupListActivated)
@@ -104,24 +103,8 @@ infoScreenState_t processInfoScreen();
 #ifdef __SerialDebugPoc    
 //debugSerial.print("P");   // PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
 #endif
-
-/*
-isListInputActive
-isInfoScreenActive
-isNumberInputActive
-isStringInputActive
-isTimeInputActive
-//isDateInputActive
-//isHEXAInputActive
-*/
-/*
-sprintf(serialbuf, "List %d / Infos %d / Number %d / String %d / Time %d / Date, Mail, IP,...",
-isListInputActive(), isInfoScreenActive(), isNumberInputActive(), isStringInputActive(), isTimeInputActive()); 
-debugSerial.println(serialbuf);
-*/
 // Gestion normale des menus quand pas de saisie
-
-
+GestionEnCours();
 // ------------------------------------------------
 // Vérifier si une sélection de liste est en cours 
 // ------------------------------------------------
@@ -138,7 +121,7 @@ GestionEnCours(); // affiche le type de traitement en cours de gestion par le ha
     listInputState_t state = processListInput();
         
     switch (state)
-    {               debugSerial.println(menu000Demarrage[selectedModeIndex]); 
+    {               debugSerial.println(m0_Demarrage[selectedModeIndex]); 
       case LIST_INPUT_COMPLETED:
                 selectedModeIndex = finalizeListInput(); // Récupérer l'index sélectionné
 
@@ -148,7 +131,7 @@ GestionEnCours(); // affiche le type de traitement en cours de gestion par le ha
                  debugSerial.print(" - Depth: ");
                 debugSerial.print(currentMenuDepth);
                 debugSerial.print(" - Val: ");
-                debugSerial.println(menu000Demarrage[selectedModeIndex]);
+                debugSerial.println(m0_Demarrage[selectedModeIndex]);
 
           if (currentMenuDepth > 0)
         {
@@ -159,10 +142,10 @@ GestionEnCours(); // affiche le type de traitement en cours de gestion par le ha
                 // Ici vous pouvez traiter la sélection
 
 debugSerial.print("Chaine validée : ");
-//sprintf(stringSaisie,(char *)menu000Demarrage[selectedModeIndex]);    // recopie saisie dans destination
+//sprintf(stringSaisie,(char *)m0_Demarrage[selectedModeIndex]);    // recopie saisie dans destination
 //debugSerial.println(stringSaisie);
 //debugSerial.println(Data_LoRa.RucherName);
-debugSerial.println(menu000Demarrage[selectedModeIndex]);
+debugSerial.println(m0_Demarrage[selectedModeIndex]);
 
                 OLEDClear();// Effacer écran
 //                OLEDDrawScreenTime(0, 0); // Affiche Time/Date au complet    
@@ -331,7 +314,7 @@ debugSerial.print("H");   // HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
     {
       case HEX_INPUT_COMPLETED:
  
-        menu000_F8_GetHexDone();
+        m0_7F_GetHexDone();
         
     //    finalizeHexInput(hexBuffer); // Récupérer la chaîne finale
       //  debugSerial.print("Nouvelle cle hexadecimale: ");
@@ -374,7 +357,7 @@ GestionEnCours();   // affiche le type de traitement en cours de gestion par le 
     {
       case TIME_INPUT_COMPLETED:
            {
-             menu000_F7_GetTimeDone();
+             m0_6F_GetTimeDone();
              break;   
            }    
       case TIME_INPUT_CANCELLED:
@@ -407,6 +390,7 @@ GestionEnCours();   // affiche le type de traitement en cours de gestion par le 
     switch (state)
     {
       case DATE_INPUT_COMPLETED:
+      {
         finalizeDateInput(dateBuffer); // Récupérer la date finale
         debugSerial.print("Nouvelle date: ");
         debugSerial.println(dateBuffer);
@@ -417,8 +401,7 @@ GestionEnCours();   // affiche le type de traitement en cours de gestion par le 
           startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
         }
         break;
-        
-      case DATE_INPUT_CANCELLED:
+       case DATE_INPUT_CANCELLED:
         debugSerial.println("Saisie date annulee par timeout");
         cancelDateInput();
         // Revenir au menu
@@ -428,7 +411,7 @@ GestionEnCours();   // affiche le type de traitement en cours de gestion par le 
           startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
         }
         break;
-        
+      }  
       default:
         // Saisie toujours en cours, ne rien faire d'autre
         return;

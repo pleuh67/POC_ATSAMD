@@ -52,11 +52,26 @@
 void initStartupList(void)
 {
   // Activer la liste menu000Demarrage au démarrage
-  pushMenu("MENU PRINCIPAL:", menu000Demarrage, 9, 0);
+  pushMenu("MENU PRINCIPAL:", m0_Demarrage, 8, 0);
+/*  
+14:54:59.980 -> pushMenu() MENU PRINCIPAL:
+14:54:59.980 -> Param : CONFIG. SYSTEME(F)
+14:54:59.980 -> struct: CONFIG. SYSTEME(F)
+14:54:59.980 -> Selection dans liste demarree: MENU PRINCIPAL:
+14:54:59.980 -> OLEDDisplayMessageL8() => Choix d'une valeur
+14:55:00.495 -> Menu empile: MENU PRINCIPAL: Profondeur: 1
+
+ */
   startupListActivated = true;
   debugSerial.println("Menu principal active");
   debugSerial.print("currentMenuDepth apres init: ");
   debugSerial.println(currentMenuDepth);
+
+// debugSerialPrintMenuStruct(currentMenu);
+//      menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+//      startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex);
+
+  
 }
 
 
@@ -77,7 +92,7 @@ void startListInputWithTimeout(const char* title, const char** itemList, uint8_t
 {
 
 //   ici inseré: void startListInput(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex)
-debugSerial.print("Param : ");debugSerial.println(itemList[2]);
+//debugSerial.print("Param : ");debugSerial.println(itemList[2]);
   if (listInputCtx.state != LIST_INPUT_IDLE)
   {
     return; // Sélection déjà en cours
@@ -91,7 +106,7 @@ debugSerial.print("Param : ");debugSerial.println(itemList[2]);
   listInputCtx.selectedIndex = initialIndex;
   listInputCtx.maxItems = numItems;
   listInputCtx.itemList = itemList;
-debugSerial.print("struct: ");debugSerial.println(listInputCtx.itemList[2]);
+//debugSerial.print("struct: ");debugSerial.println(listInputCtx.itemList[2]);
   strncpy(listInputCtx.title, title, 20);  
   listInputCtx.title[20] = '\0';
   
@@ -2250,7 +2265,7 @@ dateInputState_t processDateInput(void)
         else
         {
           debugSerial.println("Date invalide, validation refusee");
-          OLEDDisplayMessageL8("Date invalide !", false, false);
+          OLEDDisplayMessageL8("Date invalide !     ", false, false);
         }
         break;
         
@@ -2303,7 +2318,7 @@ void cancelDateInput(void)
 {
   dateInputCtx.state = DATE_INPUT_CANCELLED;
   debugSerial.println("Saisie de date annulee");
-  OLEDDisplayMessageL8("Saisie annulee", false, false);
+  OLEDDisplayMessageL8("Saisie annulee      ", false, false);
   
   // Reset du contexte
   dateInputCtx.state = DATE_INPUT_IDLE;
@@ -2403,6 +2418,7 @@ void refreshDateDisplay(void)
         snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
         OLEDDrawText(1, 7, 0, timeoutMsg);
       }
+/* //     Les instructions ne clignottent pas
       else if (dateInputCtx.cursorBlink)
       {
         OLEDDrawText(1, 7, 0, "+/- Modif  VALIDE OK");
@@ -2411,7 +2427,9 @@ void refreshDateDisplay(void)
       {
         OLEDDrawText(1, 7, 0, "                    ");
       }
+*/
     }
+/* //     Les instructions ne clignottent pas
     else
     {
       if (dateInputCtx.cursorBlink)
@@ -2423,6 +2441,7 @@ void refreshDateDisplay(void)
         OLEDDrawText(1, 7, 0, "                    ");
       }
     }
+*/
   }
   
   // Sauvegarder les états pour la prochaine comparaison

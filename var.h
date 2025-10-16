@@ -408,7 +408,8 @@ extern bool displayStringDebug;
 extern hexInputContext_t hexInputCtx;
 extern timeInputContext_t timeInputCtx;
 // Contexte de saisie de date
-extern dateInputContext_t dateInputCtx;     
+extern dateInputContext_t dateInputCtx;    
+
 // Contexte de saisie de l'Email
 extern const char *emailCharSet; //[];  // /*const*/
 extern const uint8_t emailCharSetSize; // 26 lettres + 10 chiffres + 4 symboles  /*const*/

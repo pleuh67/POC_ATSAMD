@@ -20,10 +20,10 @@
  * @param initialIndex Index initial sélectionné
  * @return void
  */
-// exemple appel: pushMenu("Menu Niv 3:", menu043Reserve040, 5, 0);
+// exemple appel: pushMenu("Menu Niv 3:", menu033Reserve040, 5, 0);
 void pushMenu(const char* title, const char** menuList, uint8_t menuSize, uint8_t initialIndex)
 {
-sprintf(serialbuf, "pushMenu() %s",title); 
+sprintf(serialbuf, "pushMenu() title: %s",title); 
 debugSerial.println(serialbuf);
   if (currentMenuDepth < MAX_MENU_DEPTH)
   {
@@ -31,17 +31,14 @@ debugSerial.println(serialbuf);
     menuStack[currentMenuDepth].menuSize = menuSize;
     menuStack[currentMenuDepth].selectedIndex = initialIndex;
     strncpy(menuStack[currentMenuDepth].title, title, 20);
-    menuStack[currentMenuDepth].title[20] = '\0';
-    
+    menuStack[currentMenuDepth].title[20] = '\0';    
     currentMenuDepth++;
     
     // Démarrer l'affichage du nouveau menu
     startListInputWithTimeout(title, menuList, menuSize, initialIndex, 0);
     
-    debugSerial.print("Menu empile: ");
-    debugSerial.print(title);
-    debugSerial.print(" Profondeur: ");
-    debugSerial.println(currentMenuDepth);
+sprintf(serialbuf,"Menu empile: %s  currentMenuDepth: %d" ,title, currentMenuDepth); 
+debugSerial.println(serialbuf);
   }
   else
     OLEDDisplayMessageL8(">5 SOUS MENUS !!!", false, false);  
@@ -109,161 +106,335 @@ void processMenuSelection(uint8_t selectedIndex)
   
   menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
 debugSerialPrintMenuStruct(currentMenu);
-  
+ // =>   currentMenuDepth 1 / title  MENU PRINCIPAL: / menuSize 3 /selectedIndex 536879296
   // Sauvegarder la sélection dans le menu actuel
   currentMenu->selectedIndex = selectedIndex;
 
 debugSerial.print("processMenuSelection ");
 debugSerial.println(selectedIndex);  
-  // Traitement selon le menu actuel
+// Traitement selon le menu actuel
 // ---------------------------------------------------------------------------------
-// ------------------------------------------ menu000Demarrage[] (MENU de démarrage)
-// ---------------------------------------------------------------------------------
-  if (currentMenu->menuList == menu000Demarrage)
+  if (currentMenu->menuList == m0_Demarrage)
   {
-    // Menu principal
+// Menu principal
     switch (selectedIndex)
     {
-// ----------------------------------
-// APPEL D'UN AFFICHAGE D'ECRAN  
-// ----------------------------------   
-      case 1: // "INFOS"
-        debugSerial.println("Appel d'un ecran");
-        debugSerial.println("CONFIG. SYSTEME - Ecran INFOS demandé");   
-        infoScreenRefreshTime = true;  
-        OLEDdisplayInfoScreen();     // part dans KKKKKKKKK
-        // popMenu(); // Retour au menu principal
+      case 0: // "INFOS"
+      {
+debugSerial.print("Appel d'un ecran: ");        
+        m0_0E_PageInfos();   // APPEL D'UN AFFICHAGE D'ECRAN 
+debugSerial.println("CONFIG. SYSTEME - Ecran INFOS demandé");   
         break;
-// ----------------------------------
-// APPEL D'UNE FONCTION
-// ----------------------------------        
-      case 2: // "CONFIG. SYSTEME"
-        debugSerial.println("Appel d'une Fonction");
-        debugSerial.println("CONFIG. SYSTEME - Fonction a implementer");
+      }
+      case 1: // "CONFIG. SYSTEME"
+      {
+        m0_1M_ConfigSysteme();       // APPEL D'UN MENU
         break;
-        
-      case 3: // "CONNEX. RESEAU"
-        debugSerial.println("Appel d'une Fonction");      
-        debugSerial.println("CONNEX. RESEAU - Fonction a implementer");
+      }
+      case 2: // "CONNEX. RESEAU"
+      {  
+        m0_2M_ConnexLoRa();
         break;
-// ----------------------------------
-// APPEL D'UN SOUS MENU    
-// ----------------------------------
-    case 4: // "CALIB. TENSIONS"
-            {
-        debugSerial.println("Appel d'un sous menu");    
-        pushMenu("CALIB. TENSIONS:", menu040CalibTensions, 5, 0);
+      }  
+      case 3: // "CALIB. TENSIONS"
+      {
+        m0_3M_CalibTensions();
         break;
-            }
-      case 5: // "CALIB. BALANCES"
-           {      
-        debugSerial.println("Appel d'une Fonction");
-        debugSerial.println("Appel weightCalibration(1)");
-        // weightCalibration(1); // Fonction existante
+      }
+      case 4: // "CALIB. BALANCES"
+      {  
+        m0_4M_CalibBalances();    
         break;
-           }
-// ----------------------------------
-// APPEL D'UNE SAISIE, ici DATE
-// ----------------------------------        
-     case 6: // "SAISIE DATE"
-             {
-               menu000_F6_GetDate();
-               break;
-             }
-// ----------------------------------
-// APPEL D'UNE SAISIE, ici HEURE
-// ----------------------------------        
-     case 7: // "SAISIE HEURE"
-             {
-               menu000_F7_GetTime();
-               break;
-             }
-      case 8: // "SAISIE HEXA "
-             {
-               menu000_F8_GetHex();
-               break;
-             }
+      }
+      case 5: // "SAISIE DATE"
+      {
+        m0_5F_GetDate();   // APPEL D'UNE SAISIE, ici DATE
+        break;
+      }
+      case 6: // "SAISIE HEURE"
+      {
+        m0_6F_GetTime();   // APPEL D'UNE SAISIE, ici HEURE
+        break;
+      }
+      case 7: 
+      {
+        m0_7F_GetHex();    // "SAISIE HEXA "
+        break;
+      }
       default:
-              {
-                break;
-              }  
+      {
+        break;
+      }  
     }
   }
 // ---------------------------------------------------------------------------------
-// ----------------------------------------------------------- menu040CaliTensions[]
+  else if (currentMenu->menuList == m01_ConfigSysteme)
+  {
+    switch (selectedIndex)
+    {
+      case 0:  
+      {
+debugSerial.println("m01_0 demandé");   
+        break;
+      }
+      case 1: 
+      {
+debugSerial.println("m01_1 demandé");   
+        break;
+      }
+      case 2:
+      {
+debugSerial.println("m01_2 demandé");   
+        break;
+      }
+      case 3:
+      {
+debugSerial.println("m01_3 demandé");   
+        break;
+      }
+      case 4:
+      {  
+debugSerial.println("m01_4 demandé");   
+        break;
+      }
+      case 5:
+      {  
+debugSerial.println("m01_5 demandé");   
+        break;
+      }
+      case 6:
+      {  
+debugSerial.println("m01_6 demandé");   
+        break;
+      }
+      default:
+      {
+        break;
+      }  
+    }
+  }
 // ---------------------------------------------------------------------------------
-  else if (currentMenu->menuList == menu040CalibTensions)
+  else if (currentMenu->menuList == m02_ConfigLoRa)
+  {
+    switch (selectedIndex)
+    {
+      case 0:  
+      {
+debugSerial.println("m02_0 demandé");   
+        break;
+      }
+      case 1: 
+      {
+debugSerial.println("m02_1 demandé");   
+        break;
+      }
+      case 2:
+      {
+debugSerial.println("m02_2 demandé");   
+
+        break;
+      }
+      case 3:
+      {
+debugSerial.println("m02_3 demandé");   
+        break;
+      }
+      case 4:
+      {  
+debugSerial.println("m02_4 demandé");   
+        break;
+      }
+      default:
+      {
+        break;
+      }  
+    }
+  }
+// ---------------------------------------------------------------------------------
+  else if (currentMenu->menuList == m03_CalibTensions)
   {
     switch (selectedIndex)
     {
       case 0: // "Calib. VBAT"
+      {
         debugSerial.println("Calib. VBAT - Fonction a implementer");
 //        popMenu(); // Retour au menu principal
         break;
-        
+      }  
       case 1: // "Calib. VSOL"
+      {
         debugSerial.println("Calib. VSOL - Saisie numerique a implementer");
 // startNumericInput("CALIB VSOL:", &variable_vsol, min, max);
 //        popMenu(); // Retour au menu principal
         break;
-        
+      }  
       case 2: // "Calib. LUM"
+      {
         debugSerial.println("Calib. LUM - Fonction a implementer");
 //        popMenu(); // Retour au menu principal
         break;
-        
+      } 
       case 3: // "Reserve"
+      {
         debugSerial.println("Reserve - Fonction libre");
-        pushMenu("Menu Niv 3:", menu043Reserve040, 5, 0);
+        pushMenu("Menu Niv 3:", m033_Reserve040, 5, 0);
 //        popMenu(); // Retour au menu principal
         break;
-        
+      } 
       case 4: // "RETOUR"
+      {
         popMenu(); // Retour au menu principal
         break;
-        
+      }  
       default:
         break;
     }
   }  
 // ---------------------------------------------------------------------------------
-// ------------------------------------------------------------- menu043Reserve040[]
-// ---------------------------------------------------------------------------------
-  else if (currentMenu->menuList == menu043Reserve040)
+  else if (currentMenu->menuList == m033_Reserve040)
   {
     switch (selectedIndex)
     {
-      case 0: // menu043-0
+      case 0: // menu033-0
+      {
         debugSerial.println("0");
 //        popMenu(); // Retour au menu principal
         break;
-        
-      case 1: // menu043-1
-        debugSerial.println("menu043-1");
+      } 
+      case 1: // menu033-1
+      {
+        debugSerial.println("menu033-1");
 //        popMenu(); // Retour au menu principal
         break;
-        
-      case 2: // menu043-2
-        debugSerial.println("menu043-2");
+      }  
+      case 2: // menu033-2
+      {
+        debugSerial.println("menu033-2");
 //        popMenu(); // Retour au menu principal
         break;
-        
-      case 3: // menu043-3
-        debugSerial.println("menu043-3");
+      }  
+      case 3: // menu033-3
+      {
+        debugSerial.println("menu033-3");
 //        popMenu(); // Retour au menu principal
         break;
-        
-      case 4: // RET   popMenu(M040)
+      }  
+      case 4: // RET   popMenu(M030)
+      {
         popMenu(); // Retour au menu: menu040CaliTensions
+        break;
+      }  
+      default:
+        break;
+    }
+  }
+// ---------------------------------------------------------------------------------
+  else if (currentMenu->menuList == m04_CalibBalances)
+  {
+    switch (selectedIndex)
+    {
+      case 0:  
+      {
+debugSerial.println("m04_0 demandé");   
+        break;
+      }
+      case 1: 
+      {
+debugSerial.println("m04_1 demandé");   
+        break;
+      }
+      case 2:
+      {
+debugSerial.println("m04_2 demandé");   
+        break;
+      }
+      case 3:
+      {
+debugSerial.println("m04_3 demandé");   
+        break;
+      }
+      case 4:
+      {  
+debugSerial.println("m04_4 demandé");   
+        break;
+      }
+      default:
+      {
+        break;
+      }  
+    }
+  }  
+// ---------------------------------------------------------------------------------
+  else if (currentMenu->menuList == m04x_CalibBal)
+  {
+    switch (selectedIndex)
+    {
+      case 0: // m04x-0
+        debugSerial.println("menu04x-0  demandé");
+//        popMenu(); // Retour au menu principal
+        break;
+      case 1: // m04x-1
+        debugSerial.println("menu04x-1  demandé");
+//        popMenu(); // Retour au menu principal
+        break;
+      case 2: // m04x-2
+        debugSerial.println("menu04x-2  demandé");
+//        popMenu(); // Retour au menu principal
+        break;
+      case 3: // m04x-3
+        debugSerial.println("menu04x-3  demandé");
+//        popMenu(); // Retour au menu principal
+        break;
+      case 4: // RET   popMenu(M04)
+        popMenu(); // Retour au menu: m04_CalibBalances
         break;
       default:
         break;
     }
   }
+// ---------------------------------------------------------------------------------
 /*
 // A decliner selon les menus
-   else if (currentMenu->menuList == autreMenu)
+// ---------------------------------------------------------------------------------
+  else if (currentMenu->menuList == AutreMenu)
   {
-  }
+    switch (selectedIndex)
+    {
+      case 1:  
+              {
+ 
+                break;
+              }
+      case 2: 
+              {
+ 
+                break;
+              }
+      case 3:
+              {
+ 
+                break;
+              }
+      case 4:
+              {
+
+                break;
+              }
+      case 5:
+              {  
+
+                break;
+              }
+     case 6:
+              {
+ 
+                break;
+              }
+      default:
+              {
+                break;
+              }  
+    }
+  }  
 */
 }

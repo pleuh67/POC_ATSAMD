@@ -363,11 +363,12 @@ float getVBatMoy(void)
   if (++v > 9) 
     v = 0;
 //          Affichage de controle
+/*  
   sprintf(serialbuf, " VBat : %4.3f V", VBat[v - 1]);
   debugSerial.print(serialbuf);
   sprintf(serialbuf, " VBatMoy : %4.3f V", VBat[10]);
   debugSerial.println(serialbuf);
-
+*/
  return (VBat[10]);
 }
 
@@ -388,11 +389,12 @@ float getVSolMoy(void)
     v = 0;
 
  //          Affichage de controle
+/*
   sprintf(serialbuf, " VSol : %4.2f V %d", VSol[v], v); // valeur lue
   debugSerial.print(serialbuf);
   sprintf(serialbuf, " VSolMoy : %4.2f V", VSol[10]); // moyenne courante
   debugSerial.println(serialbuf);
-
+*/
   return (VSol[10]);   // moyenne courante
 }
 

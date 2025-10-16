@@ -323,7 +323,7 @@ typedef struct
     uint8_t adresseOLED;
     uint8_t adresseEEPROM;
     uint8_t reserve[5];
-} ConfigMateriel_t;
+} nonConfigMateriel_t;
 
 typedef struct 
 {
@@ -334,18 +334,8 @@ typedef struct
     uint16_t wakeupIntervalPayload;
     uint16_t interval1Sec;
     uint8_t reserve[8];
-} ConfigApplicatif_t;
+} nonConfigApplicatif_t;
 
-typedef struct 
-{
-    ConfigMateriel_t materiel;
-    ConfigApplicatif_t applicatif;
-    uint16_t checksum;
-} ConfigGenerale_t;
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// redefinir toutes les structures dès que compile !
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // prefixer _no pour paramètres à éliminer (tranformer en dummy sur LoRa)
 typedef struct 
@@ -354,7 +344,7 @@ typedef struct
 // Forcement LoRa
 //  uint8_t MediaCOM;       // True
 //  uint8_t _noBlueTooth;  //False
-  uint8_t Rtc;        // True or False, autodetect?
+  uint8_t noRtc;        // True or False, autodetect?
   uint8_t KBD_Ana;    // True or False
   uint8_t Oled;       // True or False
   uint8_t SDHC;       // True or False
@@ -422,6 +412,91 @@ typedef struct     // regroupe tous les paramètres de EEPROM
   float   VSolScale;            //  
   float   VBatScale;
 } ConfigBalanceHW;
+
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// redefinir toutes les structures dès que compile pour mise en eprom !
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+// ConfigMateriel_t
+// ConfigBalanceHW
+typedef struct 
+{
+    uint16_t version;       // version matérielle : 3 = PCB2
+    uint8_t adresseRTC;     // DS3231_ADDRESS 0x68
+    uint8_t adresseOLED;    //
+    uint8_t adresseEEPROM;  // EEPROM_ADDRESS 0x57
+
+  uint8_t Num_Carte;  // Numéro de carte
+// Forcement LoRa
+//  uint8_t MediaCOM;       // True
+//  uint8_t _noBlueTooth;  //False
+  uint8_t Rtc;        // True or False, autodetect?
+  uint8_t KBD_Ana;    // True or False
+  uint8_t Oled;       // True or False OLED096 ou OLED130
+  uint8_t SDHC;       // True or False
+  uint8_t LiPo;       // True or False
+  uint8_t Solaire;    // True or False Aabandonné?
+  uint8_t Balance[4];   // True or False or N° Peson
+// HX711#0 parameters    
+  uint8_t HX711Clk_0;           
+  uint8_t HX711Dta_0;
+  float   HX711ZeroValue_0;
+  float   HX711Scaling_0;
+  float   HX711Cor_Temp_0;
+// HX711#1 parameters  
+  uint8_t HX711Clk_1;           
+  uint8_t HX711Dta_1;
+  float   HX711ZeroValue_1;
+  float   HX711Scaling_1;
+  float   HX711Cor_Temp_1;
+// HX711#2 parameters
+  uint8_t HX711Clk_2;           
+  uint8_t HX711Dta_2;
+  float   HX711ZeroValue_2;
+  float   HX711Scaling_2;
+  float   HX711Cor_Temp_2;
+// HX711#3 parameters
+  uint8_t HX711Clk_3;           
+  uint8_t HX711Dta_3;
+  float   HX711ZeroValue_3;
+  float   HX711Scaling_3;
+  float   HX711Cor_Temp_3;
+// Analog scaling  
+  float   LDRBrightnessScale;   // 
+  float   VSolScale;            //  
+  float   VBatScale;
+} ConfigMateriel_t;
+
+typedef struct 
+{
+    uint16_t version;  // version logicielle
+// paramètres cosmétiques    
+    uint16_t redLedDuration;      // RED_LED_DURATION 100
+    uint16_t greenLedDuration;    // GREEN_LED_DURATION 100
+    uint16_t blueLedDuration;     // BLUE_LED_DURATION 100   
+    uint16_t builtinLedDuration;  // BUILTIN_LED_DURATION 100  
+// paramètres Rucher
+  uint8_t Balance_ID;         // ID Rucher           xx  uint8_t
+  char    RucherName [20];    // Localisation Rucher (saisir direct ou liste + "autre") 
+// paramètres LoRa
+  uint8_t HWEUI [20];         // ID RN2483: "0004A30B00EEEE01"
+  uint8_t AppEUI [10];        // AppEUI: {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31, 0x00}
+  uint8_t AppKey [18];        // AppKEY: // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
+// {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00} 
+  uint8_t SpreadingFactor;    // 7, 9 et 12 echec freudeneck
+  uint8_t SendingPeriod;      // WAKEUP_INTERVAL_PAYLOAD 5
+  uint8_t OLEDRefreshPeriod;  // INTERVAL_1SEC 1000 
+} ConfigApplicatif_t;
+
+typedef struct 
+{
+    ConfigMateriel_t materiel;
+    ConfigApplicatif_t applicatif;
+    uint16_t checksum;
+} ConfigGenerale_t;
 
 
 

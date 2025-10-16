@@ -18,9 +18,8 @@
  */
 void debugSerialPrintMenuStruct(menuLevel_t* menu)
 {
-  debugSerial.println(currentMenuDepth);
-  sprintf(serialbuf,"Profondeur %d / title  %s / /* menuList %s /16 */ menuSize %d /selectedIndex %d",
-                      currentMenuDepth, menu->title, /*menu->menuList[selectedModeIndex],*/ menu->menuSize, menu->selectedIndex);
+  sprintf(serialbuf,"currentMenuDepth %d / title  %s / menuSize %d /selectedIndex %d",    // /* menuList %s /16 */=>  /*menu->menuList[selectedModeIndex],
+                      currentMenuDepth, menu->title, menu->menuSize, menu->selectedIndex);
   debugSerial.println(serialbuf); 
 }
 

@@ -35,16 +35,53 @@ void pushMenu(const char* title, const char** menuList, uint8_t menuSize, uint8_
 void popMenu(void);
 void processMenuSelection(uint8_t selectedIndex);
 
-void menu000_F6_GetDate(void);
 
-void menu000_F7_GetTime(void);
-void menu000_F7_GetTimeDone(void);
+// Appels du menu 0
+void m0_0E_PageInfos(void);
+void m0_1M_ConfigSysteme(void);
+void m0_2M_ConnexLoRa(void);
+void m0_3M_CalibTensions(void);
+void m0_4M_CalibBalances(void);
+void m0_5F_GetDate(void);
+void m0_6F_GetTime(void);
+void m0_6F_GetTimeDone(void);
+void m0_7F_GetHex(void);
+void m0_7F_GetHexDone(void);
 
-void menu000_F8_GetHex(void);
-void menu000_F8_GetHexDone(void);
+// Appels du menu 01
+void m01_0F_CalibVBat(void);
+void m01_1F_CalibVSol(void);
+void m01_2F_CalibVLum(void); 
+void m01_3F_Reserve(void);  
+void m01_4M_PopMenu(void);
 
+// Appels du menu 02
+void m02_0F_CalibVBat(void);
+void m02_1F_CalibVSol(void);
+void m02_2F_CalibVLum(void); 
+void m02_3F_Reserve(void);  
+void m02_4M_PopMenu(void);
 
+// Appels du menu 03
+void m03_0F_CalibVBat(void);
+void m03_1F_CalibVSol(void);
+void m03_2F_CalibVLum(void); 
+void m03_3F_Reserve(void);  
+void m03_4M_PopMenu(void);
 
+// Appels du menu 033
+void m033_0(void);
+void m033_1(void);
+void m033_2(void);
+void m033_3(void);
+void m033_4(void);
+
+// Appels du menu 04
+void m04_0F_CalibBal_1(void);
+void m04_1F_CalibBal_2(void);
+void m04_2F_CalibBal_3(void);
+void m04_3F_CalibBal_4(void);
+void m04_4M_PopMenu(void);
 
 
 // Fonctions de gestion des ecrans infos
