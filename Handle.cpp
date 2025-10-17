@@ -1,33 +1,37 @@
 #define __INIT_DONE
 #include "define.h"
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
 
-/* 
- *  Fonctions handleOperationMode() et handleProgrammingMode()
- *  executées dans loop()
- *  
- *  selon mode, 
- *  
- *  Traite en mode non bloquant
- *  
- *  La navigation dans les menus:
- *    Ouvre autre menu
- *    Lance une saisie
- *    Execute une fonction
- *    Affiche un écran
- *  
- *  Les saisie de Listes, numériques, Alphanumériques, chaines HEXA, date, time, email et IP
- */
+// ---------------------------------------------------------------------------*
+//  Fonctions handleOperationMode() et handleProgrammingMode()
+//  executées dans loop()
+//  
+//  selon mode, 
+//  
+//  Traite en mode non bloquant
+//  
+//  La navigation dans les menus:
+//    Ouvre autre menu
+//    Lance une saisie
+//    Execute une fonction
+//    Affiche un écran
+//  
+//  Les saisie de Listes, numériques, Alphanumériques, chaines HEXA, date, time, email et IP
+
 
 #define __SerialDebugPoc      // decommenter pour afficher messages debug
 
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // MODE EXPLOITATION
-// ---------------------------------------------------------------------------
-/**
- * @brief Gestion du mode exploitation
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gestion du mode exploitation
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void handleOperationMode(void) // Mode exploitation : que réveil payload
 { 
   if (switchToOperationMode)    // affiche qu'une fois
@@ -42,11 +46,11 @@ debugSerial.print("E");   // EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 #endif
 }
 
-/**
- * @brief affiche le type de traitement en cours de gestion par le handler
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief affiche le type de traitement en cours de gestion par le handler
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void GestionEnCours()
 { 
   return;
@@ -71,14 +75,13 @@ void GestionEnCours()
 }
 
 
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // MODE PROGRAMMATION
-// ---------------------------------------------------------------------------
-/**
- * @brief Gestion du mode programmation avec saisie non-bloquante
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gestion du mode programmation avec saisie non-bloquante
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
  // serial : PL (Liste) ou PN (Numerique) ou PA (Alphanumérique) ou PK (Pas de saisie, attente touche)
 void handleProgrammingMode(void) 
 {    // Mode programmation : réveil payload + 1 sec + interface utilisateur
@@ -105,9 +108,9 @@ infoScreenState_t processInfoScreen();
 #endif
 // Gestion normale des menus quand pas de saisie
 GestionEnCours();
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Vérifier si une sélection de liste est en cours 
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
   if (isListInputActive())
   {
     static uint8_t selectedModeIndex = 0; // Index du mode sélectionné
@@ -178,9 +181,9 @@ debugSerial.println(m0_Demarrage[selectedModeIndex]);
               return;
     }
   }
-// ------------------------------------------------    
+// ---------------------------------------------------------------------------*
 // Vérifier si un écran d'info est actif                >> doit retourner dans LISTE menu
-// ------------------------------------------------    
+// ---------------------------------------------------------------------------*
   else if (isInfoScreenActive())
   {
 GestionEnCours(); // affiche le type de traitement en cours de gestion par le handler
@@ -202,9 +205,9 @@ infoScreenRefreshTime = false;
         return;
     }
   }  
-// ------------------------------------------------    
+// ---------------------------------------------------------------------------*
 // Vérifier si une saisie numérique est en cours
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (isNumberInputActive())   // numberInputCtx.state == NUMBER_INPUT_ACTIVE
   {
     static char numberBuffer[11] = ""; // Buffer pour le nombre
@@ -247,9 +250,9 @@ debugSerial.println(Data_LoRa.RucherName);
 debugSerial.print("N");   // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 #endif
   }
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Vérifier si une saisie alphanumérique est en cours
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (isStringInputActive())
   {
     static char stringBuffer[21] = ""; // Buffer pour la chaîne
@@ -257,7 +260,7 @@ debugSerial.print("N");   // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
 GestionEnCours();   // affiche le type de traitement en cours de gestion par le handler
         
 #ifdef __SerialDebugPoc    
-debugSerial.print("A");   // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+debugSerial.print("A");   // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 #endif    
 
     stringInputState_t state = processStringInput();   // traite la touche lors de la saisie
@@ -295,9 +298,9 @@ debugSerial.print("Chaine validée : "); debugSerial.print(stringSaisie);debugSe
     }
 */
   }
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Vérifier si une saisie HEXA est en cours
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (isHexInputActive())
   {
     static char hexBuffer[41] = "0123456789ABCDEF0123456789ABCDEF01234567"; // Buffer pour l'hexa
@@ -343,9 +346,9 @@ debugSerial.println("Saisie hexadecimale annulee par timeout");
         return;
     }
   }
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Vérifier si une saisie d'heure est en cours
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (isTimeInputActive())
   {
 //    static char timeBuffer[9] = ""; // Buffer pour l'heure
@@ -376,9 +379,9 @@ debugSerial.println("Saisie heure annulee par timeout");
               return;
     }
   }
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Vérifier si une saisie de date est en cours
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (isDateInputActive())
   {
     static char dateBuffer[11] = ""; // Buffer pour la date
@@ -417,9 +420,9 @@ GestionEnCours();   // affiche le type de traitement en cours de gestion par le 
         return;
     }
   }
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Vérifier si une saisie Email est en cours
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (isEmailInputActive())
   {
     static char emailBuffer[41] = "user@example.com";
@@ -444,9 +447,9 @@ GestionEnCours();   // affiche le type de traitement en cours de gestion par le 
         return;
     }
   }
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Vérifier si une saisie IP est en cours
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (isIPInputActive())
   {
     static char ipBuffer[16] = "192.168.001.001";
@@ -471,9 +474,9 @@ GestionEnCours();   // affiche le type de traitement en cours de gestion par le 
         return;
     }
   }
-// ------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Gestion normale des menus quand pas de saisie, dans quels cas????, pas prévu hors saisies par fonctions
-// ------------------------------------------------    
+// ---------------------------------------------------------------------------*
   else
   {
 GestionEnCours();     // affiche le type de traitement en cours de gestion par le handler
@@ -543,11 +546,11 @@ debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
 
 // repositionner ?????
 
-/**
- * @brief Traite l'écran d'informations (à appeler dans loop)
- * @param void
- * @return État actuel de l'écran
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite l'écran d'informations (à appeler dans loop)
+// @param void
+// @return État actuel de l'écran
+// ---------------------------------------------------------------------------*
 infoScreenState_t processInfoScreen(void)
 {
   if (infoScreenState != INFO_SCREEN_ACTIVE)
@@ -576,11 +579,11 @@ infoScreenState_t processInfoScreen(void)
   return infoScreenState;
 }
 
-/**
- * @brief Vérifie si un écran d'info est actif
- * @param void
- * @return true si écran actif
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si un écran d'info est actif
+// @param void
+// @return true si écran actif
+// ---------------------------------------------------------------------------*
 bool isInfoScreenActive(void)
 {
   return (infoScreenState == INFO_SCREEN_ACTIVE);

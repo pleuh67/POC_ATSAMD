@@ -1,3 +1,12 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
+
+// ---------------------------------------------------------------------------*
+
+
 // ===== ÉNUMÉRATIONS =====
 typedef enum 
 {
@@ -10,9 +19,9 @@ typedef enum
     KEY_INVALID = 255    // Valeur analogique invalide/hors plages
 } key_code_t;
 
-/**
- * États possibles de la sélection dans une liste
- */
+// ---------------------------------------------------------------------------*
+// États possibles de la sélection dans une liste
+// ---------------------------------------------------------------------------*
 typedef enum 
 {
     LIST_INPUT_IDLE,        // 0 : Pas de sélection en cours
@@ -21,9 +30,9 @@ typedef enum
     LIST_INPUT_CANCELLED    // 3 : Sélection annulée
 } listInputState_t;
 
-/**
- * États possibles de la saisie numérique
- */
+// ---------------------------------------------------------------------------*
+// États possibles de la saisie numérique
+// ---------------------------------------------------------------------------*
 typedef enum 
 {
   NUMBER_INPUT_IDLE,      // 0 : Pas de saisie en cours
@@ -33,9 +42,9 @@ typedef enum
 } numberInputState_t;
 
 
-/**
- * États possibles de la saisie alphanumérique
- */
+// ---------------------------------------------------------------------------*
+// États possibles de la saisie alphanumérique
+// ---------------------------------------------------------------------------*
 typedef enum 
 {
     STRING_INPUT_IDLE,      // 0 : Pas de saisie en cours
@@ -44,9 +53,9 @@ typedef enum
     STRING_INPUT_CANCELLED  // 3 : Saisie annulée
 } stringInputState_t;
 
-/**
- * États possibles de la saisie hexadécimale
- */
+// ---------------------------------------------------------------------------*
+// États possibles de la saisie hexadécimale
+// ---------------------------------------------------------------------------*
 typedef enum 
 {
   HEX_INPUT_IDLE,         // Pas de saisie en cours
@@ -55,9 +64,9 @@ typedef enum
   HEX_INPUT_CANCELLED     // Saisie annulée
 } hexInputState_t;
 
-/**
- * États possibles de la saisie d'heure
- */
+// ---------------------------------------------------------------------------*
+// États possibles de la saisie d'heure
+// ---------------------------------------------------------------------------*
 typedef enum 
 {
   TIME_INPUT_IDLE,        // Pas de saisie en cours
@@ -66,9 +75,9 @@ typedef enum
   TIME_INPUT_CANCELLED    // Saisie annulée
 } timeInputState_t;
 
-/**
- * États possibles de la saisie de date
- */
+// ---------------------------------------------------------------------------*
+// États possibles de la saisie de date
+// ---------------------------------------------------------------------------*
 typedef enum 
 {
   DATE_INPUT_IDLE,        // Pas de saisie en cours
@@ -77,9 +86,9 @@ typedef enum
   DATE_INPUT_CANCELLED    // Saisie annulée
 } dateInputState_t;
 
-/**
- * États possibles de la saisie email
- */
+// ---------------------------------------------------------------------------*
+// États possibles de la saisie email
+// ---------------------------------------------------------------------------*
 typedef enum 
 {
   EMAIL_INPUT_IDLE,         // Pas de saisie en cours
@@ -88,9 +97,9 @@ typedef enum
   EMAIL_INPUT_CANCELLED     // Saisie annulée
 } emailInputState_t;
 
-/**
- * États possibles de la saisie IP
- */
+// ---------------------------------------------------------------------------*
+// États possibles de la saisie IP
+// ---------------------------------------------------------------------------*
 typedef enum 
 {
   IP_INPUT_IDLE,         // Pas de saisie en cours
@@ -100,9 +109,9 @@ typedef enum
 } ipInputState_t;
 
 
-/**
- * États possibles de l'affichage d'écran d'info
- */
+// ---------------------------------------------------------------------------*
+// États possibles de l'affichage d'écran d'info
+// ---------------------------------------------------------------------------*
  typedef enum 
 {
   INFO_SCREEN_IDLE,       // Pas d'écran actif
@@ -123,9 +132,9 @@ typedef struct {
 } clavier_context_t;
 
 
-/**
- * Contexte de sélection dans une liste
- */
+// ---------------------------------------------------------------------------*
+// Contexte de sélection dans une liste
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
   listInputState_t state;     // État actuel
@@ -145,9 +154,9 @@ typedef struct
   const char** itemList;      // Pointeur vers la liste des éléments
 } listInputContext_t;
 
-/**
- * Structure pour gérer la pile de menus
- */
+// ---------------------------------------------------------------------------*
+// Structure pour gérer la pile de menus
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
   const char** menuList;    // Pointeur vers le menu
@@ -157,9 +166,9 @@ typedef struct
 } menuLevel_t;
 
 
-/**
- * Contexte de saisie numérique
- */
+// ---------------------------------------------------------------------------*
+// Contexte de saisie numérique
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
   numberInputState_t state;   // État actuel
@@ -175,9 +184,9 @@ typedef struct
 } numberInputContext_t;
 
 
-/**
- * Contexte de saisie alphanumérique
- */
+// ---------------------------------------------------------------------------*
+// Contexte de saisie alphanumérique
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
     stringInputState_t state;   // État actuel
@@ -191,9 +200,9 @@ typedef struct
     char title[21];             // Titre de la saisie
 } stringInputContext_t;
 
-/**
- * Contexte de saisie hexadécimale
- */
+// ---------------------------------------------------------------------------*
+// Contexte de saisie hexadécimale
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
   hexInputState_t state;      // État actuel
@@ -217,9 +226,9 @@ typedef struct
   uint8_t lastTimeoutValue;   // Dernière valeur de timeout affichée
 } hexInputContext_t;
 
-/**
- * Contexte de saisie d'heure
- */
+// ---------------------------------------------------------------------------*
+// Contexte de saisie d'heure
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
   timeInputState_t state;     // État actuel
@@ -238,9 +247,9 @@ typedef struct
   bool firstDisplay;          // Premier affichage
 } timeInputContext_t;
 
-/**
- * Contexte de saisie de date
- */
+// ---------------------------------------------------------------------------*
+// Contexte de saisie de date
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
   dateInputState_t state;     // État actuel
@@ -259,9 +268,9 @@ typedef struct
   bool firstDisplay;          // Premier affichage
 } dateInputContext_t;
 
-/**
- * Contexte de saisie email
- */
+// ---------------------------------------------------------------------------*
+// Contexte de saisie email
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
   emailInputState_t state;    // État actuel
@@ -289,9 +298,9 @@ typedef struct
   uint8_t lastTimeoutValue;   // Dernière valeur de timeout affichée
 } emailInputContext_t;
 
-/**
- * Contexte de saisie IP
- */
+// ---------------------------------------------------------------------------*
+// Contexte de saisie IP
+// ---------------------------------------------------------------------------*
 typedef struct 
 {
   ipInputState_t state;       // État actuel

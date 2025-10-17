@@ -1,15 +1,22 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
 
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
+
 
 //#define __debugSerial_NonBlockingLED  
 
 
-/**
- * @brief Initialise les LEDs RGB et builtin
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Initialise les LEDs RGB et builtin
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void initLEDs(void) 
 {
   pinMode(LED_RED, OUTPUT);         // vert
@@ -30,30 +37,31 @@ void initLEDs(void)
 debugSerial.println("LEDs initialisées");
 }
 
-/**
- * @brief Allume la LED rouge
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Allume la LED rouge
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void turnOnRedLED(void) 
 {
   digitalWrite(LED_RED, LED_ON);
 }
 
-/**
- * @brief Éteint la LED rouge
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Éteint la LED rouge
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void turnOffRedLED(void) 
 {
   digitalWrite(LED_RED, LED_OFF);
 }
-/**
- * @brief Fait clignoter la LED Rouge pendant 300 ms
- * @param Aucun
- * @return void
- */
+
+// ---------------------------------------------------------------------------*
+// @brief Fait clignoter la LED Rouge pendant 300 ms
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void blinkRedLED(void) 
 {
   turnOnRedLED();
@@ -61,61 +69,63 @@ void blinkRedLED(void)
   turnOffRedLED();
 }
 
-/**
- * @brief Allume la LED bleue
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Allume la LED bleue
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void turnOnBlueLED(void) 
 {
   digitalWrite(LED_BLUE, LED_ON);
 }
-/**
- * @brief Éteint la LED bleue
- * @param Aucun
- * @return void
- */
+
+// ---------------------------------------------------------------------------*
+// @brief Éteint la LED bleue
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void turnOffBlueLED(void) 
 {
   digitalWrite(LED_BLUE, LED_OFF);
 }
 
-/**
- * @brief Fait clignoter la LED bleue pendant 300 ms
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Fait clignoter la LED bleue pendant 300 ms
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void blinkBlueLED(void) 
 {
   turnOnBlueLED();
   delay(300);
   turnOffBlueLED();
 }
-/**
- * @brief Allume la LED verte
- * @param Aucun
- * @return void
- */
+
+// ---------------------------------------------------------------------------*
+// @brief Allume la LED verte
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void turnOnGreenLED(void) 
 {
   digitalWrite(LED_GREEN, LED_ON);
 }
 
-/**
- * @brief Éteint la LED verte
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Éteint la LED verte
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void turnOffGreenLED(void) 
 {
   digitalWrite(LED_GREEN, LED_OFF);
 }
 
-/**
- * @brief Fait clignoter la LED verte pendant 300 ms
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Fait clignoter la LED verte pendant 300 ms
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void blinkGreenLED(void) 
 {
   turnOnGreenLED();
@@ -123,31 +133,31 @@ void blinkGreenLED(void)
   turnOffGreenLED();
 }
 
-/**
- * @brief Allume la LED builtin
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Allume la LED builtin
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void turnOnBuiltinLED(void) 
 {
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
-/**
- * @brief Éteint la LED builtin
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Éteint la LED builtin
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void turnOffBuiltinLED(void) 
 {
   digitalWrite(LED_BUILTIN, LOW);
 }
 
-/**
- * @brief Fait clignoter la LED builtin pendant BUILTIN_LED_DURATION ms
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Fait clignoter la LED builtin pendant BUILTIN_LED_DURATION ms
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void blinkBuiltinLED(void) 
 {
   turnOnBuiltinLED();
@@ -158,11 +168,11 @@ void blinkBuiltinLED(void)
 
 // ***    gestion LEDs Non Bloquant ***
 
-/**
- * @brief Démarre le cycle LED rouge (non-bloquant)
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre le cycle LED rouge (non-bloquant)
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void LEDStartRed(void)
 {
     redLedActive = true;
@@ -176,11 +186,11 @@ void LEDStartRed(void)
     
 }
 
-/**
- * @brief Démarre le cycle LED rouge (non-bloquant)
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre le cycle LED rouge (non-bloquant)
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void LEDStartGreen(void)
 {
     greenLedActive = true;
@@ -193,11 +203,11 @@ void LEDStartGreen(void)
 #endif    
 }
 
-/**
- * @brief Démarre le cycle LED rouge (non-bloquant)
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre le cycle LED rouge (non-bloquant)
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void LEDStartBlue(void)
 {
     blueLedActive = true;
@@ -210,11 +220,11 @@ void LEDStartBlue(void)
 #endif    
 }
 
-/**
- * @brief Démarre le cycle LED builtin (non-bloquant)
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre le cycle LED builtin (non-bloquant)
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void demarrerLEDBuiltin(void)
 {
     builtinLedActive = true;
@@ -234,11 +244,11 @@ void demarrerLEDBuiltin(void)
 }
 
 
-/**
- * @brief Gère les LEDs de manière non-bloquante
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère les LEDs de manière non-bloquante
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void gererLEDsNonBloquant(void)
 {
     unsigned long currentTime = millis();

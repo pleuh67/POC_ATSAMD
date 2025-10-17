@@ -1,3 +1,17 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
+//     __      __        _    
+//     \ \    / /       | |   
+//      \ \  / /_ _ _ __| |__ 
+//       \ \/ / _` | '__| '_ \
+//        \  / (_| | |_ | | | |
+//         \/ \__,_|_(_)|_| |_|
+//                            
+//
+// ---------------------------------------------------------------------------*
 #include ".\Menu.h"
 #ifdef __MAIN__
 
@@ -30,9 +44,6 @@ DateTime nextPayload;
 // variables clavier
 clavier_context_t clavierContext = {KEY_NONE, KEY_NONE, 0, 0, false};
 key_code_t touche; 
-
-
-
 
 // ===== VARIABLES GLOBALES MACHINE A ETAT MENUS=====
 menuLevel_t menuStack[MAX_MENU_DEPTH];

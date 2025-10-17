@@ -1,25 +1,32 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
+
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
 
-/*
- * Navigation entre le 5 niveaux de menus : pushMenu() et popMenu()
- */
+
+// Navigation entre le 5 niveaux de menus : pushMenu() et popMenu()
+
 
 
 
 // PROGRAMMATION MODE
-// *************************************************************************************
+// ---------------------------------------------------------------------------*
 //  MENUS
-// *************************************************************************************
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE GESTION DES MENUS =====
-/**
- * @brief Empile un nouveau menu dans la pile
- * @param title Titre du menu
- * @param menuList Pointeur vers la liste du menu
- * @param menuSize Nombre d'éléments
- * @param initialIndex Index initial sélectionné
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Empile un nouveau menu dans la pile
+// @param title Titre du menu
+// @param menuList Pointeur vers la liste du menu
+// @param menuSize Nombre d'éléments
+// @param initialIndex Index initial sélectionné
+// @return void
+// ---------------------------------------------------------------------------*
 // exemple appel: pushMenu("Menu Niv 3:", menu033Reserve040, 5, 0);
 void pushMenu(const char* title, const char** menuList, uint8_t menuSize, uint8_t initialIndex)
 {
@@ -44,11 +51,11 @@ debugSerial.println(serialbuf);
     OLEDDisplayMessageL8(">5 SOUS MENUS !!!", false, false);  
 }
 
-/**
- * @brief Dépile le menu actuel et revient au précédent
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Dépile le menu actuel et revient au précédent
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void popMenu(void)
 {
 sprintf(serialbuf, "popMenu()"); 
@@ -91,11 +98,11 @@ debugSerial.println(serialbuf);
 
 
 
-/**
- * @brief Traite la sélection d'un élément de menu
- * @param selectedIndex Index de l'élément sélectionné
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la sélection d'un élément de menu
+// @param selectedIndex Index de l'élément sélectionné
+// @return void
+// ---------------------------------------------------------------------------*
 void processMenuSelection(uint8_t selectedIndex)
 {
   if (currentMenuDepth == 0)
@@ -113,7 +120,7 @@ debugSerialPrintMenuStruct(currentMenu);
 debugSerial.print("processMenuSelection ");
 debugSerial.println(selectedIndex);  
 // Traitement selon le menu actuel
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
   if (currentMenu->menuList == m0_Demarrage)
   {
 // Menu principal
@@ -167,7 +174,7 @@ debugSerial.println("CONFIG. SYSTEME - Ecran INFOS demandé");
       }  
     }
   }
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (currentMenu->menuList == m01_ConfigSysteme)
   {
     switch (selectedIndex)
@@ -213,7 +220,7 @@ debugSerial.println("m01_6 demandé");
       }  
     }
   }
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (currentMenu->menuList == m02_ConfigLoRa)
   {
     switch (selectedIndex)
@@ -250,7 +257,7 @@ debugSerial.println("m02_4 demandé");
       }  
     }
   }
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (currentMenu->menuList == m03_CalibTensions)
   {
     switch (selectedIndex)
@@ -290,7 +297,7 @@ debugSerial.println("m02_4 demandé");
         break;
     }
   }  
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (currentMenu->menuList == m033_Reserve040)
   {
     switch (selectedIndex)
@@ -328,7 +335,7 @@ debugSerial.println("m02_4 demandé");
         break;
     }
   }
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (currentMenu->menuList == m04_CalibBalances)
   {
     switch (selectedIndex)
@@ -364,7 +371,7 @@ debugSerial.println("m04_4 demandé");
       }  
     }
   }  
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (currentMenu->menuList == m04x_CalibBal)
   {
     switch (selectedIndex)
@@ -392,10 +399,10 @@ debugSerial.println("m04_4 demandé");
         break;
     }
   }
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 /*
 // A decliner selon les menus
-// ---------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
   else if (currentMenu->menuList == AutreMenu)
   {
     switch (selectedIndex)

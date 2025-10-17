@@ -1,12 +1,25 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
+//      ___  _  _    _____ ____ ___                   
+//     |__ \| || |  / ____|___ \__ \                  
+//        ) | || |_| |      __) | ) |  ___ _ __  _ __ 
+//       / /|__   _| |     |__ < / /  / __| '_ \| '_ \
+//      / /_   | | | |____ ___) / /_ | (__| |_) | |_) |
+//     |____|  |_|  \_____|____/____(_)___| .__/| .__/
+//                                        | |   | |   
+//                                        |_|   |_|    
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
 
-
-/**
- * @brief Définit la configuration par défaut
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Définit la configuration par défaut
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void setDefaultConfig(void) 
 {
     config.materiel.version = CONFIG_VERSION;
@@ -25,33 +38,33 @@ void setDefaultConfig(void)
 }
 
 
-/**
- * @brief Initialise la configuration par défaut
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Initialise la configuration par défaut
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void initConfig(void) 
 {
     loadConfigFromEEPROM();
     debugSerial.println("Configuration chargée");
 }
 
-/**
- * @brief Charge la configuration depuis l'EEPROM
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Charge la configuration depuis l'EEPROM
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void loadConfigFromEEPROM(void) 
 {
     // Simulation de lecture EEPROM - à implémenter avec bibliothèque I2C EEPROM
     setDefaultConfig();
 }
 
-/**
- * @brief Sauvegarde la configuration dans l'EEPROM
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Sauvegarde la configuration dans l'EEPROM
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void saveConfigToEEPROM(void) 
 {
     config.checksum = calculateChecksum(&config);
@@ -59,11 +72,11 @@ void saveConfigToEEPROM(void)
     debugSerial.println("Configuration sauvegardée");
 }
 
-/**
- * @brief Calcule le checksum de la configuration
- * @param cfg Pointeur vers la configuration
- * @return uint16_t Checksum calculé
- */
+// ---------------------------------------------------------------------------*
+// @brief Calcule le checksum de la configuration
+// @param cfg Pointeur vers la configuration
+// @return uint16_t Checksum calculé
+// ---------------------------------------------------------------------------*
 uint16_t calculateChecksum(ConfigGenerale_t* cfg) 
 {
     uint16_t sum = 0;

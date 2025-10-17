@@ -1,13 +1,19 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
 
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
 
-/**
- * @brief Traite le clavier en continu (à appeler dans loop)
- * @param Aucun
- * @return void
- * @description Gère l'anti-rebond et la détection des touches de manière non-bloquante
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite le clavier en continu (à appeler dans loop)
+// @param Aucun
+// @return void
+// @description Gère l'anti-rebond et la détection des touches de manière non-bloquante
+// ---------------------------------------------------------------------------*
 void processContinuousKeyboard(void)
 {
     unsigned long currentTime = millis();
@@ -63,11 +69,11 @@ void processContinuousKeyboard(void)
     }
 }
 
-/**
- * @brief Lecture instantanée d'une touche du clavier analogique
- * @param Aucun
- * @return key_code_t Code de la touche ou état d'erreur
- */
+// ---------------------------------------------------------------------------*
+// @brief Lecture instantanée d'une touche du clavier analogique
+// @param Aucun
+// @return key_code_t Code de la touche ou état d'erreur
+// ---------------------------------------------------------------------------*
 key_code_t readKeyOnce(void) 
 { static const int levels[NB_KEYS] = {10, 149, 332, 501, 735};
   static const key_code_t keycodes[NB_KEYS] = {KEY_1, KEY_2, KEY_3, KEY_4, KEY_5};
@@ -82,11 +88,11 @@ key_code_t readKeyOnce(void)
   return KEY_INVALID;                                     // Val non identifiable
 }
 
-/**
- * @brief Lecture avec anti-rebond du clavier analogique
- * @param Aucun
- * @return key_code_t Code de touche stable après confirmation
- */
+// ---------------------------------------------------------------------------*
+// @brief Lecture avec anti-rebond du clavier analogique
+// @param Aucun
+// @return key_code_t Code de touche stable après confirmation
+// ---------------------------------------------------------------------------*
 /* 
 key_code_t readKey(void) 
 { key_code_t key, key2;
@@ -112,11 +118,11 @@ key_code_t readKey(void)
 }
 */
 
-/**
- * @brief Convertit un code de touche en chaîne de caractères
- * @param key Code de la touche
- * @return const char* Nom de la touche
- */
+// ---------------------------------------------------------------------------*
+// @brief Convertit un code de touche en chaîne de caractères
+// @param key Code de la touche
+// @return const char* Nom de la touche
+// ---------------------------------------------------------------------------*
 const char* keyToString(key_code_t key) 
 { switch (key) 
   {
@@ -132,12 +138,12 @@ const char* keyToString(key_code_t key)
 }
 
 
-/**
- * @brief Version non-bloquante de readKey() - Retourne immédiatement
- * @param Aucun
- * @return key_code_t Touche disponible ou KEY_NONE si aucune touche
- * @description Récupère une touche stabilisée sans attendre
- */
+// ---------------------------------------------------------------------------*
+// @brief Version non-bloquante de readKey() - Retourne immédiatement
+// @param Aucun
+// @return key_code_t Touche disponible ou KEY_NONE si aucune touche
+// @description Récupère une touche stabilisée sans attendre
+// ---------------------------------------------------------------------------*
 key_code_t readKeyNonBlocking(void)
 {
     if (clavierContext.toucheDisponible)

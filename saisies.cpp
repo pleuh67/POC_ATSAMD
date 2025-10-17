@@ -1,4 +1,10 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
 
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
 
@@ -7,12 +13,12 @@ uint32_t inputDecimal(const char* variable, uint32_t valeurInitiale);
 
 
 
-/**
- * @brief Interface de saisie d'une valeur hexadécimale 64 bits
- * @param variable Nom de la variable (affichage)
- * @param valeurInitiale Valeur initiale à afficher
- * @return uint64_t Valeur hexadécimale saisie
- */
+// ---------------------------------------------------------------------------*
+// @brief Interface de saisie d'une valeur hexadécimale 64 bits
+// @param variable Nom de la variable (affichage)
+// @param valeurInitiale Valeur initiale à afficher
+// @return uint64_t Valeur hexadécimale saisie
+// ---------------------------------------------------------------------------*
 uint64_t inputHex(const char* variable, uint64_t valeurInitiale) 
 {
     char digits[17];

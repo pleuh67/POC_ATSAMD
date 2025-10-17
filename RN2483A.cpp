@@ -1,3 +1,12 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
+
+// ---------------------------------------------------------------------------*
+
+
 //       1         2         3         4         5         6         7        7  
 //34567890123456789012345678901234567890123456789012345678901234567890123456789
 // IMPRESSION 1 page pour test
@@ -15,7 +24,7 @@
 //
 // RSSI entre 0 et -110 SF7, en dessous limite spread factor 12
 //
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // Datas PROTO 1 envoyées le: 10/05/2020 10:41:03
 //
 //  Source:   devEUI : 0004A30B0024BF45              (=> carte 2 = ID Rucher)
@@ -38,7 +47,7 @@
 //
 // Gateway: 10
 // Lat/Lon: 48.57322,7.655769 
-// ---------------------------------------------------------------------------//
+// ---------------------------------------------------------------------------*
 
 
 // RN 2483 freq par défaut 868.1 868.3 et 868.5 data rate 0 à 5; 30% duty cycle
@@ -48,11 +57,11 @@
 #define __INIT_DONE
 #include "define.h"
 
-/**
- * Vide complètement le buffer série du modem
- * Paramètres : Aucun
- * Retour : void (aucun retour)
- */
+// ---------------------------------------------------------------------------*
+// Vide complètement le buffer série du modem
+// Paramètres : Aucun
+// Retour : void (aucun retour)
+// ---------------------------------------------------------------------------*
 void clearLoRaBuffer()
 {
   while (loraSerial.available())
@@ -62,12 +71,12 @@ void clearLoRaBuffer()
   delay(10);  // Petite pause pour être sûr
 }
 
-/**
- * Lit la réponse du modem avec timeout
- * Paramètres :
- *   - timeoutMs (int) : Timeout en millisecondes
- * Retour : String - Réponse complète du modem
- */
+// ---------------------------------------------------------------------------*
+// Lit la réponse du modem avec timeout
+// Paramètres :
+//   - timeoutMs (int) : Timeout en millisecondes
+// Retour : String - Réponse complète du modem
+// ---------------------------------------------------------------------------*
 String readLoRaResponse(int timeoutMs = 1000)
 {
   String response = "";
@@ -91,12 +100,12 @@ String readLoRaResponse(int timeoutMs = 1000)
   return response;
 }
 
-/**
- * @brief Lit les infos du modem
- * @param Aucun
- *   - timeoutMs (int) : Timeout en millisecondes
- * @return String - Réponse complète du modem
- */
+// ---------------------------------------------------------------------------*
+// @brief Lit les infos du modem
+// @param Aucun
+//   - timeoutMs (int) : Timeout en millisecondes
+// @return String - Réponse complète du modem
+// ---------------------------------------------------------------------------*
 uint8_t RN2483Version(void)   
 { uint8_t len;
 
@@ -292,9 +301,9 @@ debugSerial.print("(fin buildLoraPayload) hexPayload: "); debugSerial.println(he
 }
 
 
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // envoi toutes les IRQ2
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 void sendLoRaPayload(uint8_t *Datas,uint8_t len)
 { 
 debugSerialPrintLoraPayload(Datas,len);
@@ -563,7 +572,7 @@ void Reset_LoRa(void)  //Hardreset the RN module
 
 bool LoRa_sleeps = false;
 
-// ****************************************************************************
+// ---------------------------------------------------------------------------*
 // Sleep commands
 // ---------------------------------------------------------------------------*
 //                               

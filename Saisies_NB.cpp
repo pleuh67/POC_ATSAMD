@@ -1,19 +1,27 @@
+
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
+
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
 
-/*
- * initStartupList() : Menu de démarrage
- * 
- * startListInputWithTimeout()
- * startNumberInput()
- * startStringInput()
- * startHexInput()
- * startTimeInput()
- * startDateInput()
- * startIPInput()
- * startEmailInput()
- * 
- */
+// ---------------------------------------------------------------------------*
+// initStartupList() : Menu de démarrage
+// 
+// startListInputWithTimeout()
+// startNumberInput()
+// startStringInput()
+// startHexInput()
+// startTimeInput()
+// startDateInput()
+// startIPInput()
+// startEmailInput()
+// 
+// ---------------------------------------------------------------------------*
 
 
 
@@ -41,14 +49,14 @@
 
 
 
-// -------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SÉLECTION DANS UNE LISTE =====
-// -------------------------------------------------------------------------------------
-/**
- * @brief Initialise l'affichage de la liste au démarrage
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Initialise l'affichage de la liste au démarrage
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
+
 void initStartupList(void)
 {
   // Activer la liste menu000Demarrage au démarrage
@@ -70,24 +78,19 @@ void initStartupList(void)
 // debugSerialPrintMenuStruct(currentMenu);
 //      menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
 //      startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex);
-
-  
 }
 
-
-
-// -------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE DANS LISTE =====
-// -------------------------------------------------------------------------------------
-/**
- * @brief Démarre la sélection dans une liste de valeurs avec timeout personnalisé
- * @param title Titre de la sélection à afficher
- * @param itemList Tableau de pointeurs vers les chaînes de caractères
- * @param numItems Nombre d'éléments dans la liste
- * @param initialIndex Index initial sélectionné
- * @param timeoutMs Timeout en millisecondes (0 = pas de timeout)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre la sélection dans une liste de valeurs avec timeout personnalisé
+// @param title Titre de la sélection à afficher
+// @param itemList Tableau de pointeurs vers les chaînes de caractères
+// @param numItems Nombre d'éléments dans la liste
+// @param initialIndex Index initial sélectionné
+// @param timeoutMs Timeout en millisecondes (0 = pas de timeout)
+// @return void
+// ---------------------------------------------------------------------------*
 void startListInputWithTimeout(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex, unsigned long timeoutMs)
 {
 
@@ -151,11 +154,11 @@ void startListInputWithTimeout(const char* title, const char** itemList, uint8_t
 }
 
 
-/**
- * @brief Traite la sélection dans la liste (à appeler dans loop)
- * @param void
- * @return État actuel de la sélection
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la sélection dans la liste (à appeler dans loop)
+// @param void
+// @return État actuel de la sélection
+// ---------------------------------------------------------------------------*
 listInputState_t processListInput(void)
 {
   if (listInputCtx.state != LIST_INPUT_ACTIVE)
@@ -265,11 +268,11 @@ debugSerial.println("Down de processListInput");
   return listInputCtx.state;
 }
 
-/**
- * @brief Finalise la sélection et récupère l'index choisi
- * @param void
- * @return Index de l'élément sélectionné
- */
+// ---------------------------------------------------------------------------*
+// @brief Finalise la sélection et récupère l'index choisi
+// @param void
+// @return Index de l'élément sélectionné
+// ---------------------------------------------------------------------------*
 uint8_t finalizeListInput(void)
 {
   uint8_t selectedIndex = 0;
@@ -291,11 +294,11 @@ uint8_t finalizeListInput(void)
   return selectedIndex;
 }
 
-/**
- * @brief Annule la sélection dans la liste
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Annule la sélection dans la liste
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void cancelListInput(void)
 {
   listInputCtx.state = LIST_INPUT_CANCELLED;
@@ -306,21 +309,21 @@ void cancelListInput(void)
   listInputCtx.state = LIST_INPUT_IDLE;
 }
 
-/**
- * @brief Vérifie si une sélection dans une liste est en cours
- * @param void
- * @return true si sélection active
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une sélection dans une liste est en cours
+// @param void
+// @return true si sélection active
+// ---------------------------------------------------------------------------*
 bool isListInputActive(void)
 {
   return (listInputCtx.state == LIST_INPUT_ACTIVE);
 }
 
-/**
- * @brief Rafraîchit l'affichage de la liste avec curseur et défilement
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage de la liste avec curseur et défilement
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void refreshListDisplay(void)
 { char timeoutMsg[21];
   bool scrollChanged = (listInputCtx.scrollOffset != listInputCtx.lastScrollOffset);
@@ -459,11 +462,11 @@ void refreshListDisplay(void)
   listInputCtx.lastCursorBlink = listInputCtx.cursorBlink;
 }
 
-/**
- * @brief Gère le clignotement du curseur pour la sélection de liste
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour la sélection de liste
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateListInputCursorBlink(void)
 {
   if (millis() - listInputCtx.lastBlink > 500) // Clignotement toutes les 500ms
@@ -490,14 +493,14 @@ void updateListInputCursorBlink(void)
 // refreshNumberDisplay(affichage) & processNumberInput(traite touche et mets touche = KEY_NONE; + affichage)
 
 
-/**
- * @brief Démarre la saisie numérique non-bloquante, initialise MAE
- * @param title Titre à afficher
- * @param initialNumber Nombre initial
- * @param maxLength Longueur maximum (max 10)
- * @param allowNegative Autoriser les nombres négatifs
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre la saisie numérique non-bloquante, initialise MAE
+// @param title Titre à afficher
+// @param initialNumber Nombre initial
+// @param maxLength Longueur maximum (max 10)
+// @param allowNegative Autoriser les nombres négatifs
+// @return void
+// ---------------------------------------------------------------------------*
 void startNumberInput(const char* title, const char* initialNumber, uint8_t maxLength, bool allowNegative)
 {
   if (numberInputCtx.state != NUMBER_INPUT_IDLE)
@@ -548,14 +551,14 @@ void startNumberInput(const char* title, const char* initialNumber, uint8_t maxL
 }
 
 
-/**
- * @brief Obtient le caractère numérique suivant/précédent
- * @param current Caractère actuel
- * @param delta Direction (+1 ou -1)
- * @param allowNegative Autoriser le signe moins
- * @param position Position du caractère (0 = premier caractère)
- * @return Nouveau caractère numérique
- */
+// ---------------------------------------------------------------------------*
+// @brief Obtient le caractère numérique suivant/précédent
+// @param current Caractère actuel
+// @param delta Direction (+1 ou -1)
+// @param allowNegative Autoriser le signe moins
+// @param position Position du caractère (0 = premier caractère)
+// @return Nouveau caractère numérique
+// ---------------------------------------------------------------------------*
 char getNextNumericChar(char current, int delta, bool allowNegative, uint8_t position)
 {
   // Pour la première position, inclure le signe moins si autorisé
@@ -612,11 +615,11 @@ char getNextNumericChar(char current, int delta, bool allowNegative, uint8_t pos
   }
 }
 
-/**
- * @brief Valide qu'une chaîne représente un nombre valide
- * @param number Chaîne à valider
- * @return true si nombre valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Valide qu'une chaîne représente un nombre valide
+// @param number Chaîne à valider
+// @return true si nombre valide
+// ---------------------------------------------------------------------------*
 bool isValidNumber(const char* number)
 {
   if (!number || strlen(number) == 0) return false;
@@ -649,11 +652,11 @@ bool isValidNumber(const char* number)
 }
 
 
-/**
- * @brief Traite la saisie numérique (à appeler dans loop)
- * @param void
- * @return État actuel de la saisie
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la saisie numérique (à appeler dans loop)
+// @param void
+// @return État actuel de la saisie
+// ---------------------------------------------------------------------------*
 numberInputState_t processNumberInput(void)
 {
   if (numberInputCtx.state != NUMBER_INPUT_ACTIVE)
@@ -735,11 +738,11 @@ debugSerial.println(serialbuf);
   return numberInputCtx.state;
 }
 
-/**
- * @brief Finalise la saisie et récupère le nombre
- * @param outputNumber Buffer pour stocker le nombre final
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Finalise la saisie et récupère le nombre
+// @param outputNumber Buffer pour stocker le nombre final
+// @return void
+// ---------------------------------------------------------------------------*
 void finalizeNumberInput(char* outputNumber)
 {
   if (numberInputCtx.state == NUMBER_INPUT_COMPLETED)
@@ -777,11 +780,11 @@ void finalizeNumberInput(char* outputNumber)
   }
 }
 
-/**
- * @brief Annule la saisie numérique
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Annule la saisie numérique
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void cancelNumberInput(void)
 {
   numberInputCtx.state = NUMBER_INPUT_CANCELLED;
@@ -792,21 +795,21 @@ void cancelNumberInput(void)
   numberInputCtx.state = NUMBER_INPUT_IDLE;
 }
 
-/**
- * @brief Vérifie si une saisie numérique est en cours
- * @param void
- * @return true si saisie active
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une saisie numérique est en cours
+// @param void
+// @return true si saisie active
+// ---------------------------------------------------------------------------*
 bool isNumberInputActive(void)
 {
   return (numberInputCtx.state == NUMBER_INPUT_ACTIVE);
 }
 
-/**
- * @brief Rafraîchit l'affichage du nombre avec curseur
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage du nombre avec curseur
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void refreshNumberDisplay(void)
 {
   // Afficher le titre (ligne 0)
@@ -868,11 +871,11 @@ void refreshNumberDisplay(void)
   }
 }
 
-/**
- * @brief Gère le clignotement du curseur pour la saisie numérique
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour la saisie numérique
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateNumberInputCursorBlink(void)
 {
   if (millis() - numberInputCtx.lastBlink > 500) // Clignotement toutes les 500ms
@@ -883,13 +886,13 @@ void updateNumberInputCursorBlink(void)
   }
 }
 
-/**
- * @brief Modifie un caractère du nombre
- * @param str Chaîne de caractères représentant le nombre
- * @param pos Position du caractère à modifier
- * @param delta Valeur à ajouter (+1 ou -1)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Modifie un caractère du nombre
+// @param str Chaîne de caractères représentant le nombre
+// @param pos Position du caractère à modifier
+// @param delta Valeur à ajouter (+1 ou -1)
+// @return void
+// ---------------------------------------------------------------------------*
 void modifyNumberChar(char* str, uint8_t pos, int delta)
 {
   if (pos >= numberInputCtx.maxLength)
@@ -907,16 +910,15 @@ void modifyNumberChar(char* str, uint8_t pos, int delta)
 }
 
 
-// -------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE ALPHANUMÉRIQUE =====
-// -------------------------------------------------------------------------------------
-/**
- * @brief Démarre la saisie alphanumérique non-bloquante
- * @param title Titre à afficher
- * @param initialString Chaîne initiale
- * @param maxLength Longueur maximum (max 20)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre la saisie alphanumérique non-bloquante
+// @param title Titre à afficher
+// @param initialString Chaîne initiale
+// @param maxLength Longueur maximum (max 20)
+// @return void
+// ---------------------------------------------------------------------------*
 void startStringInput(const char* title, const char* initialString, uint8_t maxLength)
 {
   if (stringInputCtx.state != STRING_INPUT_IDLE)
@@ -969,11 +971,11 @@ void startStringInput(const char* title, const char* initialString, uint8_t maxL
 
 
 
-/**
- * @brief Rafraîchit l'affichage de la chaîne avec curseur
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage de la chaîne avec curseur
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void refreshStringDisplay(void)
 {
   // Afficher le titre (ligne 0)
@@ -1031,12 +1033,12 @@ void refreshStringDisplay(void)
 
 
 
-/**
- * @brief Obtient le caractère alphanumérique suivant/précédent
- * @param current Caractère actuel
- * @param delta Direction (+1 ou -1)
- * @return Nouveau caractère alphanumérique
- */
+// ---------------------------------------------------------------------------*
+// @brief Obtient le caractère alphanumérique suivant/précédent
+// @param current Caractère actuel
+// @param delta Direction (+1 ou -1)
+// @return Nouveau caractère alphanumérique
+// ---------------------------------------------------------------------------*
 char getNextAlphaNumChar(char current, int delta)
 {
   // Caractères disponibles : 0-9, A-Z, espace, tiret, underscore
@@ -1067,11 +1069,11 @@ char getNextAlphaNumChar(char current, int delta)
 }
 
 
-/**
- * @brief Traite la saisie alphanumérique (à appeler dans loop)
- * @param void
- * @return État actuel de la saisie
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la saisie alphanumérique (à appeler dans loop)
+// @param void
+// @return État actuel de la saisie
+// ---------------------------------------------------------------------------*
 stringInputState_t processStringInput(void)
 {
   if (stringInputCtx.state != STRING_INPUT_ACTIVE)
@@ -1143,11 +1145,11 @@ stringInputState_t processStringInput(void)
   return stringInputCtx.state;
 }
 
-/**
- * @brief Finalise la saisie et récupère la chaîne
- * @param outputString Buffer pour stocker la chaîne finale
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Finalise la saisie et récupère la chaîne
+// @param outputString Buffer pour stocker la chaîne finale
+// @return void
+// ---------------------------------------------------------------------------*
 void finalizeStringInput(char* outputString)
 {
   if (stringInputCtx.state == STRING_INPUT_COMPLETED)
@@ -1171,11 +1173,11 @@ void finalizeStringInput(char* outputString)
   }
 }
 
-/**
- * @brief Annule la saisie alphanumérique
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Annule la saisie alphanumérique
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void cancelStringInput(void)
 {
   stringInputCtx.state = STRING_INPUT_CANCELLED;
@@ -1186,21 +1188,21 @@ void cancelStringInput(void)
   stringInputCtx.state = STRING_INPUT_IDLE;
 }
 
-/**
- * @brief Vérifie si une saisie alphanumérique est en cours
- * @param void
- * @return true si saisie active
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une saisie alphanumérique est en cours
+// @param void
+// @return true si saisie active
+// ---------------------------------------------------------------------------*
 bool isStringInputActive(void)
 {
   return (stringInputCtx.state == STRING_INPUT_ACTIVE);
 }
 
-/**
- * @brief Gère le clignotement du curseur pour la saisie alphanumérique
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour la saisie alphanumérique
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateStringInputCursorBlink(void)
 {
   if (millis() - stringInputCtx.lastBlink > 500) // Clignotement toutes les 500ms
@@ -1211,13 +1213,13 @@ void updateStringInputCursorBlink(void)
   }
 }
 
-/**
- * @brief Modifie un caractère de la chaîne
- * @param str Chaîne de caractères
- * @param pos Position du caractère à modifier
- * @param delta Valeur à ajouter (+1 ou -1)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Modifie un caractère de la chaîne
+// @param str Chaîne de caractères
+// @param pos Position du caractère à modifier
+// @param delta Valeur à ajouter (+1 ou -1)
+// @return void
+// ---------------------------------------------------------------------------*
 void modifyStringChar(char* str, uint8_t pos, int delta)
 {
   if (pos >= stringInputCtx.maxLength)
@@ -1234,14 +1236,13 @@ void modifyStringChar(char* str, uint8_t pos, int delta)
   debugSerial.println("'");
 }
 
-// -------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE HEXA =====
-// -------------------------------------------------------------------------------------
-/**
- * @brief Vérifie si une chaîne hexadécimale est valide
- * @param hex Chaîne de caractères hexadécimale (40 caractères)
- * @return bool True si la chaîne est valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une chaîne hexadécimale est valide
+// @param hex Chaîne de caractères hexadécimale (40 caractères)
+// @return bool True si la chaîne est valide
+// ---------------------------------------------------------------------------*
 bool isHexStringValid(const char *hex) 
 {
   if (strlen(hex) != 40) return false;
@@ -1257,12 +1258,12 @@ bool isHexStringValid(const char *hex)
   return true;
 }
 
-/**
- * @brief Obtient le caractère hexadécimal suivant/précédent
- * @param current Caractère actuel
- * @param delta Direction (+1 ou -1)
- * @return Nouveau caractère hexadécimal
- */
+// ---------------------------------------------------------------------------*
+// @brief Obtient le caractère hexadécimal suivant/précédent
+// @param current Caractère actuel
+// @param delta Direction (+1 ou -1)
+// @return Nouveau caractère hexadécimal
+// ---------------------------------------------------------------------------*
 char getNextHexChar(char current, int delta)
 {
   const char hexChars[] = "0123456789ABCDEF";
@@ -1291,11 +1292,11 @@ char getNextHexChar(char current, int delta)
   return hexChars[newIndex];
 }
 
-/**
- * @brief Démarre la saisie hexadécimale non-bloquante
- * @param initialHex Chaîne hexadécimale initiale (40 caractères)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre la saisie hexadécimale non-bloquante
+// @param initialHex Chaîne hexadécimale initiale (40 caractères)
+// @return void
+// ---------------------------------------------------------------------------*
 void startHexInput(const char* initialHex)
 {
   if (hexInputCtx.state != HEX_INPUT_IDLE)
@@ -1342,11 +1343,11 @@ void startHexInput(const char* initialHex)
   OLEDDisplayMessageL8("Modifiez la cle hexa", false, false);
 }
 
-/**
- * @brief Met à jour le décalage d'affichage selon la position du curseur
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Met à jour le décalage d'affichage selon la position du curseur
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateHexDisplayOffset(void)
 {
   // Centrer l'affichage sur la position du curseur
@@ -1363,11 +1364,11 @@ void updateHexDisplayOffset(void)
   }
 }
 
-/**
- * @brief Traite la saisie hexadécimale (à appeler dans loop)
- * @param void
- * @return État actuel de la saisie
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la saisie hexadécimale (à appeler dans loop)
+// @param void
+// @return État actuel de la saisie
+// ---------------------------------------------------------------------------*
 hexInputState_t processHexInput(void)
 {
   if (hexInputCtx.state != HEX_INPUT_ACTIVE)
@@ -1461,11 +1462,11 @@ hexInputState_t processHexInput(void)
   return hexInputCtx.state;
 }
 
-/**
- * @brief Finalise la saisie et récupère la chaîne hexadécimale
- * @param outputHex Buffer pour stocker la chaîne finale (41 chars minimum)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Finalise la saisie et récupère la chaîne hexadécimale
+// @param outputHex Buffer pour stocker la chaîne finale (41 chars minimum)
+// @return void
+// ---------------------------------------------------------------------------*
 void finalizeHexInput(char* outputHex)
 {
   if (hexInputCtx.state == HEX_INPUT_COMPLETED)
@@ -1484,11 +1485,11 @@ void finalizeHexInput(char* outputHex)
   }
 }
 
-/**
- * @brief Annule la saisie hexadécimale
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Annule la saisie hexadécimale
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void cancelHexInput(void)
 {
   hexInputCtx.state = HEX_INPUT_CANCELLED;
@@ -1500,22 +1501,22 @@ void cancelHexInput(void)
   hexInputCtx.firstDisplay = true;
 }
 
-/**
- * @brief Vérifie si une saisie hexadécimale est en cours
- * @param void
- * @return true si saisie active
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une saisie hexadécimale est en cours
+// @param void
+// @return true si saisie active
+// ---------------------------------------------------------------------------*
 bool isHexInputActive(void)
 {
   return (hexInputCtx.state == HEX_INPUT_ACTIVE);
 }
 
 
-/**
- * @brief Rafraîchit l'affichage de la chaîne hexadécimale avec curseur (optimisé)
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage de la chaîne hexadécimale avec curseur (optimisé)
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void refreshHexDisplay(void)
 {
   // Préparer la chaîne d'affichage (portion visible)
@@ -1640,11 +1641,11 @@ void refreshHexDisplay(void)
   hexInputCtx.lastCursorBlink = hexInputCtx.cursorBlink;
 }
 
-/**
- * @brief Gère le clignotement du curseur pour l'hexadécimal
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour l'hexadécimal
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateHexInputCursorBlink(void)
 {
   if (millis() - hexInputCtx.lastBlink > 500) // Clignotement toutes les 500ms
@@ -1655,13 +1656,13 @@ void updateHexInputCursorBlink(void)
   }
 }
 
-/**
- * @brief Modifie un caractère hexadécimal
- * @param hex Chaîne de caractères hexadécimale
- * @param pos Position du caractère à modifier (0-39)
- * @param delta Valeur à ajouter (+1 ou -1)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Modifie un caractère hexadécimal
+// @param hex Chaîne de caractères hexadécimale
+// @param pos Position du caractère à modifier (0-39)
+// @param delta Valeur à ajouter (+1 ou -1)
+// @return void
+// ---------------------------------------------------------------------------*
 void modifyHexDigit(char *hex, uint8_t pos, int delta) 
 {
   if (pos >= 40)
@@ -1678,18 +1679,13 @@ void modifyHexDigit(char *hex, uint8_t pos, int delta)
 }
 
 
-
-
-
-// -------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE TIME =====
-// -------------------------------------------------------------------------------------
-
-/**
- * @brief Vérifie si une heure est valide
- * @param t Chaîne de caractères représentant l'heure (format HH:MM:SS)
- * @return bool True si l'heure est valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une heure est valide
+// @param t Chaîne de caractères représentant l'heure (format HH:MM:SS)
+// @return bool True si l'heure est valide
+// ---------------------------------------------------------------------------*
 bool isTimeValid(const char *t) 
 {
   if (strlen(t) != 8) return false;
@@ -1702,11 +1698,11 @@ bool isTimeValid(const char *t)
   return (hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59 && ss >= 0 && ss <= 59);
 }
 
-/**
- * @brief Démarre la saisie d'heure non-bloquante avec timeout
- * @param initialTime Heure initiale au format "HH:MM:SS"
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre la saisie d'heure non-bloquante avec timeout
+// @param initialTime Heure initiale au format "HH:MM:SS"
+// @return void
+// ---------------------------------------------------------------------------*
 void startTimeInput(const char* initialTime)
 {
   if (timeInputCtx.state != TIME_INPUT_IDLE)
@@ -1735,11 +1731,11 @@ void startTimeInput(const char* initialTime)
   OLEDDisplayMessageL8("Modifiez l'heure", false, false);
 }
 
-/**
- * @brief Traite la saisie d'heure (à appeler dans loop)
- * @param void
- * @return État actuel de la saisie
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la saisie d'heure (à appeler dans loop)
+// @param void
+// @return État actuel de la saisie
+// ---------------------------------------------------------------------------*
 timeInputState_t processTimeInput(void)
 {
   if (timeInputCtx.state != TIME_INPUT_ACTIVE)
@@ -1836,11 +1832,11 @@ timeInputState_t processTimeInput(void)
   return timeInputCtx.state;
 }
 
-/**
- * @brief Finalise la saisie et récupère l'heure
- * @param outputTime Buffer pour stocker l'heure finale
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Finalise la saisie et récupère l'heure
+// @param outputTime Buffer pour stocker l'heure finale
+// @return void
+// ---------------------------------------------------------------------------*
 void finalizeTimeInput(char* outputTime)
 {
   if (timeInputCtx.state == TIME_INPUT_COMPLETED)
@@ -1857,11 +1853,11 @@ void finalizeTimeInput(char* outputTime)
   }
 }
 
-/**
- * @brief Annule la saisie d'heure
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Annule la saisie d'heure
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void cancelTimeInput(void)
 {
   timeInputCtx.state = TIME_INPUT_CANCELLED;
@@ -1872,21 +1868,21 @@ void cancelTimeInput(void)
   timeInputCtx.state = TIME_INPUT_IDLE;
 }
 
-/**
- * @brief Vérifie si une saisie d'heure est en cours
- * @param void
- * @return true si saisie active
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une saisie d'heure est en cours
+// @param void
+// @return true si saisie active
+// ---------------------------------------------------------------------------*
 bool isTimeInputActive(void)
 {
   return (timeInputCtx.state == TIME_INPUT_ACTIVE);
 }
 
-/**
- * @brief Rafraîchit l'affichage de l'heure avec curseur (optimisé)
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage de l'heure avec curseur (optimisé)
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void refreshTimeDisplay(void)
 {
   bool timeChanged = (strcmp(timeInputCtx.workingTime, timeInputCtx.lastDisplayedTime) != 0);
@@ -1998,11 +1994,11 @@ void refreshTimeDisplay(void)
   timeInputCtx.lastCursorBlink = timeInputCtx.cursorBlink;
 }
 
-/**
- * @brief Gère le clignotement du curseur pour l'heure
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour l'heure
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateTimeInputCursorBlink(void)
 {
   if (millis() - timeInputCtx.lastBlink > 500) // Clignotement toutes les 500ms
@@ -2013,12 +2009,12 @@ void updateTimeInputCursorBlink(void)
   }
 }
 
-/**
- * @brief Calcule la prochaine position valide du curseur pour l'heure
- * @param currentPos Position actuelle
- * @param forward true pour avancer, false pour reculer
- * @return Nouvelle position valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Calcule la prochaine position valide du curseur pour l'heure
+// @param currentPos Position actuelle
+// @param forward true pour avancer, false pour reculer
+// @return Nouvelle position valide
+// ---------------------------------------------------------------------------*
 uint8_t getNextValidTimePosition(uint8_t currentPos, bool forward)
 {
   uint8_t validPositions[] = {0, 1, 3, 4, 6, 7}; // Positions des chiffres (pas les ':')
@@ -2060,13 +2056,13 @@ uint8_t getNextValidTimePosition(uint8_t currentPos, bool forward)
   }
 }
 
-/**
- * @brief Modifie un chiffre d'une heure avec gestion des limites
- * @param t Chaîne de caractères de l'heure
- * @param pos Position du chiffre à modifier
- * @param delta Valeur à ajouter (+1 ou -1)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Modifie un chiffre d'une heure avec gestion des limites
+// @param t Chaîne de caractères de l'heure
+// @param pos Position du chiffre à modifier
+// @param delta Valeur à ajouter (+1 ou -1)
+// @return void
+// ---------------------------------------------------------------------------*
 void modifyTimeDigit(char *t, uint8_t pos, int delta) 
 {
   if (pos >= 8 || t[pos] < '0' || t[pos] > '9') 
@@ -2126,14 +2122,13 @@ void modifyTimeDigit(char *t, uint8_t pos, int delta)
   debugSerial.println(t[pos]);
 }
 
-// -------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE DATE =====
-// -------------------------------------------------------------------------------------
-/**
- * @brief Vérifie si une date est valide
- * @param d Chaîne de caractères représentant la date (format JJ/MM/AAAA)
- * @return bool True si la date est valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une date est valide
+// @param d Chaîne de caractères représentant la date (format JJ/MM/AAAA)
+// @return bool True si la date est valide
+// ---------------------------------------------------------------------------*
 bool isDateValid(const char *d) 
 {
   if (strlen(d) != 10) return false;
@@ -2154,11 +2149,11 @@ bool isDateValid(const char *d)
   return jj >= 1 && jj <= joursMax[mm - 1];
 }
 
-/**
- * @brief Démarre la saisie de date non-bloquante avec timeout
- * @param initialDate Date initiale au format "JJ/MM/AAAA"
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre la saisie de date non-bloquante avec timeout
+// @param initialDate Date initiale au format "JJ/MM/AAAA"
+// @return void
+// ---------------------------------------------------------------------------*
 void startDateInput(const char* initialDate)
 {
   if (dateInputCtx.state != DATE_INPUT_IDLE)
@@ -2187,11 +2182,11 @@ void startDateInput(const char* initialDate)
   OLEDDisplayMessageL8("Modifiez la date", false, false);
 }
 
-/**
- * @brief Traite la saisie de date (à appeler dans loop)
- * @param void
- * @return État actuel de la saisie
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la saisie de date (à appeler dans loop)
+// @param void
+// @return État actuel de la saisie
+// ---------------------------------------------------------------------------*
 dateInputState_t processDateInput(void)
 {
   if (dateInputCtx.state != DATE_INPUT_ACTIVE)
@@ -2288,11 +2283,11 @@ dateInputState_t processDateInput(void)
   return dateInputCtx.state;
 }
 
-/**
- * @brief Finalise la saisie et récupère la date
- * @param outputDate Buffer pour stocker la date finale
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Finalise la saisie et récupère la date
+// @param outputDate Buffer pour stocker la date finale
+// @return void
+// ---------------------------------------------------------------------------*
 void finalizeDateInput(char* outputDate)
 {
   if (dateInputCtx.state == DATE_INPUT_COMPLETED)
@@ -2309,11 +2304,11 @@ void finalizeDateInput(char* outputDate)
   }
 }
 
-/**
- * @brief Annule la saisie de date
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Annule la saisie de date
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void cancelDateInput(void)
 {
   dateInputCtx.state = DATE_INPUT_CANCELLED;
@@ -2324,21 +2319,21 @@ void cancelDateInput(void)
   dateInputCtx.state = DATE_INPUT_IDLE;
 }
 
-/**
- * @brief Vérifie si une saisie de date est en cours
- * @param void
- * @return true si saisie active
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une saisie de date est en cours
+// @param void
+// @return true si saisie active
+// ---------------------------------------------------------------------------*
 bool isDateInputActive(void)
 {
   return (dateInputCtx.state == DATE_INPUT_ACTIVE);
 }
 
-/**
- * @brief Rafraîchit l'affichage de la date avec curseur (optimisé)
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage de la date avec curseur (optimisé)
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void refreshDateDisplay(void)
 {
   bool dateChanged = (strcmp(dateInputCtx.workingDate, dateInputCtx.lastDisplayedDate) != 0);
@@ -2448,11 +2443,11 @@ void refreshDateDisplay(void)
   dateInputCtx.lastCursorBlink = dateInputCtx.cursorBlink;
 }
 
-/**
- * @brief Gère le clignotement du curseur pour la date
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour la date
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateDateInputCursorBlink(void)
 {
   if (millis() - dateInputCtx.lastBlink > 500) // Clignotement toutes les 500ms
@@ -2463,12 +2458,12 @@ void updateDateInputCursorBlink(void)
   }
 }
 
-/**
- * @brief Calcule la prochaine position valide du curseur pour la date
- * @param currentPos Position actuelle
- * @param forward true pour avancer, false pour reculer
- * @return Nouvelle position valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Calcule la prochaine position valide du curseur pour la date
+// @param currentPos Position actuelle
+// @param forward true pour avancer, false pour reculer
+// @return Nouvelle position valide
+// ---------------------------------------------------------------------------*
 uint8_t getNextValidDatePosition(uint8_t currentPos, bool forward)
 {
   uint8_t validPositions[] = {0, 1, 3, 4, 6, 7, 8, 9}; // Positions des chiffres (pas les '/')
@@ -2510,13 +2505,13 @@ uint8_t getNextValidDatePosition(uint8_t currentPos, bool forward)
   }
 }
 
-/**
- * @brief Modifie un chiffre d'une date avec gestion des limites
- * @param d Chaîne de caractères de la date
- * @param pos Position du chiffre à modifier
- * @param delta Valeur à ajouter (+1 ou -1)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Modifie un chiffre d'une date avec gestion des limites
+// @param d Chaîne de caractères de la date
+// @param pos Position du chiffre à modifier
+// @param delta Valeur à ajouter (+1 ou -1)
+// @return void
+// ---------------------------------------------------------------------------*
 void modifyDateDigit(char *d, uint8_t pos, int delta) 
 {
   if (pos >= 10 || d[pos] < '0' || d[pos] > '9') 
@@ -2577,14 +2572,13 @@ void modifyDateDigit(char *d, uint8_t pos, int delta)
   debugSerial.println(d[pos]);
 }
 
-// -------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE IP =====
-// -------------------------------------------------------------------------------------
-/**
- * @brief Vérifie si une adresse IP est valide
- * @param ip Chaîne de caractères IP (format XXX.XXX.XXX.XXX)
- * @return bool True si l'IP est valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une adresse IP est valide
+// @param ip Chaîne de caractères IP (format XXX.XXX.XXX.XXX)
+// @return bool True si l'IP est valide
+// ---------------------------------------------------------------------------*
 bool isIPValid(const char *ip) 
 {
   if (strlen(ip) != 15) return false;
@@ -2614,12 +2608,12 @@ bool isIPValid(const char *ip)
   return true;
 }
 
-/**
- * @brief Calcule la prochaine position valide du curseur pour l'IP
- * @param currentPos Position actuelle
- * @param forward true pour avancer, false pour reculer
- * @return Nouvelle position valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Calcule la prochaine position valide du curseur pour l'IP
+// @param currentPos Position actuelle
+// @param forward true pour avancer, false pour reculer
+// @return Nouvelle position valide
+// ---------------------------------------------------------------------------*
 uint8_t getNextValidIPPosition(uint8_t currentPos, bool forward)
 {
   // Positions valides : 0,1,2, 4,5,6, 8,9,10, 12,13,14 (pas les points)
@@ -2662,13 +2656,13 @@ uint8_t getNextValidIPPosition(uint8_t currentPos, bool forward)
   }
 }
 
-/**
- * @brief Modifie un chiffre d'une adresse IP avec gestion des limites
- * @param ip Chaîne de caractères de l'IP
- * @param pos Position du chiffre à modifier
- * @param delta Valeur à ajouter (+1 ou -1)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Modifie un chiffre d'une adresse IP avec gestion des limites
+// @param ip Chaîne de caractères de l'IP
+// @param pos Position du chiffre à modifier
+// @param delta Valeur à ajouter (+1 ou -1)
+// @return void
+// ---------------------------------------------------------------------------*
 void modifyIPDigit(char *ip, uint8_t pos, int delta) 
 {
   if (pos >= 15 || ip[pos] < '0' || ip[pos] > '9') 
@@ -2757,11 +2751,11 @@ void modifyIPDigit(char *ip, uint8_t pos, int delta)
   debugSerial.println(octetValue);
 }
 
-/**
- * @brief Démarre la saisie IP non-bloquante
- * @param initialIP Adresse IP initiale (format XXX.XXX.XXX.XXX)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre la saisie IP non-bloquante
+// @param initialIP Adresse IP initiale (format XXX.XXX.XXX.XXX)
+// @return void
+// ---------------------------------------------------------------------------*
 void startIPInput(const char* initialIP)
 {
   if (ipInputCtx.state != IP_INPUT_IDLE)
@@ -2800,11 +2794,11 @@ void startIPInput(const char* initialIP)
   OLEDDisplayMessageL8("Modifiez l'IP", false, false);
 }
 
-/**
- * @brief Traite la saisie IP (à appeler dans loop)
- * @param void
- * @return État actuel de la saisie
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la saisie IP (à appeler dans loop)
+// @param void
+// @return État actuel de la saisie
+// ---------------------------------------------------------------------------*
 ipInputState_t processIPInput(void)
 {
   if (ipInputCtx.state != IP_INPUT_ACTIVE)
@@ -2901,11 +2895,11 @@ ipInputState_t processIPInput(void)
   return ipInputCtx.state;
 }
 
-/**
- * @brief Finalise la saisie et récupère l'adresse IP
- * @param outputIP Buffer pour stocker l'IP finale (16 chars minimum)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Finalise la saisie et récupère l'adresse IP
+// @param outputIP Buffer pour stocker l'IP finale (16 chars minimum)
+// @return void
+// ---------------------------------------------------------------------------*
 void finalizeIPInput(char* outputIP)
 {
   if (ipInputCtx.state == IP_INPUT_COMPLETED)
@@ -2922,11 +2916,11 @@ void finalizeIPInput(char* outputIP)
   }
 }
 
-/**
- * @brief Annule la saisie IP
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Annule la saisie IP
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void cancelIPInput(void)
 {
   ipInputCtx.state = IP_INPUT_CANCELLED;
@@ -2937,21 +2931,21 @@ void cancelIPInput(void)
   ipInputCtx.state = IP_INPUT_IDLE;
 }
 
-/**
- * @brief Vérifie si une saisie IP est en cours
- * @param void
- * @return true si saisie active
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une saisie IP est en cours
+// @param void
+// @return true si saisie active
+// ---------------------------------------------------------------------------*
 bool isIPInputActive(void)
 {
   return (ipInputCtx.state == IP_INPUT_ACTIVE);
 }
 
-/**
- * @brief Rafraîchit l'affichage de l'IP avec curseur (optimisé)
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage de l'IP avec curseur (optimisé)
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void refreshIPDisplay(void)
 {
   bool ipChanged = (strcmp(ipInputCtx.workingIP, ipInputCtx.lastDisplayedIP) != 0);
@@ -3053,11 +3047,11 @@ void refreshIPDisplay(void)
   ipInputCtx.lastCursorBlink = ipInputCtx.cursorBlink;
 }
 
-/**
- * @brief Gère le clignotement du curseur pour l'IP
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour l'IP
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateIPInputCursorBlink(void)
 {
   if (millis() - ipInputCtx.lastBlink > 500)
@@ -3068,14 +3062,13 @@ void updateIPInputCursorBlink(void)
   }
 }
 
-// -------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE MAIL =====
-// -------------------------------------------------------------------------------------
-/**
- * @brief Vérifie si une adresse email est valide (basique)
- * @param email Chaîne de caractères email
- * @return bool True si l'email semble valide
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une adresse email est valide (basique)
+// @param email Chaîne de caractères email
+// @return bool True si l'email semble valide
+// ---------------------------------------------------------------------------*
 bool isEmailValid(const char *email) 
 {
   uint8_t len = strlen(email);
@@ -3098,12 +3091,12 @@ bool isEmailValid(const char *email)
   return true;
 }
 
-/**
- * @brief Obtient le caractère email suivant/précédent dans le jeu de caractères
- * @param current Caractère actuel
- * @param delta Direction (+1 ou -1)
- * @return Nouveau caractère
- */
+// ---------------------------------------------------------------------------*
+// @brief Obtient le caractère email suivant/précédent dans le jeu de caractères
+// @param current Caractère actuel
+// @param delta Direction (+1 ou -1)
+// @return Nouveau caractère
+// ---------------------------------------------------------------------------*
 char getNextEmailChar(char current, int delta)
 {
 // Trouver l'index du caractère actuel
@@ -3128,14 +3121,14 @@ char getNextEmailChar(char current, int delta)
   return emailCharSet[newIndex];
 }
 
-/**
- * @brief Insère un caractère à la position donnée
- * @param email Chaîne email
- * @param length Pointeur vers la longueur actuelle
- * @param pos Position d'insertion
- * @param c Caractère à insérer
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Insère un caractère à la position donnée
+// @param email Chaîne email
+// @param length Pointeur vers la longueur actuelle
+// @param pos Position d'insertion
+// @param c Caractère à insérer
+// @return void
+// ---------------------------------------------------------------------------*
 void insertCharAtPosition(char *email, uint8_t *length, uint8_t pos, char c)
 {
   if (*length >= 40 || pos > *length) return;
@@ -3151,13 +3144,13 @@ void insertCharAtPosition(char *email, uint8_t *length, uint8_t pos, char c)
   email[*length] = '\0';
 }
 
-/**
- * @brief Supprime un caractère à la position donnée
- * @param email Chaîne email
- * @param length Pointeur vers la longueur actuelle
- * @param pos Position de suppression
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Supprime un caractère à la position donnée
+// @param email Chaîne email
+// @param length Pointeur vers la longueur actuelle
+// @param pos Position de suppression
+// @return void
+// ---------------------------------------------------------------------------*
 void deleteCharAtPosition(char *email, uint8_t *length, uint8_t pos)
 {
   if (*length == 0 || pos >= *length) return;
@@ -3172,11 +3165,11 @@ void deleteCharAtPosition(char *email, uint8_t *length, uint8_t pos)
   email[*length] = '\0';
 }
 
-/**
- * @brief Démarre la saisie email non-bloquante
- * @param initialEmail Adresse email initiale
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Démarre la saisie email non-bloquante
+// @param initialEmail Adresse email initiale
+// @return void
+// ---------------------------------------------------------------------------*
 void startEmailInput(const char* initialEmail)
 {
   if (emailInputCtx.state != EMAIL_INPUT_IDLE)
@@ -3223,11 +3216,11 @@ void startEmailInput(const char* initialEmail)
   OLEDDisplayMessageL8("Saisissez email", false, false);
 }
 
-/**
- * @brief Met à jour le décalage d'affichage selon la position du curseur
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Met à jour le décalage d'affichage selon la position du curseur
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateEmailDisplayOffset(void)
 {
   // Centrer l'affichage sur la position du curseur
@@ -3247,11 +3240,11 @@ void updateEmailDisplayOffset(void)
   }
 }
 
-/**
- * @brief Traite la saisie email (à appeler dans loop)
- * @param void
- * @return État actuel de la saisie
- */
+// ---------------------------------------------------------------------------*
+// @brief Traite la saisie email (à appeler dans loop)
+// @param void
+// @return État actuel de la saisie
+// ---------------------------------------------------------------------------*
 emailInputState_t processEmailInput(void)
 {
   if (emailInputCtx.state != EMAIL_INPUT_ACTIVE)
@@ -3376,11 +3369,11 @@ emailInputState_t processEmailInput(void)
   return emailInputCtx.state;
 }
 
-/**
- * @brief Finalise la saisie et récupère l'adresse email
- * @param outputEmail Buffer pour stocker l'email final (41 chars minimum)
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Finalise la saisie et récupère l'adresse email
+// @param outputEmail Buffer pour stocker l'email final (41 chars minimum)
+// @return void
+// ---------------------------------------------------------------------------*
 void finalizeEmailInput(char* outputEmail)
 {
   if (emailInputCtx.state == EMAIL_INPUT_COMPLETED)
@@ -3399,11 +3392,11 @@ void finalizeEmailInput(char* outputEmail)
   }
 }
 
-/**
- * @brief Annule la saisie email
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Annule la saisie email
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void cancelEmailInput(void)
 {
   emailInputCtx.state = EMAIL_INPUT_CANCELLED;
@@ -3414,21 +3407,21 @@ void cancelEmailInput(void)
   emailInputCtx.state = EMAIL_INPUT_IDLE;
 }
 
-/**
- * @brief Vérifie si une saisie email est en cours
- * @param void
- * @return true si saisie active
- */
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une saisie email est en cours
+// @param void
+// @return true si saisie active
+// ---------------------------------------------------------------------------*
 bool isEmailInputActive(void)
 {
   return (emailInputCtx.state == EMAIL_INPUT_ACTIVE);
 }
 
-/**
- * @brief Rafraîchit l'affichage de l'email avec curseur (optimisé)
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage de l'email avec curseur (optimisé)
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void refreshEmailDisplay(void)
 {
   // Préparer la chaîne d'affichage (portion visible)
@@ -3580,11 +3573,11 @@ void refreshEmailDisplay(void)
   emailInputCtx.lastCursorBlink = emailInputCtx.cursorBlink;
 }
 
-/**
- * @brief Gère le clignotement du curseur pour l'email
- * @param void
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour l'email
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
 void updateEmailInputCursorBlink(void)
 {
   if (millis() - emailInputCtx.lastBlink > 500)

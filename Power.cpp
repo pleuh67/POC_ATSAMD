@@ -1,12 +1,18 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
+
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
 
-
-/**
- * @brief Met le microcontrôleur en veille
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Met le microcontrôleur en veille
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void sleep(void) 
 {     static int sleepCount = 0;
     
@@ -52,11 +58,11 @@ void sleep(void)
 
 // ===== FONCTIONS UTILITAIRES SUPPLÉMENTAIRES =====
 
-/**
- * @brief Configure les registres de bas niveau pour la basse consommation
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Configure les registres de bas niveau pour la basse consommation
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void configureLowPowerMode(void)
 {
 // Désactiver les périphériques non utilisés pour économiser l'énergie

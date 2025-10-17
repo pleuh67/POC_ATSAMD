@@ -1,30 +1,37 @@
-
-//blocage sur erreur RTC => FIN
-
-
-
-
-
-//Virer 3 x colonne?0:0 valider sur 0.96"
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
 // https://claude.ai/chat/75e1ba53-8b90-4f09-97a5-cfc366e36a8e
-// 16:40:59.416 -> Alarme 2 (payload) programmée pour: 16:39:16  afficher a chaque reprogrammation
-//  Compiled: Aug 22 2025, 08:34:58, 1.1.1-PL
+// ---------------------------------------------------------------------------*
+//      _____                     _                           _   _            
+//     |  __ \               /\  | |                         | | (_)           
+//     | |__) |__   ___     /  \ | |_ ___  __ _ _ __ ___   __| |  _ _ __   ___ 
+//     |  ___/ _ \ / __|   / /\ \| __/ __|/ _` | '_ ` _ \ / _` | | | '_ \ / _ \
+//     | |  | (_) | (__   / ____ \ |_\__ \ (_| | | | | | | (_| |_| | | | | (_) |
+//     |_|   \___/ \___| /_/    \_\__|___/\__,_|_| |_| |_|\__,_(_)_|_| |_|\___/
+//                   ______                                                    
+//                  |______|                                                   
+// ---------------------------------------------------------------------------*
+// https://patorjk.com/software/taag/#p=display&f=Big&t=&x=cppComment&v=4&h=4&w=80&we=true
+// Ascii Art Font : BIG
+// C++ style comment
+// ---------------------------------------------------------------------------*
+//
+// @file POC_ATSAMD.ino
+// @brief Programme de démonstration pour SODAQ EXPLORER avec gestion basse consommation
+// @author Votre nom
+// @version 1.1.1-PL
+// @date 2025
+// 
+// Description : Gestion de deux modes de fonctionnement avec interruptions RTC
+// - MODE EXPLOITATION : réveil périodique pour LED rouge
+// - MODE PROGRAMMATION : réveil périodique + clignotement LED builtin + interface utilisateur
+// ---------------------------------------------------------------------------*
 
-
-/**
- * @file POC_IRQ_LOW_POWER.ino
- * @brief Programme de démonstration pour SODAQ EXPLORER avec gestion basse consommation
- * @author Votre nom
- * @version 1.1.1-PL
- * @date 2025
- * 
- * Description : Gestion de deux modes de fonctionnement avec interruptions RTC
- * - MODE EXPLOITATION : réveil périodique pour LED rouge
- * - MODE PROGRAMMATION : réveil périodique + clignotement LED builtin + interface utilisateur
- */
 
 #define __MAIN__
-
 // ===== INCLUDES PROJET =====
 #include ".\define.h"
 
@@ -218,10 +225,9 @@ setupDone = true;
 
 }
 
-
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ===== LOOP PRINCIPAL =====
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 void loop() 
 {  static int index=0; 
    static int counter1s=0,counter15m=0;   
@@ -290,10 +296,10 @@ static unsigned long noIRQSecLast=0;
       wakeup1Sec = true;
     }
 }
-// ------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ISR1
-// ------------------------------------------------------------
-  if (wakeup1Sec) // && !modeExploitation)                  // màj heure, blink LED
+// ---------------------------------------------------------------------------*
+  if (wakeup1Sec) // && !modeExploitation)            // màj heure, blink LED
   {    
     loopWDT  = millis();
 //#ifdef __SerialDebugPoc     
@@ -306,18 +312,19 @@ debugSerial.println(loopWDT);
     {     
 //      debugSerialPrintReprogNextAlarm(2);
       debugSerialPrintNextAlarm(nextPayload,2);
-      debugSerial.print("Min/ menuDeep: ");    // MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+      debugSerial.print("Min/ menuDeep: ");    // MMMMMMMMMMMMMMMMMMMMMMMMMMM
       debugSerial.println(currentMenuDepth);
     }
     switch (counter1s %10)
     {
       case 0 :    // Rafraichir OLED
-  //             OLEDDisplayHivesDatas();  // ne pas executer quans saisies en cours....
+  //             OLEDDisplayHivesDatas();  // pas quand saisies en cours....
 debugSerial.println("Case0");
                break;
-      case 1 :   //  read_DHT(dht);  // Reading temperature or humidity takes about 250 milliseconds!
+      case 1 :   //  read_DHT(dht);  
+// Reading temperature or humidity takes about 250 milliseconds!
 debugSerial.println("Case1");
-               read_DHT(dht); // initialise : Data_LoRa.DHT_Temp et Data_LoRa.DHT_Hum
+               read_DHT(dht); // init: Data_LoRa.DHT_Temp, Data_LoRa.DHT_Hum
                break;
      case 2 :
 debugSerial.println("Case2");
@@ -372,21 +379,21 @@ debugSerial.println("Case8");
     LEDStartBlue();                           //Clignotement 100ms
 // si Affichage menu "INFOS" 
     if (infoScreenRefreshTime)
-      OLEDDrawScreenRefreshTime(1, 0); // partial refresh Time/Date every second
+      OLEDDrawScreenRefreshTime(1, 0); // refresh Time/Date every second
   }
 #ifdef __SerialDebugPoc  
 debugSerial.print("6");   // 666666666666666666666666666666666666666666666
 #endif
-// ------------------------------------------------------------
+// ---------------------------------------------------------------------------*
 // ISR2
-// ------------------------------------------------------------
-  if (wakeupPayload)                                    // Envoi LoRa, LED Activité LoRa
+// ---------------------------------------------------------------------------*
+  if (wakeupPayload)                          // Envoi LoRa, LED Activité LoRa
   {
     wakeupPayload = false;
     counter15m++;
 //#ifdef __SerialDebugPoc    
-sprintf(serialbuf, "I2£%d ", counter15m);  // I2£n I2£n I2£n I2£n I2£n I2£n I2£n 
-debugSerial.println(serialbuf); 
+sprintf(serialbuf, "I2£%d ", counter15m);   
+debugSerial.println(serialbuf);       // I2£n I2£n I2£n I2£n I2£n I2£n I2£n
 //#endif
     turnOnRedLED();     // PCB donne GREEN?
     buildLoraPayload();

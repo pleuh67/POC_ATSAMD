@@ -1,13 +1,25 @@
-
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
+//      _____   _____ ____ ___  ____  __                  
+//     |  __ \ / ____|___ \__ \|___ \/_ |                 
+//     | |  | | (___   __) | ) | __) || |  ___ _ __  _ __ 
+//     | |  | |\___ \ |__ < / / |__ < | | / __| '_ \| '_ \
+//     | |__| |____) |___) / /_ ___) || || (__| |_) | |_) |
+//     |_____/|_____/|____/____|____/ |_(_)___| .__/| .__/
+//                                            | |   | |   
+//                                            |_|   |_|   
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
 
-
-/**
- * @brief Initialise le module RTC DS3231
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Initialise le module RTC DS3231
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 #define debugSerialinitRTC  // decommenter pour les messages debugSerial
 void initRTC(void) 
 {
@@ -47,12 +59,12 @@ OLEDDebugDisplay("RTC introuvable");
   }
 }
 
- /**
- * @brief Configure alarme du RTC
- * Alarme 1 : Toutes les secondes (mode programmation)
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Configure alarme du RTC
+// Alarme 1 : Toutes les secondes (mode programmation)
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void DS3231setRTCAlarm1(void) 
 {
   return; 
@@ -76,12 +88,12 @@ debugSerial.println("=== 1s DONE ===");
 // IRQ 1 et lowpower false
 // les IRQ2 suivantes restent opérationnelles
 // remis le 29/06: no interrupt et 
- /**
- * @brief Configure alarme du RTC
- * Alarme 2 : Payload toutes les X minutes
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Configure alarme du RTC
+// Alarme 2 : Payload toutes les X minutes
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void DS3231setRTCAlarm2(void) 
 {
 // Désactiver TOUTES les interruptions temporairement
@@ -117,11 +129,11 @@ debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
     interrupts();
 }
 
-/**
- * @brief Efface les alarmes du RTC
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Efface les alarmes du RTC
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void clearRTCAlarms(void) 
 {
   rtc.clearAlarm(1);
@@ -129,11 +141,11 @@ void clearRTCAlarms(void)
 }
 
 
-/**
- * @brief Hard Reset du RTC
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Hard Reset du RTC
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void DS3231hardReset() 
 {
     // Reset des registres de contrôle
@@ -151,11 +163,11 @@ void DS3231hardReset()
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 }
 
-/**
- * @brief Reset du RTC
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Reset du RTC
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void DS3231CompleteReset() 
 {
     Wire.beginTransmission(0x68);
@@ -181,11 +193,11 @@ void DS3231CompleteReset()
 }
 
 
-/**
- * @brief Synchronise l'heure du microcontrôleur avec celle du DS3231
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Synchronise l'heure du microcontrôleur avec celle du DS3231
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void synchronizeDS3231TimeToMicro(void)
 {
   debugSerial.println("=== SYNCHRONISATION DS3231 -> MICRO ===");
@@ -210,11 +222,11 @@ void synchronizeDS3231TimeToMicro(void)
   OLEDDisplayMessageL8("Heure synchronisee", false, false);
 }
 
-/**
- * @brief Copie l'heure du DS3231 vers le microcontrôleur avec option de forçage
- * @param forcer True pour forcer la copie même si les heures sont proches
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Copie l'heure du DS3231 vers le microcontrôleur avec option de forçage
+// @param forcer True pour forcer la copie même si les heures sont proches
+// @return void
+// ---------------------------------------------------------------------------*
 void copyDS3231TimeToMicro(bool forcer)
 {
     static unsigned long derniereCopie = 0;
@@ -277,11 +289,11 @@ void copyDS3231TimeToMicro(bool forcer)
     }
 }
 
-/**
- * @brief Fonction utilitaire pour forcer une synchronisation immédiate
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Fonction utilitaire pour forcer une synchronisation immédiate
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void forcerSynchronisationDS3231(void)
 {
     debugSerial.println("=== SYNCHRONISATION FORCEE ===");

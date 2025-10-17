@@ -1,4 +1,10 @@
+//       1         2         3         4         5         6         7        7
+//34567890123456789012345678901234567890123456789012345678901234567890123456789
+// IMPRESSION 79 COLONES EN TAILLE 12
+//
+// ---------------------------------------------------------------------------*
 
+// ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
 
@@ -11,11 +17,11 @@
 //   char title[21];           // Titre du menu (20 caractères + \0)
 // } menuLevel_t;
 
-/**
- * @brief Affiche la structure du Menu
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche la structure du Menu
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void debugSerialPrintMenuStruct(menuLevel_t* menu)
 {
   sprintf(serialbuf,"currentMenuDepth %d / title  %s / menuSize %d /selectedIndex %d",    // /* menuList %s /16 */=>  /*menu->menuList[selectedModeIndex],
@@ -23,15 +29,11 @@ void debugSerialPrintMenuStruct(menuLevel_t* menu)
   debugSerial.println(serialbuf); 
 }
 
- 
-
-
-
-/**
- * @brief Affiche la structure de saisir d'une Liste
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche la structure de saisir d'une Liste
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 // listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 6, false, 0, false, 0, "", NULL};
 /*
 typedef struct 
@@ -77,11 +79,11 @@ void debugSerialListStruct(void)
 }
 
 
-/**
- * @brief Affiche la structure de saisir d'un Nombre
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche la structure de saisir d'un Nombre
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 // numberInputContext_t numberInputCtx = {NUMBER_INPUT_IDLE, 0, "", 10, false, 0, false, 0, "", false};
 /*
 typedef struct 
@@ -114,11 +116,11 @@ void debugSerialPrintNumberStruct(void)
   debugSerial.println(serialbuf); 
 }
 
-/**
- * @brief Affiche la structure de saisir d'un Alphnumerique
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche la structure de saisir d'un Alphnumerique
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 // stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, "", 20, false, 0, false, 0, ""};
 /* 
 typedef struct 
@@ -150,11 +152,11 @@ void debugSerialPrintStringStruct(void)
 }
 
 
-/**
- * @brief Affiche heure et status Alarmes sur SerialDebug
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche heure et status Alarmes sur SerialDebug
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void debugSerialTestConnexionDS3231(void)
 {
     debugSerial.println("=== TEST CONNEXION DS3231 ===");
@@ -180,11 +182,11 @@ void debugSerialTestConnexionDS3231(void)
 }
 
 
-/**
- * @brief Affiche l'heure système et l'heure RTC côte à côte pour comparaison
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche l'heure système et l'heure RTC côte à côte pour comparaison
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void debugSerialPrintTimeComparison(void)
 {
     DateTime systemTime = rtc.now();
@@ -215,11 +217,11 @@ void debugSerialPrintTimeComparison(void)
     debugSerial.println("===============================");
 }
 
-/**
- * @brief Affiche l'heure et la date système sur le port série
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche l'heure et la date système sur le port série
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void debugSerialPrintTime(void)
 {
     DateTime systemTime = rtc.now();
@@ -248,11 +250,11 @@ void debugSerialPrintTime(void)
     debugSerial.println("");
 }
 
-/**
- * @brief Affiche un nombre avec 2 chiffres minimum
- * @param number Nombre à afficher
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche un nombre avec 2 chiffres minimum
+// @param number Nombre à afficher
+// @return void
+// ---------------------------------------------------------------------------*
 void debugSerialPrint2digits(int number) 
 {
   if (number >= 0 && number < 10) 
@@ -262,14 +264,12 @@ void debugSerialPrint2digits(int number)
   debugSerial.print(number);
 }
 
-
-
-/**
- * @brief Construit et affiche le message HEXA sur le port série de debug
- * @param payload Pointeur vers les données
- * @param len Longueur des données
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Construit et affiche le message HEXA sur le port série de debug
+// @param payload Pointeur vers les données
+// @param len Longueur des données
+// @return void
+// ---------------------------------------------------------------------------*
 void debugSerialPrintLoraPayload(uint8_t *payload, uint8_t len)
 { int i;
 /*
@@ -288,12 +288,12 @@ void debugSerialPrintLoraPayload(uint8_t *payload, uint8_t len)
     debugSerial.println(len);
 }
 
-/**
- * @brief Affiche des données au format hexadécimal sur le port série
- * @param txt Pointeur vers les données
- * @param len Longueur des données
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche des données au format hexadécimal sur le port série
+// @param txt Pointeur vers les données
+// @param len Longueur des données
+// @return void
+// ---------------------------------------------------------------------------*
 void debugSerialPrintHEXA(char *txt, char len)
 { int i;
   char buf[256];
@@ -313,6 +313,8 @@ void debugSerialPrintHEXA(char *txt, char len)
 }
 
 
+// ---------------------------------------------------------------------------*
+// ---------------------------------------------------------------------------*
 void debugSerialPrintReprogNextAlarm(int IRQ)  
 { DateTime systemTime = rtc.now();
   
@@ -322,6 +324,8 @@ void debugSerialPrintReprogNextAlarm(int IRQ)
 }
 
 
+// ---------------------------------------------------------------------------*
+// ---------------------------------------------------------------------------*
 void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)  
 {   
   sprintf(serialbuf,"IRQ%d prévue pour: %02d:%02d:%02d",
@@ -330,6 +334,8 @@ void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)
 }
 
 
+// ---------------------------------------------------------------------------*
+// ---------------------------------------------------------------------------*
 void debugSerialPrintLoRaStatus()  
 {
   debugSerial.println("\n=== STATUS LoRa ===");
@@ -342,11 +348,11 @@ void debugSerialPrintLoRaStatus()
   debugSerial.println("=====================");
 }  
 
-/**
- * @brief Fonction de test du clavier analogique
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Fonction de test du clavier analogique
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void debugSerialPrintKbdKey(void) 
 { key_code_t key = readKey();
     
@@ -388,11 +394,11 @@ void debugSerialPrintKbdKey(void)
 }
 
 
-/**
- * @brief Affiche les informations système sur debugSerial
- * @param Aucun
- * @return void
- */
+// ---------------------------------------------------------------------------*
+// @brief Affiche les informations système sur debugSerial
+// @param Aucun
+// @return void
+// ---------------------------------------------------------------------------*
 void serialDebugPrintSystemInfo(void)
 {
     debugSerial.println("=== INFORMATIONS SYSTEME ===");
