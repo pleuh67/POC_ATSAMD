@@ -41,11 +41,11 @@
 #define MAX_MENU_DEPTH 5
 // nombre d'options pour le menu
 #define M0_ITEM   5 // Menu Demarrage
-#define M01_ITEM  8 // Menu config. Système
-#define M02_ITEM  6 // Menu config. LoRa
+#define M01_ITEM  7 // Menu config. Système
+#define M02_ITEM  8 // Menu config. LoRa
 #define M03_ITEM  5 // menu Calb. Tensions
 #define M033_ITEM 5
-#define M04_ITEM  5 // Menu Calib. Balances
+#define M04_ITEM  7 // Menu Calib. Balances
 #define M04x_ITEM 4
 
 // ===== EEPROM CONFIGURATION =====

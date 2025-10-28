@@ -205,19 +205,19 @@ debugSerial.println("m01_3F_GetNameRucher demandé");
       case 4: // ReadEEPROM
       {  
 debugSerial.println("m01_5F_readConfig demandé");   
-        m01_5F_readConfig();
+        m01_4F_readConfig();
         break;
       }
       case 5: // WriteEEPROM
       {  
 debugSerial.println("m01_6F_writeConfig demandé");   
-        m01_6F_writeConfig();
+        m01_5F_writeConfig();
         break;
       }
       
-      case 7: // Retour m0_Demarrage
+      case 6: // Retour m0_Demarrage
       {
-        popMenu(); // Retour au menu principal
+        m01_6M_PopMenu();    // Retour au menu principal
         break;
       }  
       default:
@@ -262,7 +262,19 @@ debugSerial.println("m02_4F_GetPayloadDelay demandé");
         m02_4F_GetPayloadDelay();
         break;
       }
-      case 5: // Retour m0_Demarrage
+      case 5: // Demande de connexion réseau LoRa
+      {
+debugSerial.println("m02_5F_Join demandé");   
+        m02_5F_Join(); // Connexion LoRa
+        break;
+      }
+      case 6: // SendPayload 
+      {
+debugSerial.println("m02_6F_SendPayload() demandé");   
+        m02_6F_SendPayLoad(); // Envoyer Payload  
+        break;
+      }
+      case 7: // Retour m0_Demarrage
       {
         popMenu(); // Retour au menu principal
         break;

@@ -21,7 +21,7 @@
 // Variables modifiées par interruptions : controler rtc,nextPayload passé volatile pour test compile pas
 // Variables liées au hardware (registres) : pas modifiés par moi (lib)
 // Variables partagées entre threads : pas de threads
-// Flags de communication ISR ↔ loop() : controler wakeup1Sec, alarm1_enabled, wakeupPayload
+// Flags de communication ISR ↔ loop() : controler wakeup1Sec, alarm1_enabled, alarm2_enabled, wakeupPayload
 
 // ===== FLAGS DEBUG =====
 bool DEBUG_WAKEUP_PAYLOAD = true;    // Activer/désactiver réveil payload
@@ -149,6 +149,7 @@ bool debugOLEDDrawText = false;
 
 // Variables pour gestion des interruptions
 volatile bool alarm1_enabled = true;
+volatile bool alarm2_enabled = true;
 volatile bool wakeupPayload = false;
 volatile bool displayNextPayload = false;
 volatile bool wakeup1Sec = false;
@@ -230,7 +231,7 @@ uint8_t AppEUI_List [6][9] ={
                                    };  // Orange : liste des AppEUI
                                     
 //const 
-uint8_t AppKey_List [56][17] = {  // 5048494C495050454C4F56454C414B4F != PHILIPPELOVEBEES
+uint8_t AppKey_List [6][17] = {  // 5048494C495050454C4F56454C414B4F != PHILIPPELOVEBEES
   {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x4C, 0x41, 0x4F, 0x4F, 0x00},  // 0x4F, 0x4F = 00 Pb
   {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x4C, 0x41, 0x4B, 0x4F, 0x00},  // 0x4B, 0x4F = 50 RN reconnu
   {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x4C, 0x41, 0x4B, 0x4F, 0x00},
@@ -365,6 +366,7 @@ extern unsigned long loopWDT;
 
 // Variables pour gestion des interruptions
 extern volatile bool alarm1_enabled;
+extern volatile bool alarm2_enabled;
 extern volatile bool wakeupPayload;
 extern volatile bool displayNextPayload;
 extern volatile bool wakeup1Sec;

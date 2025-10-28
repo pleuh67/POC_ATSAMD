@@ -696,7 +696,7 @@ typedef struct
  */
 
 
-
+// AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
 void OLEDdisplayInfoScreenLoRa(void)
 { char localOLEDbuf[21] = "12345678901234567890";
   infoScreenState = INFO_SCREEN_ACTIVE;   // pour eviter KKKKKKKK
@@ -707,21 +707,26 @@ void OLEDdisplayInfoScreenLoRa(void)
   OLEDClear();
   OLEDDrawText(1, 0, 0, "==== INFOS LoRa ====");
 
-  snprintf(localOLEDbuf, 21,"#%2d %15s",Ruche.Num_Carte,"Sapin Freudeneck7890");  // ConfigApplicatif_t =>   uint8_t Balance_ID + char    RucherName [20]; 
-  OLEDDrawText(1, 1, 0,localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"SF: %d  Tx: %d min.",LoRa_Config.SpreadingFactor,LoRa_Config.SendingPeriod);  // SF + Tx Interval (min)  
+  snprintf(localOLEDbuf, 21,"#%2d %15s",Ruche.Num_Carte,Data_LoRa.RucherName);  // ConfigApplicatif_t =>   uint8_t Balance_ID + char    RucherName [20]; 
   OLEDDrawText(1, 2, 0,localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"%s",Module_ID);  // DevEUI (N° RN 16 car) 
+// Affichage SF
+  snprintf(localOLEDbuf, 21,"SF: %d  Tx: %d min.",LoRa_Config.SpreadingFactor,LoRa_Config.SendingPeriod);  // SF + Tx Interval (min)  
+  OLEDDrawText(1, 3, 0,localOLEDbuf);
+// Affichage DevEUI
+  snprintf(localOLEDbuf, 21,"SN: %16s",Module_ID);  // DevEUI (N° RN 16 car) 
   // ou HWEUI_List[Ruche.Num_Carte] à vérifier
-  OLEDDrawText(1, 3, 0, localOLEDbuf);
-// Appkey => 5048494C495050454C4F56454C414B4F (32 char vers 16 uint8_t
-  snprintf(localOLEDbuf, 21,"%20s","ApK: 012345678901234");  // AppKey 1/2   
-  OLEDDrawText(1, 4, 0,localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"%20s","+5601234567890123456");  // AppKey 2/2   
+  OLEDDrawText(1, 4, 0, localOLEDbuf);
+  
+// AK => AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];  
+// 5048494C49505045 4C4F56454C414B4F != PHILIPPELOVEBEES
+  snprintf(localOLEDbuf, 21,"AK: %s",AppKey_List[Ruche.Num_Carte]); 
   OLEDDrawText(1, 5, 0,localOLEDbuf);
-// AppEUI => 414245494C4C4533  (16 char vers 8 uint8_t ) 
- 
-  snprintf(localOLEDbuf, 21,"AE: %s","414245494C4C4533");  // AppEUI    
+
+//  snprintf(localOLEDbuf, 21,"+ %s",&AppKey_List[Ruche.Num_Carte][16]);  // AppKey 1/2 => "5048494C49505045"
+//  OLEDDrawText(1, 5, 0,localOLEDbuf);
+
+// AE => AppEUI => 414245494C4C4533  (16 char vers 8 uint8_t )
+  snprintf(localOLEDbuf, 21,"AE: %s",AppEUI_List[Ruche.Num_Carte]);  
   OLEDDrawText(1, 6, 0,localOLEDbuf);
 
  
@@ -768,7 +773,7 @@ int num = 1;
   OLEDDrawText(1, 3, 0, localOLEDbuf);
   snprintf(localOLEDbuf, 21,"Echelle : %d ", Jauge[Peson[Ruche.Num_Carte][bal-1]][1]);
   OLEDDrawText(1, 4, 0, localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"Temp    : %d ", Jauge[Peson[Ruche.Num_Carte][bal-1]][3]);
+  snprintf(localOLEDbuf, 21,"Comp. T : %d ", Jauge[Peson[Ruche.Num_Carte][bal-1]][3]);
   OLEDDrawText(1, 5, 0, localOLEDbuf);
 
   snprintf(localOLEDbuf, 21, "#%1d - Num Pes:%2d", Ruche.Num_Carte,Peson[Ruche.Num_Carte][bal-1]);

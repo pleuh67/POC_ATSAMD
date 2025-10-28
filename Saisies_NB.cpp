@@ -48,7 +48,7 @@
 // ===== FONCTIONS DE SÉLECTION DANS UNE LISTE ===== 12
 // ===== FONCTIONS DE SAISIE NUMÉRIQUE ===== 250
 #define __SerialDebugSaisie   // decommenter pour afficher messages debug
-// ===== FONCTIONS DE SAISIE ALPHANUMÉRIQUE ===== 637
+// ===== FONCTIONS DE SAISIE ALPHANUMÉRIQUE ===== 
 // suite HEXA
 // suite HEURE
 // suite DATE
@@ -1864,6 +1864,13 @@ void cancelTimeInput(void)
   OLEDDisplayMessageL8("Saisie annulee", false, false);  
   // Reset du contexte
   timeInputCtx.state = TIME_INPUT_IDLE;
+
+// retour dans l'affichage et traitement du menu "Père"              
+  if (currentMenuDepth > 0)           // Revenir au menu
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }
 }
 
 // ---------------------------------------------------------------------------*
@@ -2315,6 +2322,13 @@ void cancelDateInput(void)
   
   // Reset du contexte
   dateInputCtx.state = DATE_INPUT_IDLE;
+  
+// Revenir au menu, déplacé de Handle.cpp, après cancelDateInput();
+  if (currentMenuDepth > 0)
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }
 }
 
 // ---------------------------------------------------------------------------*

@@ -390,7 +390,7 @@ debugSerial.print("6");   // 666666666666666666666666666666666666666666666
   if (wakeupPayload)                          // Envoi LoRa, LED Activité LoRa
   {
 
-void GestionEnCours();
+GestionEnCours("ISR2a");  // Surveillance pour Debug
     
     wakeupPayload = false;
     counterPayload++;  // compte le nombre d'envois Payload
@@ -414,7 +414,7 @@ debugSerial.print("7");   // 777777777777777777777777777777777777
 //   isInfoScreenActive() à inactive  commentaire ligne 215 handle !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // get void GestionEnCours()
-
+/*
 15:49:43.076 -> Info WDT : 290679
 15:49:43.076 -> Info WDT : 290680
 15:49:43.076 -> Info WDT : 290680
@@ -457,9 +457,8 @@ debugSerial.print("7");   // 777777777777777777777777777777777777
 15
 
 // set void GestionEnCours()
-
-void GestionEnCours();
-
+*/
+GestionEnCours("ISR2b");  // Surveillance pour Debug
   }
 #ifdef __SerialDebugPoc    
 debugSerial.print("8");   // 888888888888888888888888888888888888

@@ -44,7 +44,7 @@ const char* List_Ruchers[] = {
 
 // Définition des menus
 
-#define M0_ITEM 4 // Maintenir dans Define.h
+#define M0_ITEM 5 // Maintenir dans Define.h
 const char* m0_Demarrage[] = {
   "Page INFOS     (P)",  // m0_0E_PageInfosSyst()
   "CONFIG. SYSTEME(M)",  // m0_1M_ConfigSystem() Date, Time, N° LoRa
@@ -53,26 +53,27 @@ const char* m0_Demarrage[] = {
   "CALIB. Bal.  (m04)",  // m0_4M_CalibBal() VBat, Vsol, VLum
 };
 
-#define M01_ITEM 8 // Maintenir dans Define.h
+#define M01_ITEM 7 // Maintenir dans Define.h
 const char* m01_ConfigSystem[] = {
   "SAISIE DATE    (S)",  // m01_0F_GetDate()
   "SAISIE HEURE   (S)",  // m01_1F_GetTime()
-  "NUM. RUCHER    (S)",  // m01_3F_NumRucher()
-  "NOM. RUCHER    (S)",  // m01_4F_NomRucher()
-  "Lire EEPROM    (F)",  // m01_5F_readConfig()
-  "Ecrire EEPROM  (F)",  // m01_6F_writeConfig()
-  "Reserve N/A (m013)",  // m01_7F_Reserve()
-  "RET  popMenu(m0)"     // m01_8M_PopMenu()
+  "NUM. RUCHER    (S)",  // m01_2F_NumRucher()
+  "NOM. RUCHER    (S)",  // m01_3F_NomRucher()
+  "Lire EEPROM    (F)",  // m01_4F_readConfig()
+  "Ecrire EEPROM  (F)",  // m01_5F_writeConfig()
+  "RET  popMenu(m0)"     // m01_6M_PopMenu()
 };
 
-#define M02_ITEM 6 // Maintenir dans Define.h
+#define M02_ITEM 8 // Maintenir dans Define.h
 const char* m02_ConfigLoRa[] = {
   "INFOS LoRa     (P)",  // m02_0E_PageInfosLoRa() // afficher prochain Payload
   "DevEUI         (S)",  // m02_1F_DevEUI()
   "AppEUI         (S)",  // m02_2F_AppEUI()
   "Spread Fact    (S)",  // m02_3F_SpreadFact()
   "PayLoad time   (S)",  // m02_4F_PayLoad() // Afficher prochain Payload
-  "RET  popMenu(m0)"     // m02_5M_PopMenu()
+  "Join LoRa      (S)",  // m02_5F_Join() // Connexion LoRa
+  "Send Payload   (S)",  // m02_6F_SendPayLoad() // Envoyer Payload  
+  "RET  popMenu(m0)"     // m02_7M_PopMenu()
 };
 
 #define M03_ITEM 5 // Maintenir dans Define.h
@@ -93,13 +94,15 @@ const char* m033_Reserve[] = {
   "RET   popMenu (m03)"     // Retour menu principal
 };
 
-#define M04_ITEM 5 // Maintenir dans Define.h
+#define M04_ITEM 7 // Maintenir dans Define.h
 const char* m04_CalibBalances[] = {
-  "info.  Bal #1  (F)",  // m04_0F_CalibBal_1()  /!\ sortie info, c'est la pagaille!!!!
+  "Calib. Bal #1  (F)",  // m04_0F_CalibBal_1()
   "Calib. Bal #2  (F)",  // m04_1F_CalibBal_2()
   "Calib. Bal #3  (F)",  // m05_2F_CalibBal_3()
   "Calib. Bal #4  (F)",  // m05_3F_CalibBal_4()
-  "RET  popMenu  (m0)"   // m05_4M_PopMenu()
+  "info.  Balances(F)",  // m04_4F_CalibBal_1()  /!\ sortie info, c'est la pagaille!!!!
+  "Poids  Balances(F)",  // m04_5F_PoidsBal()  /!\ sortie info, c'est la pagaille!!!!  
+  "RET  popMenu  (m0)"   // m05_6M_PopMenu()
 };
 
 

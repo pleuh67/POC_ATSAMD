@@ -20,6 +20,19 @@
 
 
 /*
+
+// Relance la navigation menu après saisie  ou timeout
+  if (currentMenuDepth > 0) 
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }
+
+
+*/
+
+
+/*
  * Fonctions lancées par les menus
  * 
  * lancement : menuNNN_FN_WhatToDo()     // ex: menu000_F7_GetTime()
@@ -153,14 +166,16 @@ debugSerial.println(dateBuffer);        // Ici vous pouvez traiter la date et re
   jour += (byte)dateBuffer[1] -48;
   mois = ((byte)dateBuffer[3] -48)*10;
   mois += (byte)dateBuffer[4] -48;
-  
   annee = ((byte)dateBuffer[8] -48)*10;
   annee += (byte)dateBuffer[9] -48;
   
   systemTime = rtc.now();
-  rtc.adjust(DateTime(annee/*-2000*/, mois, jour, systemTime.hour(), systemTime.minute(), systemTime.second()));  
-
-debugSerial.println("mise à la date DS3231");
+  rtc.adjust(DateTime(annee, mois, jour, systemTime.hour(), systemTime.minute(), systemTime.second()));  
+/*
+  rtc.adjust(DateTime(systemTime.year()-2000, systemTime.month(), systemTime.day(), hour, minute, second));  
+*/
+sprintf(serialbuf, "mise à la date DS3231 %d/%d/%d",annee,mois,jour);
+debugSerial.println(serialbuf);
   copyDS3231TimeToMicro(1);
   synchronizeDS3231TimeToMicro();
 
@@ -211,6 +226,8 @@ debugSerial.println(timeBuffer);        // Ici vous pouvez traiter l'heure et re
 debugSerial.println("mise à l'heure DS3231");
   copyDS3231TimeToMicro(1);
   synchronizeDS3231TimeToMicro();
+
+  
 debugSerial.println("Reprogramme IRQ2");  
   DS3231setRTCAlarm2(); // Reprogrammer prochaine alarme dans n min
 // Activer la liste de démarrage quand fin saisie TIME : void finalizeTimeInput(char* outputTime)
@@ -223,9 +240,22 @@ debugSerial.println("Reprogramme IRQ2");
 
 
 void m01_2F_GetNumRucher()  
-{
+{ static char currentNumber[3] = "03";
+
   debugSerial.print("Appel d'une Fonction: ");      
-  debugSerial.println("m01_2F_GetNumRucher()");       
+  debugSerial.println("m01_2F_GetNumRucher()");   
+
+//sprintf(currentNumber,"03");
+  startNumberInput("SAISIE NOMBRE:", currentNumber, 2, false);
+
+
+// Si pas fonction_Done();
+// Activer la liste de démarrage quand fin saisie 
+  if (currentMenuDepth > 0)
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }      
 }
 
 void m01_2F_GetNumRucherDone()  
@@ -234,44 +264,73 @@ void m01_2F_GetNumRucherDone()
   debugSerial.println("m01_2F_GetNumRucherDone()");       
 }
 
-
 void m01_3F_GetNameRucher()  // Saisir dans la liste List_Ruchers[], 12 elements
-{
+{ static char currentString[21];
   debugSerial.print("Appel d'une Fonction: ");      
-  debugSerial.println("m01_3F_GetNameRucher()");       
+  debugSerial.println("m01_4F_GetNameRucher()");   
+
+         
+sprintf(currentString,Data_LoRa.RucherName); // pointeur sur valeur courante traiter
+          startStringInput("SAISIE TEXTE:", currentString, 20);
+
+// Si pas fonction_Done();
+// Activer la liste de démarrage quand fin saisie
+  if (currentMenuDepth > 0)
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }
+      
 }
 
 void m01_3F_GetNameRucherDone()  
 {
   debugSerial.print("Appel d'une Fonction: ");      
-  debugSerial.println("m01_3F_GetNameRucherDone()");       
+  debugSerial.println("m01_4F_GetNameRucherDone()");       
 }
 
-void m01_5F_readConfig()  
+void m01_4F_readConfig()  
 {
   debugSerial.print("Appel d'une Fonction: ");      
-  debugSerial.println("m01_5F_readConfig()");       
+  debugSerial.println("m01_5F_readConfig() à developper");     
+
+// 
+
+
+// Si pas fonction_Done();
+// Activer la liste de démarrage quand fin saisie
+  if (currentMenuDepth > 0)
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }
 }
 
-void m01_5F_readConfigDone()  
+void m01_4F_readConfigDone()  
 {
   debugSerial.print("Appel d'une Fonction: ");      
-  debugSerial.println("m01_5F_readConfigDone()");       
+  debugSerial.println("m01_5F_readConfigDone() à developper");       
 }
 
-void m01_6F_writeConfig()  
+void m01_5F_writeConfig()  
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("m01_6F_writeConfig()");       
+
+// Si pas fonction_Done();
+// Activer la liste de démarrage quand fin saisie
+  if (currentMenuDepth > 0)
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }
 }
 
-void m01_6F_writeConfigDone()  
+void m01_5F_writeConfigDone()  
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("m01_6F_writeConfigDone()");       
 }
-
-
 
 //  "RET  popMenu(M000)"       // 6: Retour menu principal
 void m01_6M_PopMenu()  // retour menu000Demarrage
@@ -308,8 +367,11 @@ void m02_0E_PageInfosLoRa()
   OLEDdisplayInfoScreenLoRa(); 
 }
 
-
-void m02_1F_GetHex()  // DevEUI
+// doit on saisir AppKey ????? Plutot que DevEUI (N° du Module LoRa) !!!!!!!!!!!!
+// AppKey => {0x50,0x48,0x49,0x4C,0x49,0x50,0x50,0x45,0x4C,0x4F,0x56,0x45,0x42,0x45,0x45,0x53,0x00} 
+// 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
+// AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
+void m02_1F_GetHex()  // DevEUI  (N° du Module LoRa)
 { static char hexBuffer[41] = "0123456789ABCDEF0123456789ABCDEF01234567"; // Buffer pour l'hexa
 
 debugSerial.println("Lancement saisie HEXA");
@@ -318,8 +380,11 @@ strcpy(hexBuffer,"0004A30B00EEEE01");
   startHexInput(hexBuffer); 
 }           
 
-void m02_1F_GetHexDone()    // DevEUI
+void m02_1F_GetHexDone()    // DevEUI  (N° du Module LoRa)
 { static char hexBuffer[41] = "0123456789ABCDEF0123456789ABCDEF01234567"; // Buffer pour l'hexa
+
+// INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
+//   DevEUI = (uint8_t *)SN2483_List[Ruche.Num_Carte];
 
   finalizeHexInput(hexBuffer); // Récupérer chaine HEXA
 debugSerial.print("Nouvelle chaine DevEUI: ");
@@ -331,9 +396,17 @@ debugSerial.println(hexBuffer);        // Ici vous pouvez traiter l'heure et rev
   }
 }
 
+
+
+// AppEUI => {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x35, 0x00} = ABEILLE5
 void m02_2F_GetHex() // AppEUI
 {
 debugSerial.println("Appel m02_2F_GetHex AppEUI - a implementer");   
+
+// Init AppEUI
+//      AppEUI = (uint8_t *)AppEUI_List[Ruche.Num_Carte];
+
+
 
   if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
   {
@@ -352,7 +425,6 @@ debugSerial.println("Appel m02_2F_GetHexDone AppEUI - a implementer");
     startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
   }    
 }
-
 
 void m02_3L_GetSF() // Spread Factor, saisir dans la liste List_SF[], 3 elements
 {
@@ -390,7 +462,7 @@ void m02_4F_GetPayloadDelay() // Delais Payload
 
 void m02_4F_GetPayloadDelayDone()    // Delais Payload
 {
- debugSerial.println("Appel m02_4F_GetPayloadDelayDone - a implementer");   
+debugSerial.println("Appel m02_4F_GetPayloadDelayDone - a implementer");   
 
   if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
   {
@@ -399,8 +471,80 @@ void m02_4F_GetPayloadDelayDone()    // Delais Payload
   }       
 }
 
+
+void m02_5F_Join() // Connexion LoRa
+{
+debugSerial.println("Appel m02_5F_Join - a tester");   
+/*
+// INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
+      DevEUI = (uint8_t *)SN2483_List[Ruche.Num_Carte];
+// Init AppEUI
+      AppEUI = (uint8_t *)AppEUI_List[Ruche.Num_Carte];
+// Init AppKey
+      AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
+       break;  // sortie du for() quand trouvé egalité.... pas terrible!!!  
+
+
+*/
+GestionEnCours("m02_5Fa");
+  init2483A();  // Réinitialise DevEUI, AppEUI et AppKey
+debugSerial.println("Fin init2483A");   
+ GestionEnCours("m02_5Fb");
+  initLoRa();   // Reconnecte et envoie Payload + affiche résultat
+GestionEnCours("m02_5Fc");
+debugSerial.println("Appel m02_5F_Join - FIN"); 
+
+
+// Relance la navigation menu execution
+  if (currentMenuDepth > 0) 
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }
+
+
+
+
+}
+
+
+void m02_5F_JoinDone() // Connexion LoRa
+{
+    // pas besoin ???
+}
+  
+  
+void m02_6F_SendPayLoad() // Envoyer Payload  
+{
+    alarm1_enabled = false;  // Bloquer alarme 1
+    alarm2_enabled = false;  // Bloquer alarme 2
+debugSerial.println("Appel m02_6F_SendPayLoad - a tester");   
+    turnOnRedLED();     // PCB donne GREEN?
+    buildLoraPayload();
+#ifdef __SendLoRa
+  sendLoRaPayload((uint8_t*)payload,19);   // hex
+#endif    
+    turnOffRedLED();
+debugSerial.println("Fin Payload, Reactive IRQ1");    
+    alarm1_enabled = true;   // Réactiver alarme 1 
+    alarm2_enabled = true;   // Réactiver alarme 2 
+
+// Relance la navigation menu après execution
+  if (currentMenuDepth > 0) 
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  }
+
+
+}
+
+
+
+
+
 //  "RET  popMenu(M000)"       // 5: Retour menu principal
-void m02_5M_PopMenu()  // retour menu000Demarrage
+void m02_7M_PopMenu()  // retour menu000Demarrage
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("PopMenu()");  

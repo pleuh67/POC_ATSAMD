@@ -52,6 +52,8 @@ debugSerial.print("\n$irq\n");   // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 // ALARME 2 : Payload périodique    
   if (rtc.alarmFired(2)) 
   {
+    if (!alarm2_enabled) 
+      return;     // interruption execution code de IRQ1 pendant IRQ2
     wakeup1Sec = false;    // annule si activée
 displayNextPayload = true;
     alarm1_enabled = false;  // Bloquer alarme 1

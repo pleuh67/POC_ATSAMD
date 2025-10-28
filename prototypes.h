@@ -80,11 +80,11 @@ void m01_2F_GetNumRucherDone(void);
 void m01_3F_GetNameRucher(void);
 void m01_3F_GetNameRucherDone(void);
 
-void m01_5F_readConfig(void);
-void m01_5F_readConfigDone(void);
+void m01_4F_readConfig(void);
+void m01_4F_readConfigDone(void);
 
-void m01_6F_writeConfig(void);
-void m01_6F_writeConfigDone(void);
+void m01_5F_writeConfig(void);
+void m01_5F_writeConfigDone(void);
 
 void m01_6M_PopMenu(void);  // Retour menu précédent m0_Demarrage
 
@@ -105,7 +105,12 @@ void m02_3L_GetSFDone(void);
 void m02_4F_GetPayloadDelay(void);  // Periodicité Payload
 void m02_4F_GetPayloadDelayDone(void);
 
-void m02_5M_PopMenu(void);          // Retour menu précédent m0_Demarrage
+void m02_5F_Join(void); // Connexion LoRa
+void m02_5F_JoinDone(void); // Connexion LoRa
+  
+void m02_6F_SendPayLoad(void); // Envoyer Payload  
+
+void m02_7M_PopMenu(void);          // Retour menu précédent m0_Demarrage
 
 
 // ---------------------------------------------------------------------------*
@@ -382,7 +387,7 @@ void executeOperationMode(void);
 void handleProgrammingMode(void);
 void executeProgrammingMode(void);
 // fonctions debug :
-void GestionEnCours(void);   // affiche le type de traitement en cours de gestion par le handler
+void GestionEnCours(char *from);   // affiche le type de traitement en cours de gestion par le handler
 
 void onRTCAlarm(void);
 
