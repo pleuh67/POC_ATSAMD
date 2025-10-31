@@ -19,47 +19,33 @@
 // info afficher MODE PE
 
 
-/*
-
-// Relance la navigation menu après saisie  ou timeout
-  if (currentMenuDepth > 0) 
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
-
-
-*/
-
-
-/*
- * Fonctions lancées par les menus
- * 
- * lancement : menuNNN_FN_WhatToDo()     // ex: menu000_F7_GetTime()
- * Traitement: menuNNN_FN_WhatToDoDone() // ex: menu000_F7_GetTimeDone()    
- * 
- * 
- * 
- * menu000_F6_GetDate()
- * menu000_F7_GetTime() + Done
- * menu000_F8_GetHex()  + Done
- * 
- * prévoir inits param Lora :
+// Fonctions lancées par les menus
+// 
+// lancement : menuNNN_FN_WhatToDo()     // ex: menu000_F7_GetTime()
+// Traitement: menuNNN_FN_WhatToDoDone() // ex: menu000_F7_GetTimeDone()    
+// 
+// 
+// 
+// menu000_F6_GetDate()
+// menu000_F7_GetTime() + Done
+// menu000_F8_GetHex()  + Done
+// 
+// prévoir inits param Lora :
 //  uint8_t HWEUI [20];       // ID RN2483: "0004A30B00EEEE01"
 //  uint8_t AppEUI [10];      // AppEUI: {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31, 0x00} menuxxx_xx_GetHex()
 //  uint8_t AppKey [18];      // AppKEY: // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
 //// {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00} 
 //  uint8_t SpreadingFactor;  // 7, 9 et 12 echec freudeneck
 //  uint8_t SendingPeriod;    // 15 minutes = 500 sans IT
- * 
- * Prévoir inits generaux + Bal
+// 
+// Prévoir inits generaux + Bal
 //  Date:  menuxxx_xx_GetDate()
 //  Heure: menuxxx_xx_GetTime()
 //  uint8_t Balance_ID;           // ID Rucher           xx  uint8_t
 //  char    RucherName [20];      // Localisation Rucher (saisir direct ou liste + "autre")
 //  version, mail (pour le fun), 
- * 
- * Prévoir Config Hardware
+// 
+// Prévoir Config Hardware
 //  uint8_t HX711Clk_0;           // HX711#0 parameters
 //  uint8_t HX711Dta_0;
 //  float   HX711ZeroValue_0;
@@ -83,8 +69,8 @@
 //  float   LDRBrightnessScale;   // 
 //  float   VSolScale;            //  
 //  float   VBatScale;
- * 
- */
+// 
+// ---------------------------------------------------------------------------*
 
 
 // ---------------------------------------------------------------------------*
@@ -94,8 +80,14 @@
 void m0_0E_PageInfosSyst()
 {
   debugSerial.println("CONFIG. SYSTEME - Ecran INFOS demandé");   
-  infoScreenRefreshTime = true;  
+  PageInfosSystRefresh = true;  
   OLEDdisplayInfoScreenSyst(); 
+}
+
+// trouver ou appeler
+void m0_0E_PageInfosSystDone()
+{
+  PageInfosSystRefresh = false;
 }
 
 // "CONFIG. SYSTEME(F)"
@@ -149,7 +141,7 @@ sprintf(serialbuf, "%02d:%02d:%02d    %02d/%02d/%02d",
         systemTime.day(), systemTime.month(), systemTime.year()-2000);
 debugSerial.println(serialbuf);
   sprintf(serialbuf, "%02d/%02d/%04d",systemTime.day(), systemTime.month(), systemTime.year());
-  startDateInput(serialbuf); 
+  startDateInput("-- SAISIR LA DATE --", serialbuf); 
 }               
 
 
@@ -185,12 +177,9 @@ debugSerial.println("Reprogramme IRQ2");
 
   
 // Activer la liste de démarrage quand fin saisie Date : void finalizeDateInput(char* outputDate)
-  if (currentMenuDepth > 0)
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  } 
-}
+
+  backMenu(); 
+  }
 
 void m01_1F_GetTime()
 { DateTime systemTime;     
@@ -203,7 +192,7 @@ sprintf(serialbuf, "%02d:%02d:%02d    %02d/%02d/%02d",
         systemTime.day(), systemTime.month(), systemTime.year()-2000);
 debugSerial.println(serialbuf);
   sprintf(serialbuf, "%02d:%02d:%02d",systemTime.hour(), systemTime.minute(), systemTime.second());
-  startTimeInput(serialbuf); 
+  startTimeInput("-- SAISIR L HEURE --",serialbuf); 
 }           
 
 void m01_1F_GetTimeDone()    
@@ -231,62 +220,64 @@ debugSerial.println("mise à l'heure DS3231");
 debugSerial.println("Reprogramme IRQ2");  
   DS3231setRTCAlarm2(); // Reprogrammer prochaine alarme dans n min
 // Activer la liste de démarrage quand fin saisie TIME : void finalizeTimeInput(char* outputTime)
-  if (currentMenuDepth > 0)
+  backMenu(); 
+/*  if (currentMenuDepth > 0)
   {
     menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
     startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
   }
+*/  
 }
 
-
+// Saisie de ConfigMateriel.Noeud_LoRa
 void m01_2F_GetNumRucher()  
-{ static char currentNumber[3] = "03";
+{ static char number[4];
 
-  debugSerial.print("Appel d'une Fonction: ");      
-  debugSerial.println("m01_2F_GetNumRucher()");   
-
-//sprintf(currentNumber,"03");
-  startNumberInput("SAISIE NOMBRE:", currentNumber, 2, false);
-
-
-// Si pas fonction_Done();
-// Activer la liste de démarrage quand fin saisie 
-  if (currentMenuDepth > 0)
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }      
+debugSerial.print("Appel d'une Fonction: m01_2F_GetNumRucher()");   
+  sprintf(number,"%d", ConfigMateriel.Noeud_LoRa);
+debugSerial.println(ConfigMateriel.Noeud_LoRa);   
+debugSerial.println(number);   
+  startNumInput("-NUM. SYSTEME LoRa-",number, 4, false, false, 0, 10);
 }
 
+// Sauvegarde de ConfigMateriel.Noeud_LoRa
 void m01_2F_GetNumRucherDone()  
-{
-  debugSerial.print("Appel d'une Fonction: ");      
-  debugSerial.println("m01_2F_GetNumRucherDone()");       
+{ static char number[9] = ""; // Buffer pour le numérique
+
+debugSerial.print("Appel d'une Fonction: ");      
+debugSerial.println("m01_2F_GetNumRucherDone()");   
+  finalizeNumInput(number); // Récupérer saisie finale  
+debugSerial.print("Nouveau nombre: ");
+debugSerial.println(number);
+  ConfigMateriel.Noeud_LoRa = atoi(number);
+debugSerial.println(ConfigMateriel.Noeud_LoRa);   
+  backMenu(); 
 }
 
+
+// Saisie de ConfigApplicatif.RucherName
 void m01_3F_GetNameRucher()  // Saisir dans la liste List_Ruchers[], 12 elements
 { static char currentString[21];
-  debugSerial.print("Appel d'une Fonction: ");      
-  debugSerial.println("m01_4F_GetNameRucher()");   
+debugSerial.println("Appel d'une Fonction: m01_4F_GetNameRucher()");   
 
-         
-sprintf(currentString,Data_LoRa.RucherName); // pointeur sur valeur courante traiter
-          startStringInput("SAISIE TEXTE:", currentString, 20);
-
-// Si pas fonction_Done();
-// Activer la liste de démarrage quand fin saisie
-  if (currentMenuDepth > 0)
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
-      
+  sprintf(currentString,"%s", ConfigApplicatif.RucherName);
+  debugSerial.print("Appel avec: "); debugSerial.println(currentString);     
+//sprintf(currentString,Data_LoRa.RucherName); // pointeur sur valeur courante traiter
+  startStringInput("---- NOM RUCHER ----", currentString, 20);
 }
 
+// Sauvegarde de ConfigApplicatif.RucherName
 void m01_3F_GetNameRucherDone()  
-{
+{ static char currentString[21];
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("m01_4F_GetNameRucherDone()");       
+
+  finalizeStringInput(currentString); // Récupérer saisie finale  
+debugSerial.print("Nouveau nom: ");
+debugSerial.println(currentString);
+  sprintf(ConfigApplicatif.RucherName,"%s", currentString);
+debugSerial.println(ConfigApplicatif.RucherName);   
+  backMenu(); 
 }
 
 void m01_4F_readConfig()  
@@ -299,17 +290,21 @@ void m01_4F_readConfig()
 
 // Si pas fonction_Done();
 // Activer la liste de démarrage quand fin saisie
+  backMenu(); 
+  /*
   if (currentMenuDepth > 0)
   {
     menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
     startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
   }
+*/  
 }
 
 void m01_4F_readConfigDone()  
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("m01_5F_readConfigDone() à developper");       
+  backMenu(); // supprimer dans pas Done  
 }
 
 void m01_5F_writeConfig()  
@@ -319,17 +314,14 @@ void m01_5F_writeConfig()
 
 // Si pas fonction_Done();
 // Activer la liste de démarrage quand fin saisie
-  if (currentMenuDepth > 0)
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
+  backMenu(); 
 }
 
 void m01_5F_writeConfigDone()  
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("m01_6F_writeConfigDone()");       
+  backMenu(); // supprimer dans pas Done
 }
 
 //  "RET  popMenu(M000)"       // 6: Retour menu principal
@@ -363,9 +355,18 @@ Data_LoRa.
 void m02_0E_PageInfosLoRa()
 {
   debugSerial.println("CONFIG. LoRa - Ecran INFOS demandé");   
-  infoScreenRefreshTime = true;  
+  PageInfosLoRaRefresh = true;  
   OLEDdisplayInfoScreenLoRa(); 
 }
+
+// trouver ou appeler
+void m02_0E_PageInfosLoRaDone()
+{
+  PageInfosLoRaRefresh = false;
+}
+
+
+
 
 // doit on saisir AppKey ????? Plutot que DevEUI (N° du Module LoRa) !!!!!!!!!!!!
 // AppKey => {0x50,0x48,0x49,0x4C,0x49,0x50,0x50,0x45,0x4C,0x4F,0x56,0x45,0x42,0x45,0x45,0x53,0x00} 
@@ -377,7 +378,7 @@ void m02_1F_GetHex()  // DevEUI  (N° du Module LoRa)
 debugSerial.println("Lancement saisie HEXA");
 debugSerial.println("CONFIG. SYSTEME - Demande saisie HEXA DevEUI");
 strcpy(hexBuffer,"0004A30B00EEEE01");
-  startHexInput(hexBuffer); 
+  startHexInput(" titre fenetre", hexBuffer); 
 }           
 
 void m02_1F_GetHexDone()    // DevEUI  (N° du Module LoRa)
@@ -389,11 +390,7 @@ void m02_1F_GetHexDone()    // DevEUI  (N° du Module LoRa)
   finalizeHexInput(hexBuffer); // Récupérer chaine HEXA
 debugSerial.print("Nouvelle chaine DevEUI: ");
 debugSerial.println(hexBuffer);        // Ici vous pouvez traiter l'heure et revenir au menu
-  if (currentMenuDepth > 0)
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
+  backMenu(); 
 }
 
 
@@ -496,15 +493,7 @@ debugSerial.println("Appel m02_5F_Join - FIN");
 
 
 // Relance la navigation menu execution
-  if (currentMenuDepth > 0) 
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
-
-
-
-
+  backMenu(); 
 }
 
 
@@ -529,18 +518,8 @@ debugSerial.println("Fin Payload, Reactive IRQ1");
     alarm1_enabled = true;   // Réactiver alarme 1 
     alarm2_enabled = true;   // Réactiver alarme 2 
 
-// Relance la navigation menu après execution
-  if (currentMenuDepth > 0) 
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
-
-
+  backMenu(); // Relance la navigation menu après execution
 }
-
-
-
 
 
 //  "RET  popMenu(M000)"       // 5: Retour menu principal
@@ -634,13 +613,7 @@ void m04_nM_CalibBal_bal()
   
   infoScreenRefreshTime = true;  
   OLEDdisplayInfoBal();     // part dans KKKKKKKKK
-
-  if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
-  
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
 
@@ -658,16 +631,8 @@ debugSerial.println("Appel m04_nM_CalibBal_1 - a implementer");
   infoScreenRefreshTime = true;  
   OLEDdisplayInfoBal();     // part dans KKKKKKKKK
 
-
-
-// Relance la navigation menu après saisie  ou timeout
-  if (currentMenuDepth > 0) 
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
-
-  
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
+   
 // listInputCtx.state == LIST_INPUT_ACTIVE;  // reste dans les 
 }
 

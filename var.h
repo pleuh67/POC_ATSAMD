@@ -24,14 +24,14 @@
 // Flags de communication ISR ↔ loop() : controler wakeup1Sec, alarm1_enabled, alarm2_enabled, wakeupPayload
 
 // ===== FLAGS DEBUG =====
-bool DEBUG_WAKEUP_PAYLOAD = true;    // Activer/désactiver réveil payload
-//bool DEBUG_WAKEUP_PAYLOAD = false;    // Activer/désactiver réveil payload
+bool DEBUG_INTERVAL_1SEC = true;       // Activer IRQ1 réveil 1 seconde
+//bool DEBUG_INTERVAL_1SEC = false;     // désactiver IRQ1 réveil 1 seconde
 
-bool DEBUG_INTERVAL_1SEC = true;     // Activer/désactiver réveil 1 seconde
-// bool DEBUG_INTERVAL_1SEC = false;     // Activer/désactiver réveil 1 seconde
+bool DEBUG_WAKEUP_PAYLOAD = true;      // Activer IRQ2 réveil payload
+//bool DEBUG_WAKEUP_PAYLOAD = false;    // désactiver IRQ2 réveil payload
 
 //bool DEBUG_LOW_POWER = true;         // Activer/désactiver basse consommation
-bool DEBUG_LOW_POWER = false;         // Activer/désactiver basse consommation
+bool DEBUG_LOW_POWER = false;        // Activer/désactiver basse consommation
 
 unsigned long loopWDT = 0;
 
@@ -59,83 +59,38 @@ bool displayListDebug = false;
 listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 0, 10, 0, 0, false, false, 0, false, 0, 0, 0, "", NULL};
 
 // Contexte de saisie Numérique
-numberInputContext_t numberInputCtx = {NUMBER_INPUT_IDLE, 0, "", 10, false, 0, false, 0, "", false};
+numInputContext_t numInputCtx = {NUM_INPUT_IDLE, 0, 0xFF, 0, 0xFF, 10, "", "", false, 0, false, false, 0, 0, 0xFF, 0xFF, 16, 0, TIMEOUT_SAISIE, false, false, 0, 9999, true, 0xFF, ""};
 bool displayNumberDebug = false;
 
 // Contexte de saisie Alphanumérique
-stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, "", 20, false, 0, false, 0, ""};
+stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, 0xFF, 20, "", "", false, 0, false, false, 0, 0, TIMEOUT_SAISIE, true, 0xFF, ""};
 bool displayStringDebug = false;
 
 // Contexte de saisie HEXA
-hexInputContext_t hexInputCtx = {HEX_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, 0xFF, 0xFF, 16, 0, 30000, false, true, 0xFF};
+hexInputContext_t hexInputCtx = {HEX_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, 0xFF, 0xFF, 16, 0, TIMEOUT_SAISIE, false, true, 0xFF, ""};
 
 // Contexte de saisie d'heure
-timeInputContext_t timeInputCtx = {TIME_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, 30000, false, true};
+timeInputContext_t timeInputCtx = {TIME_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, TIMEOUT_SAISIE, false, true, ""};
 
 // Contexte de saisie de date
-dateInputContext_t dateInputCtx = {DATE_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, 30000, false, true};
+dateInputContext_t dateInputCtx = {DATE_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, TIMEOUT_SAISIE, false, true, ""};
 
 // Contexte de saisie de l'Email
 char emailCharSet[] = "abcdefghijklmnopqrstuvwxyz0123456789@.-_"; // Jeu de caractères pour email
 uint8_t emailCharSetSize = 40; // 26 lettres + 10 chiffres + 4 symboles
-emailInputContext_t emailInputCtx = {EMAIL_INPUT_IDLE, 0, 0xFF, 0, 0xFF, "", "", false, 0, false, false, 0, 0, 0xFF, 16, 0, 30000, false, 0xFF, true, 0};
+emailInputContext_t emailInputCtx = {EMAIL_INPUT_IDLE, 0, 0xFF, 0, 0xFF, "", "", false, 0, false, false, 0, 0, 0xFF, 0xFF, 16, 0, TIMEOUT_SAISIE, false, 0xFF, true, 0, 0xFF, ""};
 
 // Contexte de saisie de l'IP
-ipInputContext_t ipInputCtx = {IP_INPUT_IDLE, 0, 0xFF, "192.168.001.001", "", false, 0, false, false, 0, 0, 30000, false, true};
+ipInputContext_t ipInputCtx = {IP_INPUT_IDLE, 0, 0xFF, "192.168.001.001", "", false, 0, false, false, 0, 0, TIMEOUT_SAISIE, false, true, ""};
 
 // État de l'écran d'information
 infoScreenState_t infoScreenState = INFO_SCREEN_IDLE;
 bool infoScreenRefreshTime = false;
 
+bool PageInfosLoRaRefresh = false;
+bool PageInfosSystRefresh = false;
 
-// Exemple de liste 
-/*
-const char* menu00ListeValeurs[] = {
-    " ",              // deroule nouveau MENU11 pour Calibrations Balances
-    " ",              // deroule nouveau MENU21
-    "SYSTEME",        // Configuration système (Heure, date, IRQ1/2,  
-    "CONNEXION",      // Configuration LoRa (=> menu21ListeValeurs)
-    "CALIBRATIONS"    // Facteurs linéarité (tensions (vBat, , balances), tare balances
-    "INFOS"           // ICI PAS DE SENS
-};
-
-const char* menu0ListeValeurs[] = {
-    "TARE",         // deroule nouveau MENU11 pour Calibrations Balances
-    "MENU2",        // deroule nouveau MENU21
-    "HEURE",        // Saisie et Maj de l'heure
-    "DATE",         // Saisie et Maj de la date
-    "NOM RUCHER"    // Saisie du Rucher
-    "RETOUR"        // ICI PAS DE SENS
-};
-
-// Exemple de liste 
-
-// extern uint8_t SN2483_List [][9];
-// extern uint8_t AppEUI_List [][9];
-// extern uint8_t AppKey_List [][17];
-// extern uint8_t *DevEUI;    // Orange : kit SodaQ RUCHE 0: 00 04 A3 0B 00 20 30 0A
-// extern uint8_t *AppEUI;    // Orange : kit SodaQ RUCHE 0 
-// extern uint8_t *AppKey;    // Orange : kit SodaQ RUCHE 0 
-
-const char* menu21ListeValeurs[] = {
-    "AppKey",        // {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00} 
-                     // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
-    "DevEUI",        // ex: 0004A30B0020300A  (N° du Module LoRa)
-    "AppEUI",        // {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x35, 0x00} = ABEILLE5
-    "SF",            // affecter selon liste: 7, 9, 12
-    "PayloadTiming"    // Periode Payload : 15 min (default)
-    "RETOUR"        // Retour MENU0
-};
-
-// Exemple de liste 
-const char* menu11ListeValeurs[] = {
-    "Calibration 1",        //
-    "Calibration 2",        // 
-    "Calibration 3",        // 
-    "Calibration 4",        // 
-    "RETOUR"        // Retour MENU0
-};
-*/
+//bool displayInfoScreenSystTimeRefresh = false;
 
 #ifdef OLED096
   Adafruit_SSD1306 display(OLED_RESET);
@@ -192,8 +147,8 @@ uint8_t payload[PAYLOADSIZE];
 int hexPayloadSize = HEXPAYLOADSIZE; // 45 characters counting from 0 + 2 for termination. 23 bytes is required by Kineis. Padding needs to be done if the payload is smaller.
 char hexPayload[HEXPAYLOADSIZE];
 
-// char hexPayload[PAYLOADSIZE * 2 + 1];
-// int hexPayloadSize = PAYLOADSIZE * 2 + 1;
+// char hexPayload[PAYLOADSIZE// 2 + 1];
+// int hexPayloadSize = PAYLOADSIZE// 2 + 1;
 
 uint8_t *DevEUI;    // Orange : kit SodaQ RUCHE 0: 00 04 A3 0B 00 20 30 0A
 uint8_t *AppEUI;    // Orange : kit SodaQ RUCHE 0 
@@ -295,6 +250,29 @@ int Peson [10][4] = {
       {8,0,0,0},
       {9,0,0,0}  
     };
+
+
+// Structures de données des configurations
+
+// maintenir table de valeurs de correction pesons
+ConfigMateriel_t ConfigMateriel = // valeurs par défaut proto 03
+{ 3, 0x68, 0x3C, 0x57,
+  0, 3, 1, 1, 1, 0, 1, 1, 
+  19, 3, 4, 7929.70, 97.49, 0,   // N° Peson, CLK, DTA, Tare, scale, temp
+  18, 3, 6, 34134.50, 103.77, 0,
+  0, 3, 8, 0, 0, 0,
+  0, 3, 10, 0, 0, 0    
+};
+
+ConfigApplicatif_t ConfigApplicatif =
+{ 1000101, RED_LED_DURATION, GREEN_LED_DURATION, BLUE_LED_DURATION, BUILTIN_LED_DURATION,    // version, RED, GREEN, BLUE, BUILTIN duration
+  91, "FREUDENECK",
+  "0004A30B00EEEE01", 
+  {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31, 0x00},
+  {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00},
+                 // "5048494C495050454C4F564542454553", PHILIPPELOVEBEES
+  DEFAULT_SF, WAKEUP_INTERVAL_PAYLOAD, INTERVAL_1SEC     // SF, Delai Payload, Refresh OLED
+};
 
 HW_equipement Ruche;
 LoRa_configuration LoRa_Config = {"","","",9,WAKEUP_INTERVAL_PAYLOAD};      /// => sous IT !!!!!
@@ -414,7 +392,8 @@ extern bool startupListActivated;
 extern char *stringSaisie;
 extern listInputContext_t listInputCtx;
 extern bool displayListDebug;
-extern numberInputContext_t numberInputCtx;
+//extern numberInputContext_t numberInputCtx;
+extern numInputContext_t numInputCtx;
 extern bool displayNumberDebug;
 extern stringInputContext_t stringInputCtx;
 extern bool displayStringDebug;
@@ -433,6 +412,10 @@ extern ipInputContext_t ipInputCtx;
 // État de l'écran d'information
 extern infoScreenState_t infoScreenState;
 extern bool infoScreenRefreshTime;
+
+extern bool PageInfosLoRaRefresh;
+extern bool PageInfosSystRefresh;
+
 
 #ifdef OLED096
   extern Adafruit_SSD1306 display; //(OLED_RESET);
@@ -474,6 +457,11 @@ extern float Jauge[][4];           // Tare , Echelle , TareTemp , CompTemp
 // Clk_PIN, Dta_PIN, Poids
 extern int balance [][2];
 extern int Peson [][4];
+
+
+// Structures de données des configurations
+extern ConfigMateriel_t ConfigMateriel;
+extern ConfigApplicatif_t ConfigApplicatif;
 extern HW_equipement Ruche;
 extern LoRa_configuration LoRa_Config; 
 extern LoRa_Var Data_LoRa;

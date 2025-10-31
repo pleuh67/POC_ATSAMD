@@ -41,12 +41,11 @@ typedef enum
 // ---------------------------------------------------------------------------*
 typedef enum 
 {
-  NUMBER_INPUT_IDLE,      // 0 : Pas de saisie en cours
-  NUMBER_INPUT_ACTIVE,    // 1 : Saisie en cours
-  NUMBER_INPUT_COMPLETED, // 2 : Saisie terminée avec succès
-  NUMBER_INPUT_CANCELLED  // 3 : Saisie annulée
-} numberInputState_t;
-
+  NUM_INPUT_IDLE,         // Pas de saisie en cours
+  NUM_INPUT_ACTIVE,       // Saisie en cours
+  NUM_INPUT_COMPLETED,    // Saisie terminée avec succès
+  NUM_INPUT_CANCELLED     // Saisie annulée
+} numInputState_t;
 
 // ---------------------------------------------------------------------------*
 // États possibles de la saisie alphanumérique
@@ -177,34 +176,57 @@ typedef struct
 // ---------------------------------------------------------------------------*
 typedef struct 
 {
-  numberInputState_t state;   // État actuel
-  uint8_t position;           // Position du curseur (0-maxLength-1)
-  char workingNumber[11];     // Chaîne numérique de travail (10 digits + '\0')
-  uint8_t maxLength;          // Longueur maximum de la chaîne
+  numInputState_t state;      // État actuel
+  uint8_t position;           // Position du curseur
+  uint8_t lastPosition;       // Dernière position affichée
+  uint8_t length;             // Longueur actuelle du nombre
+  uint8_t lastLength;         // Dernière longueur affichée
+  uint8_t maxLength;          // Longueur maximale autorisée
+  char workingNum[21];        // Nombre de travail (20 chars max + '\0')
+  char lastDisplayedNum[17];  // Dernière portion affichée (16 chars + '\0')
   bool displayRefresh;        // Flag pour rafraîchir l'affichage
   unsigned long lastUpdate;   // Dernier rafraîchissement affichage
   bool cursorBlink;           // État du clignotement curseur
+  bool lastCursorBlink;       // Dernier état du clignotement
   unsigned long lastBlink;    // Dernier clignotement
-  char title[21];             // Titre de la saisie
+  uint8_t displayOffset;      // Décalage pour affichage (scroll horizontal)
+  uint8_t lastDisplayOffset;  // Dernier décalage affiché
+  uint8_t lastCursorOffset;   // Dernier offset quand le curseur a été affiché
+  uint8_t displayWidth;       // Largeur d'affichage (nb de caractères visibles)
+  unsigned long lastActivity;    // Dernière activité utilisateur
+  unsigned long timeoutDuration; // Durée du timeout en ms
   bool allowNegative;         // Autoriser les nombres négatifs
-} numberInputContext_t;
-
+  bool allowDecimal;          // Autoriser les décimales
+  long minValue;              // Valeur minimale autorisée
+  long maxValue;              // Valeur maximale autorisée
+  bool firstDisplay;          // Premier affichage
+  uint8_t lastTimeoutValue;   // Dernière valeur de timeout affichée
+  char title[21];             // Titre de la saisie
+} numInputContext_t;
 
 // ---------------------------------------------------------------------------*
 // Contexte de saisie alphanumérique
 // ---------------------------------------------------------------------------*
 typedef struct 
 {
-    stringInputState_t state;   // État actuel
-    uint8_t position;           // Position du curseur (0-maxLength-1)
-    char workingString[21];     // Chaîne de travail (20 chars + '\0')
-    uint8_t maxLength;          // Longueur maximum de la chaîne
-    bool displayRefresh;        // Flag pour rafraîchir l'affichage
-    unsigned long lastUpdate;   // Dernier rafraîchissement affichage
-    bool cursorBlink;           // État du clignotement curseur
-    unsigned long lastBlink;    // Dernier clignotement
-    char title[21];             // Titre de la saisie
+  stringInputState_t state;      // État actuel
+  uint8_t position;              // Position du curseur
+  uint8_t lastPosition;          // Dernière position affichée
+  uint8_t maxLength;             // Longueur maximale autorisée
+  char workingString[21];        // Chaîne de travail (20 chars max + '\0')
+  char lastDisplayedString[21];  // Dernière chaîne affichée
+  bool displayRefresh;           // Flag pour rafraîchir l'affichage
+  unsigned long lastUpdate;      // Dernier rafraîchissement affichage
+  bool cursorBlink;              // État du clignotement curseur
+  bool lastCursorBlink;          // Dernier état du clignotement
+  unsigned long lastBlink;       // Dernier clignotement
+  unsigned long lastActivity;    // Dernière activité utilisateur
+  unsigned long timeoutDuration; // Durée du timeout en ms
+  bool firstDisplay;             // Premier affichage
+  uint8_t lastTimeoutValue;      // Dernière valeur de timeout affichée
+  char title[21];                // Titre de la saisie                
 } stringInputContext_t;
+
 
 // ---------------------------------------------------------------------------*
 // Contexte de saisie hexadécimale
@@ -230,6 +252,7 @@ typedef struct
   bool lastValidity;          // Dernière validité affichée
   bool firstDisplay;          // Premier affichage
   uint8_t lastTimeoutValue;   // Dernière valeur de timeout affichée
+  char title[21];             // Titre de la saisie
 } hexInputContext_t;
 
 // ---------------------------------------------------------------------------*
@@ -251,6 +274,7 @@ typedef struct
   unsigned long timeoutDuration; // Durée du timeout en ms
   bool lastValidity;          // Dernière validité affichée
   bool firstDisplay;          // Premier affichage
+  char title[21];             // Titre de la saisie
 } timeInputContext_t;
 
 // ---------------------------------------------------------------------------*
@@ -272,6 +296,7 @@ typedef struct
   unsigned long timeoutDuration; // Durée du timeout en ms
   bool lastValidity;          // Dernière validité affichée
   bool firstDisplay;          // Premier affichage
+  char title[21];             // Titre de la saisie
 } dateInputContext_t;
 
 // ---------------------------------------------------------------------------*
@@ -302,6 +327,7 @@ typedef struct
   bool firstDisplay;          // Premier affichage
   uint8_t charSetIndex;       // Index dans le jeu de caractères
   uint8_t lastTimeoutValue;   // Dernière valeur de timeout affichée
+  char title[21];             // Titre de la saisie
 } emailInputContext_t;
 
 // ---------------------------------------------------------------------------*
@@ -323,6 +349,7 @@ typedef struct
   unsigned long timeoutDuration; // Durée du timeout en ms
   bool lastValidity;          // Dernière validité affichée
   bool firstDisplay;          // Premier affichage
+  char title[21];             // Titre de la saisie
 } ipInputContext_t;
 
 
@@ -439,41 +466,43 @@ typedef struct     // regroupe tous les paramètres de EEPROM
 // ConfigBalanceHW
 typedef struct 
 {
-    uint16_t version;       // version matérielle : 3 = PCB2
-    uint8_t adresseRTC;     // DS3231_ADDRESS 0x68
-    uint8_t adresseOLED;    //
-    uint8_t adresseEEPROM;  // EEPROM_ADDRESS 0x57
+  uint16_t version;       // version matérielle : 3 = PCB2
+  uint8_t adresseRTC;     // DS3231_ADDRESS 0x68
+  uint8_t adresseOLED;    //
+  uint8_t adresseEEPROM;  // EEPROM_ADDRESS 0x57
 
-  uint8_t Num_Carte;  // Numéro de carte
-// Forcement LoRa
-//  uint8_t MediaCOM;       // True
-//  uint8_t _noBlueTooth;  //False
+  uint8_t Num_Carte;  // Numéro de carte 
+  uint8_t Noeud_LoRa;
   uint8_t Rtc;        // True or False, autodetect?
   uint8_t KBD_Ana;    // True or False
   uint8_t Oled;       // True or False OLED096 ou OLED130
   uint8_t SDHC;       // True or False
   uint8_t LiPo;       // True or False
   uint8_t Solaire;    // True or False Aabandonné?
-  uint8_t Balance[4];   // True or False or N° Peson
+
 // HX711#0 parameters    
+  uint8_t Peson_0; //  N° Peson
   uint8_t HX711Clk_0;           
   uint8_t HX711Dta_0;
   float   HX711ZeroValue_00;
   float   HX711Scaling_0;
   float   HX711Cor_Temp_0;
 // HX711#1 parameters  
+  uint8_t Peson_1; //  N° Peson
   uint8_t HX711Clk_1;           
   uint8_t HX711Dta_1;
   float   HX711ZeroValue_1;
   float   HX711Scaling_1;
   float   HX711Cor_Temp_1;
 // HX711#2 parameters
+  uint8_t Peson_2; //  N° Peson
   uint8_t HX711Clk_2;           
   uint8_t HX711Dta_2;
   float   HX711ZeroValue_2;
   float   HX711Scaling_2;
   float   HX711Cor_Temp_2;
 // HX711#3 parameters
+  uint8_t Peson_3; //  N° Peson
   uint8_t HX711Clk_3;           
   uint8_t HX711Dta_3;
   float   HX711ZeroValue_3;

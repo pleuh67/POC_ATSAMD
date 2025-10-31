@@ -91,6 +91,21 @@ debugSerial.println(serialbuf);
 }
 
 
+// ---------------------------------------------------------------------------*
+// @brief Réaffiche le menu actuel après execution Fonction.
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
+void backMenu(void)
+{
+  if (currentMenuDepth > 0)
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  } 
+}
+
+
 // isListInputActive()FALSE
 // n'est plus vrai dans handle donc teste plus comme si reponse à liste
 // Trouver ou il se devalide (en passant par Fonction())

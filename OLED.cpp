@@ -131,7 +131,7 @@ void OLEDDrawScreenNextPayload(uint8_t ligne, uint8_t colonne, DateTime nextPayl
 // ---------------------------------------------------------------------------*
 void OLEDDrawScreenTime(uint8_t ligne, uint8_t colonne)
 { static DateTime oldSystemTime(1692712245);  //1692712245);  // timestamp Unix
-  char localOLEDbuf[21] = "12345678901234567890";  
+  char localOLEDbuf[21] = "00:00:00    00/00/00";  
 
   DateTime systemTime = rtc.now();
   snprintf(localOLEDbuf, 21, "%02d:%02d:%02d    %02d/%02d/%02d", 
@@ -183,7 +183,8 @@ void OLEDDrawScreenRefreshTime(uint8_t ligne, uint8_t colonne)
                { val = systemTime.year();
      //            OLEDPrintVar(ligne, 17, &val, 'i');
                }               
- */              
+*/
+// ---------------------------------------------------------------------------*              
   if (systemTime != oldSystemTime)
     oldSystemTime = systemTime;
 }
@@ -211,7 +212,7 @@ void OLEDDebugDisplay(char* message)
   display.clearDisplay();
   for (uint8_t i = 1; i < MAX_LIGNES; i++) // uint8_t i = 0 => reserve L0 pour Time/Date
   {
-//    display.setCursor(0, i * TAILLE_LIGNE);
+//    display.setCursor(0, i// TAILLE_LIGNE);
     OLEDDrawText(1,i, 0, lignesDebug[i]);
   }
   display.display();
@@ -239,7 +240,7 @@ OLEDClear();
 /* 
   for (uint8_t i = 0; i < MAX_LIGNES; i++) 
   {
-  //  display.setCursor(0, i * TAILLE_LIGNE);
+  //  display.setCursor(0, i// TAILLE_LIGNE);
     OLEDDrawText(1,i, 0, lignesDebug[i]);
   }
   display.display();
@@ -394,7 +395,7 @@ void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse)
     
   if (defilant && len > (SCREEN_WIDTH / 6)) 
   {
-    for (int offset = 0; offset <= (len * 6 - SCREEN_WIDTH); offset += 2) 
+    for (int offset = 0; offset <= (len// 6 - SCREEN_WIDTH); offset += 2) 
     {
       display.clearDisplay();
       display.setCursor(-offset, pixelLine);
@@ -406,7 +407,7 @@ void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse)
   } 
   else 
   {
-    display.setCursor((SCREEN_WIDTH - len * 6) / 2, pixelLine);
+    display.setCursor((SCREEN_WIDTH - len// 6) / 2, pixelLine);
     display.print(message);
     display.display();
     delay(1000);
@@ -450,10 +451,10 @@ void OLEDDrawText(int8_t Txt_Size, uint8_t ligne, uint8_t colonne, const char *t
 //debugOLEDDrawText = false; 
 
 /* rappel
- *    #define OLED_Col      6
+//    #define OLED_Col      6
   #define OLED_Max_Col  20
   #define OLED_L1       8
- */
+*/
 // coordonnées en PIXELS
   display.setCursor((colonne*OLED_Col), (ligne*OLED_L1));
         
@@ -518,7 +519,6 @@ void OLEDDisplayTime(char *h, uint8_t pos)
 }
 
 // ---------------------------------------------------------------------------*
-/**
 // @brief Affiche les informations système sur écran
 // 01 :  read_DHT(dht);  // Reading temperature or humidity takes about 250 milliseconds!
 // 02 :  LDR, VBat, VSol   // lectures ANA (une seule lecture, moyenne calculée quand nécéssaire).
@@ -529,7 +529,7 @@ void OLEDDisplayTime(char *h, uint8_t pos)
 // 07 :  Température µC
 // @param Aucun
 // @return void
- 
+/* 
  typedef struct   
 {
   uint8_t rucher_ID;  // 0:non affecté, 1: Fleurs, 2: Acacia, 3: Tilleul, 4: Chataignier
@@ -545,7 +545,7 @@ void OLEDDisplayTime(char *h, uint8_t pos)
 //  float   _noLux;              // VLux, ne sera pas conservé 
   float   ProcessorTemp;    // temp µC, conservé en backup DHT22 
 } LoRa_Var;
- */
+*/
 // ---------------------------------------------------------------------------*
 void OLEDDisplayHivesDatas(void)
 { char localOLEDbuf[21] = "12345678901234567890";
@@ -602,7 +602,7 @@ void OLEDDisplayHivesDatas(void)
 // @param Aucun
 // @return void
 // ---------------------------------------------------------------------------*
- /*
+/*
 void nonOLEDDisplaySystemInfo(void)
 {
   OLEDClear();
@@ -636,7 +636,7 @@ void nonOLEDDisplaySystemInfo(void)
       // Revenir au menu principal
       menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
       startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex);
- */
+*/
 // ---------------------------------------------------------------------------*
 // @brief Affiche l'écran d'informations du  Projet (non-bloquant)
 // @param void
@@ -651,7 +651,10 @@ void OLEDdisplayInfoScreenSyst(void)
 
   OLEDClear();
   OLEDDrawText(1, 0, 0, "=== INFOS SYSTEME ==");
-//  OLEDDrawScreenTime(1, 0); // Affiche Time/Date au complet
+  OLEDDrawScreenTime(1, 0); // Affiche Time/Date au complet
+// forcer refresh
+ // displayInfoScreenSystTimeRefresh = true;
+  infoScreenRefreshTime = true;
   OLEDDrawText(1, 2, 0, "     POC ATSAMD     ");
   OLEDDrawText(1, 3, 0, "Version: " VERSION);
   OLEDDrawText(1, 4, 0, "Build: 20250924");
@@ -693,8 +696,7 @@ typedef struct
   uint8_t SendingPeriod;    // 15 minutes = 500 sans IT
 } LoRa_configuration;  // LoRa_Config.  
  
- */
-
+*/
 
 // AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
 void OLEDdisplayInfoScreenLoRa(void)

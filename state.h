@@ -74,4 +74,4 @@ void alarm2ISR() {
 
   rtc.writeSqwPinMode(DS3231_OFF); bloque les interrupts
 
- */
+ // ---------------------------------------------------------------------------*

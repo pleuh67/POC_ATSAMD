@@ -30,7 +30,6 @@
 // - MODE PROGRAMMATION : réveil périodique + clignotement LED builtin + interface utilisateur
 // ---------------------------------------------------------------------------*
 
-
 #define __MAIN__
 // ===== INCLUDES PROJET =====
 #include ".\define.h"
@@ -155,8 +154,20 @@ float pesee;                                               //
 
 // void DS3231CompleteReset() si DS3231 out!
 
-// Initialisation RTC
+  
   initRTC();
+
+//Affiche heure DS3231
+static DateTime oldSystemTime(1692712245);  //1692712245);  // timestamp Unix
+char localbuf[21] = "00:00:00    00/00/00";  
+  DateTime systemTime = rtc.now();
+
+  snprintf(localbuf, 21, "%02d:%02d:%02d    %02d/%02d/%02d", 
+          systemTime.hour(), systemTime.minute(), systemTime.second(),
+          systemTime.day(), systemTime.month(), systemTime.year()-2000);
+debugSerial.println(localbuf);
+// Affiche heure µC
+  
   
 // Désactiver TOUTES les interruptions temporairement
     noInterrupts();
@@ -287,15 +298,15 @@ debugSerial.print("3");   // 333333333333333333333333333
 debugSerial.print("4");   // 444444444444444444444444444444
 #endif
 
-if (!DEBUG_INTERVAL_1SEC)
-{
-static unsigned long noIRQSecLast=0;
-  if (millis() - noIRQSecLast > 1000) // Clignotement toutes les 1s
+  if (!DEBUG_INTERVAL_1SEC)
+  { static unsigned long noIRQSecLast=0;
+    if (millis() - noIRQSecLast > 1000) // Clignotement toutes les 1s
     {
       noIRQSecLast = millis();
       wakeup1Sec = true;
-    }
-}
+    } 
+//debugSerial.println("dans if (!DEBUG_INTERVAL_1SEC) /////////////////////////////////////////////////////////////////////////////////");    
+  }
 // ---------------------------------------------------------------------------*
 // ISR1
 // ---------------------------------------------------------------------------*
@@ -378,8 +389,13 @@ debugSerial.println("Case8");
     config.applicatif.blueLedDuration = 100;  // Clignotement Blue = 100 ms
     LEDStartBlue();                           //Clignotement 100ms
 // si Affichage menu "INFOS" 
-    if (infoScreenRefreshTime)
+
+// if non valide..... 
+   if (infoScreenRefreshTime)
+    {
+debugSerial.println("OLEDDrawScreenRefreshTime dans ISR 1 ttes sec \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");          
       OLEDDrawScreenRefreshTime(1, 0); // refresh Time/Date every second
+    }  
   }
 #ifdef __SerialDebugPoc  
 debugSerial.print("6");   // 666666666666666666666666666666666666666666666
@@ -414,50 +430,7 @@ debugSerial.print("7");   // 777777777777777777777777777777777777
 //   isInfoScreenActive() à inactive  commentaire ligne 215 handle !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // get void GestionEnCours()
-/*
-15:49:43.076 -> Info WDT : 290679
-15:49:43.076 -> Info WDT : 290680
-15:49:43.076 -> Info WDT : 290680
-15:49:43.076 -> Info WDT : 290681
-15:49:43.076 -> Info WDT : 290681
-15:49:43.076 -> 
-15:49:43.076 -> €
-15:49:43.076 -> 290683
-15:49:43.076 -> === CONFIGURATION ALARMES RTC + INTERRUPTIONS ===
-15:49:43.076 -> 
-15:49:43.076 -> IRQ2 Reprogrammée à 01:48:00
-15:49:43.076 -> IRQ2 prévue pour: 01:53:00
-15:49:43.076 -> 
-15:49:43.076 -> £
-15:49:43.076 -> IRQ2 prévue pour: 01:53:00
-15:49:43.076 -> Info WDT : 290683
-15:49:43.076 -> Info WDT : 290683
-15:49:43.076 -> I2£1 
-15:49:43.076 -> buildLoraPayload, datas:
-15:49:43.076 -> Rucher: 67  [RucherName: LPCZ] temp: 2500, Hum.: 6900
-15:49:43.076 -> Lum:    91 Vbat: 318,  Vsol: 0
-15:49:43.076 -> Masse0: 1234 / Masse1: 2345 / Masse2: 3456 / Masse3: 4567 / 
-15:49:43.076 -> (fin buildLoraPayload) hexPayload: 43C409F41A5B003E010000D2042909800DD71
-15:49:43.076 -> hexPayload: 43C409F41A5B003E010000D2042909800DD71 len : 19
-15:49:43.076 -> appel LoRaBee.send
-15:49:44.483 -> 
-15:49:44.483 -> The device is not connected to the network in Send_LoRa_Mess(). The program will reset the RN module...
-15:49:52.600 -> === STATUS LoRa ===
-15:49:52.600 ->  => RN2483#04
-15:49:52.600 -> =====================
-15:49:52.600 -> setupLoRaOTAA(), Network connection failed!
-15:49:54.007 -> Fin Payload, Reactive IRQ1
-15:49:54.007 ->  => RN2483#04
-15:49:54.007 ->  => RN2483#04
-15:49:54.007 -> K => RN2483#04
-15:49:54.007 ->  => RN2483#04
-15:49:54.007 -> K => RN2483#04
-15:49:54.007 ->  => RN2483#04
-15:49:54.007 -> K => RN2483#04
-15
 
-// set void GestionEnCours()
-*/
 GestionEnCours("ISR2b");  // Surveillance pour Debug
   }
 #ifdef __SerialDebugPoc    

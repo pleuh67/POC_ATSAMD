@@ -262,7 +262,7 @@ debugSerial.println("buildLoraPayload, datas:");
   for (i = 0; i < 4; i++) 
   {
 //debugSerial.print(i);  debugSerial.print("/");debugSerial.println(indice);
-    int Masse = Data_LoRa.HX711Weight[i] *100; //(int)(Data_LoRa.HX711Weight[i] * 100); 
+    int Masse = Data_LoRa.HX711Weight[i] *100; //(int)(Data_LoRa.HX711Weight[i]// 100); 
     payload[indice++] = ((uint8_t*)&Masse)[0];	// Hive1 to 4 Weight
     payload[indice++] = ((uint8_t*)&Masse)[1];
 //debugSerial.println(Masse);

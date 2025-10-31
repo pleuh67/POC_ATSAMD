@@ -67,7 +67,7 @@ OLEDDebugDisplay("RTC introuvable");
 // ---------------------------------------------------------------------------*
 void DS3231setRTCAlarm1(void) 
 {
-  return; 
+//  return; 
 
   
 // Configuration DS3231 AVANT interruption

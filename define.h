@@ -15,27 +15,31 @@
 #include <Wire.h>
 #include <RTClib.h>
 #include <ArduinoLowPower.h>
+//#include <stdlib.h>   // pour atoi()
 
 // ===== CONSTANTES PROJET =====
 #define PROJECT_NAME "POC IRQ_Payload IRQ_1s LOW_POWER OLED RN2483 DHT22 KEY5"  // len = 55
 #define VERSION "1.1.1-PL"
 
 // ===== TIMING CONSTANTS =====
-#define RED_LED_DURATION 100          // Durée d'allumage LED rouge 300 ms
-#define GREEN_LED_DURATION 100        // Durée d'allumage LED verte 300 ms
-#define BLUE_LED_DURATION 100         // Durée d'allumage LED bleue 300 ms
-#define BUILTIN_LED_DURATION 100      // Durée d'allumage LED builtin 100 ms
+#define RED_LED_DURATION        100   // Durée d'allumage LED rouge 300 ms
+#define GREEN_LED_DURATION      100   // Durée d'allumage LED verte 300 ms
+#define BLUE_LED_DURATION       100   // Durée d'allumage LED bleue 300 ms
+#define BUILTIN_LED_DURATION    100   // Durée d'allumage LED builtin 100 ms
 #define WAKEUP_INTERVAL_PAYLOAD 5     // Intervalle de réveil en minutes 
-#define INTERVAL_1SEC 1000            // Intervalle 1 seconde en millisecondes
+#define INTERVAL_1SEC           1000  // Intervalle 1 seconde en ms
+#define DEFAULT_SF              9     // Spread Factor par defaut
+#define TIMEOUT_SAISIE          10000    // Timeout saisies écrans (ms)
+
 
 // I2C Addresses
 #define DS3231_ADDRESS 0x68   // Adresse RTC Module DS3231
 #define EEPROM_ADDRESS 0x57   // Adresse EEPROM Module DS3231
+#define OLED_ADDRESS   0x3C   // Adresse écran OLED
 
 // ===== Def de LISTES =====
 #define LIST_SF       4
 #define LIST_RUCHERS  12
-
 
 // ===== MENU CONFIGURATION =====
 #define MAX_MENU_DEPTH 5
@@ -49,7 +53,7 @@
 #define M04x_ITEM 4
 
 // ===== EEPROM CONFIGURATION =====
-#define CONFIG_VERSION 100   // Version 1.00 * 100
+#define CONFIG_VERSION 100   // Version 1.00// 100
 
 // defines pour raccourcir et clarifier les instructions
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -117,7 +121,7 @@
 #define loraSerial     Serial2 
 #define debugSerial    SerialUSB
 #define SERIALBUFLEN   256
-#define OLEDBUFLEN     128 // 21
+#define OLEDBUFLEN     128 * 21
 #define DEBUG_BAUD     115200
 #define SERIAL_TIMEOUT 5000
 
@@ -148,7 +152,6 @@
 //#define OLED096  // Sélection du type d'écran
 #define OLED130  // Sélection du type d'écran
 //#define OLED154  // Sélection du type d'écran
-#define OLED_ADDRESS   0x3C   // Adresse écran OLED
 
 // Pour OLED selon type sélectionné
 #ifdef OLED096

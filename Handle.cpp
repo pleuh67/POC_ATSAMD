@@ -96,7 +96,7 @@ void GestionEnCours(char *from)
     sprintf(serialbuf, "Info WDT : %d GestionEnCours: ",loopWDT);
     encours += 2;
   }  
-  else if (isNumberInputActive())
+  else if (isNumInputActive())
   {
     sprintf(serialbuf, "Number WDT : %d GestionEnCours ",encours,loopWDT);
     encours += 4;
@@ -254,11 +254,37 @@ debugSerial.println("Cas ELSE");
 // ---------------------------------------------------------------------------*
 // Vérifier si un écran d'info est actif               
 // ---------------------------------------------------------------------------*
-  else if (isInfoScreenActive())
-  {
+ #define REFRESHSCREEN 1000
+ else if (isInfoScreenActive())
+  { static unsigned long refreshScreen=0;
+    if (millis() - refreshScreen > REFRESHSCREEN) // Refresh heure et datas toutes les 1s
+    {
+      refreshScreen = millis();
+// selectionner l'écran cible
+if (PageInfosLoRaRefresh)             // rien à rafraichir
+{
+ 
+}
+else if (PageInfosSystRefresh)        // rafraichir Heure
+{
+  OLEDDrawScreenRefreshTime(1, 0);    // refresh Time/Date every second 
+}
+/*
+else if (PageInfosBalRefresh)   // rafraichir les poids temp, hum
+{
+
+}
+*/
+    } 
+
 GestionEnCours("handleProgrammingModec"); // affiche le type de traitement en cours de gestion par le handler
     infoScreenState_t state = processInfoScreen();
 // debugSerial.print("S");   // SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS    
+
+    
+    
+    
+    
     switch (state)
     {
       case INFO_SCREEN_CLOSED:
@@ -278,6 +304,47 @@ GestionEnCours("handleProgrammingModec"); // affiche le type de traitement en co
 // ---------------------------------------------------------------------------*
 // Vérifier si une saisie numérique est en cours
 // ---------------------------------------------------------------------------*
+  // Vérifier si une saisie numérique est en cours
+  else if (isNumInputActive())
+  {
+    static char numBuffer[21] = "1234";
+
+GestionEnCours("handleProgrammingModed");   // affiche le type de traitement en cours de gestion par le handler
+      
+#ifdef __SerialDebugPoc    
+//  debugSerial.print("N");   // NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+#endif
+    numInputState_t state = processNumInput();
+    switch (state)
+    {
+      case NUM_INPUT_COMPLETED:
+  //      finalizeNumInput(numBuffer);
+  //      debugSerial.print("Nouveau nombre: ");
+   //     debugSerial.println(numBuffer);
+        // Ici vous pouvez traiter le nombre
+/*
+debugSerial.println("Chaine validée : ");
+sprintf(stringSaisie,(char *)numBuffer);    // recopie saisie dans destination !!!!!  attentin LISTE
+debugSerial.println(stringSaisie);
+debugSerial.println(Data_LoRa.RucherName);
+*/
+        m01_2F_GetNumRucherDone(); // retour au menu
+        break;        
+      case NUM_INPUT_CANCELLED:
+        debugSerial.println("Saisie numerique annulee par timeout");
+        cancelNumInput();
+
+m01_2F_GetNumRucherDone(); // retour au menu
+        
+        break;
+        
+      default:
+        return;
+    }
+  }
+
+/*  
+// ci dessous caduque  
   else if (isNumberInputActive())   // numberInputCtx.state == NUMBER_INPUT_ACTIVE
   {
     static char numberBuffer[11] = ""; // Buffer pour le nombre
@@ -317,55 +384,45 @@ debugSerial.println(Data_LoRa.RucherName);
           return;
     }
   }
+*/
+  
 // ---------------------------------------------------------------------------*
 // Vérifier si une saisie alphanumérique est en cours
 // ---------------------------------------------------------------------------*
+  // Vérifier si une saisie alphanumérique est en cours
   else if (isStringInputActive())
   {
-    static char stringBuffer[21] = ""; // Buffer pour la chaîne
+    static char stringBuffer[21] = "                    ";
 
 GestionEnCours("handleProgrammingModee");   // affiche le type de traitement en cours de gestion par le handler
         
 #ifdef __SerialDebugPoc    
-debugSerial.print("A");   // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+//debugSerial.print("A");   // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 #endif    
 
-    stringInputState_t state = processStringInput();   // traite la touche lors de la saisie
-        
+    
+    stringInputState_t state = processStringInput();
+    
     switch (state)
     {
       case STRING_INPUT_COMPLETED:
-        {
-          finalizeStringInput(stringBuffer); // Récupérer la chaîne finale
-debugSerial.print("Nouvelle chaine: ");
-debugSerial.println(stringBuffer);
-                // Ici vous pouvez traiter la chaîne 
-
-//stringBuffer contient la chaine à copier dans la destination
-//      sprintf(Data_LoRa.RucherName,stringBuffer);    
-
-sprintf(stringSaisie,stringBuffer);    // recopie saisie dans destination
-debugSerial.print("Chaine validée : "); 
-debugSerial.print(stringSaisie);
-debugSerial.println(Data_LoRa.RucherName);
-          OLEDClear();// Effacer écran
-          break;
-        }       
-      case STRING_INPUT_CANCELLED:
-      {
-debugSerial.println("Saisie alphanumérique annulee");
+          m01_3F_GetNameRucherDone();
+/*        finalizeStringInput(stringBuffer);
+        debugSerial.print("Nouvelle chaine: ");
+        debugSerial.println(stringBuffer);
+        // Ici vous pouvez traiter la chaîne
+*/
         break;
-      }          
+        
+      case STRING_INPUT_CANCELLED:
+        debugSerial.println("Saisie alphanumérique annulee");
+        backMenu(); 
+        cancelStringInput();
+        break;
+        
       default:  // Saisie toujours en cours, ne rien faire d'autre
         return;
     }
-/*    
-    if (stringInputCtx.state != STRING_INPUT_IDLE)  // Fin de saisie String
-    {
-      sprintf(Data_LoRa.RucherName,stringBuffer);    
-      debugSerial.println("copie dans destination");
-    }
-*/
   }
 // ---------------------------------------------------------------------------*
 // Vérifier si une saisie HEXA est en cours
@@ -568,7 +625,8 @@ debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
         case KEY_3: // Touche 3 - Test saisie numérique
         {
   static char currentNumber[11] = "12345";
-  startNumberInput("SAISIE NOMBRE:", currentNumber, 8, false);
+          startNumInput("Saisie NUMERIQUE",currentNumber, 6, false, false, 0, 999999);
+
           break;
         }            
         case KEY_4: // Touche 4 - Test saisie alphanumérique

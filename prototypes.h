@@ -48,17 +48,17 @@ void readConfigFromEEPROM(void);
 void saveConfigToEEPROM(void);
 uint16_t calculateChecksum(ConfigGenerale_t* cfg);
 
-
 // ---------------------------------------------------------------------------*
 // Fonctions de gestion des menus
 void pushMenu(const char* title, const char** menuList, uint8_t menuSize, uint8_t initialIndex);
 void popMenu(void); // Retour menu précédent
+void backMenu(void); // Réaffiche le menu actuel après execution Fonction.
 void processMenuSelection(uint8_t selectedIndex);
-
 
 // ---------------------------------------------------------------------------*
 // Appels du menu m0
 void m0_0E_PageInfosSyst(void);
+void m0_0E_PageInfosSystDone(void);
 void m0_1M_ConfigSystem(void);
 void m0_2M_ConfigLoRa(void);
 void m0_3M_CalibTensions(void);
@@ -92,6 +92,7 @@ void m01_6M_PopMenu(void);  // Retour menu précédent m0_Demarrage
 // ---------------------------------------------------------------------------*
 // Appels du menu m02
 void m02_0E_PageInfosLoRa(void);     // Page info
+void m02_0E_PageInfosLoRaDone(void);
 
 void m02_1F_GetHex(void);       // DevEUI
 void m02_1F_GetHexDone(void);
@@ -189,7 +190,25 @@ void updateListInputCursorBlink(void);
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie numérique
-void startNumberInput(const char* title, const char* initialNumber, uint8_t maxLength, bool allowNegative);
+void startNumInput(const char* title, const char* initialNum, uint8_t maxLen, bool allowNeg, bool allowDec, long minVal, long maxVal);
+numInputState_t processNumInput(void);
+void finalizeNumInput(char* outputNum);
+void cancelNumInput(void);
+bool isNumInputActive(void);
+void refreshNumDisplay(void);
+void updateNumInputCursorBlink(void);
+void updateNumDisplayOffset(void);
+bool isNumValid(const char *num, bool allowNeg, bool allowDec, long minVal, long maxVal);
+void insertNumCharAtPosition(char *num, uint8_t *length, uint8_t pos, char c);
+void deleteCharAtPosition(char *num, uint8_t *length, uint8_t pos);
+char getNextNumChar(char current, int delta, bool allowNeg, bool allowDec);
+
+
+
+/*
+// 
+// 
+// void startNumberInput(const char* title, const char* initialNumber, uint8_t maxLength, bool allowNegative);
 
 // WithTimeout
 void startNumberInputWithTimeout(const char* title, const char* initialNumber, uint8_t maxLength, bool allowNegative, unsigned long timeoutMs);
@@ -202,7 +221,7 @@ void updateNumberInputCursorBlink(void);
 char getNextNumericChar(char current, int delta, bool allowNegative, uint8_t position);
 void modifyNumberChar(char* str, uint8_t pos, int delta);
 bool isValidNumber(const char* number);
-
+*/
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie alphanumérique
@@ -221,7 +240,7 @@ void modifyStringChar(char* str, uint8_t pos, int delta);
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie hexadécimale
-void startHexInput(const char* initialHex);
+void startHexInput(const char* title, const char* initialHex);
 hexInputState_t processHexInput(void);
 void finalizeHexInput(char* outputHex);
 void cancelHexInput(void);
@@ -235,7 +254,7 @@ char getNextHexChar(char current, int delta);
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie Time
-void startTimeInput(const char* initialTime);
+void startTimeInput(const char* title, const char* initialTime);
 timeInputState_t processTimeInput(void);
 void finalizeTimeInput(char* outputTime);
 void cancelTimeInput(void);
@@ -249,7 +268,7 @@ void modifyTimeDigit(char *t, uint8_t pos, int delta);
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie de date
-void startDateInput(const char* initialDate);
+void startDateInput(const char* title, const char* initialDate);
 dateInputState_t processDateInput(void);
 void finalizeDateInput(char* outputDate);
 void cancelDateInput(void);
@@ -263,7 +282,7 @@ void modifyDateDigit(char *d, uint8_t pos, int delta);
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie email
-void startEmailInput(const char* initialEmail);
+void startEmailInput(const char* title, const char* initialEmail);
 emailInputState_t processEmailInput(void);
 void finalizeEmailInput(char* outputEmail);
 void cancelEmailInput(void);
@@ -272,14 +291,14 @@ void refreshEmailDisplay(void);
 void updateEmailInputCursorBlink(void);
 void updateEmailDisplayOffset(void);
 bool isEmailValid(const char *email);
-void insertCharAtPosition(char *email, uint8_t *length, uint8_t pos, char c);
-void deleteCharAtPosition(char *email, uint8_t *length, uint8_t pos);
+void insertEmailCharAtPosition(char *email, uint8_t *length, uint8_t pos, char c);
+void deleteEmailCharAtPosition(char *email, uint8_t *length, uint8_t pos);
 char getNextEmailChar(char current, int delta);
 
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie IP
-void startIPInput(const char* initialIP);
+void startIPInput(const char* title, const char* initialIP);
 ipInputState_t processIPInput(void);
 void finalizeIPInput(char* outputIP);
 void cancelIPInput(void);

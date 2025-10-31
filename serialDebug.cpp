@@ -32,7 +32,7 @@
 void debugSerialPrintMenuStruct(menuLevel_t* menu)
 {
   sprintf(serialbuf,"\ndebugSerialPrintMenuStruct(): currentMenuDepth %d / title  %s / menuSize %d /selectedIndex %d", currentMenuDepth, menu->title, menu->menuSize, menu->selectedIndex);
-                        // /* menuList %s /16 */=>  /*menu->menuList[selectedModeIndex],
+                        // /* menuList %s /16 // ---------------------------------------------------------------------------*=>  /*menu->menuList[selectedModeIndex],
   debugSerial.println(serialbuf); 
 }
 
@@ -95,31 +95,46 @@ void debugSerialListStruct(void)
 /*
 typedef struct 
 {
-  numberInputState_t state;   // État actuel
-  uint8_t position;           // Position du curseur (0-maxLength-1)
-  char workingNumber[11];     // Chaîne numérique de travail (10 digits + '\0')
-  uint8_t maxLength;          // Longueur maximum de la chaîne
+  numInputState_t state;      // État actuel
+  uint8_t position;           // Position du curseur
+  uint8_t lastPosition;       // Dernière position affichée
+  uint8_t length;             // Longueur actuelle du nombre
+  uint8_t lastLength;         // Dernière longueur affichée
+  uint8_t maxLength;          // Longueur maximale autorisée
+  char workingNum[21];        // Nombre de travail (20 chars max + '\0')
+  char lastDisplayedNum[17];  // Dernière portion affichée (16 chars + '\0')
   bool displayRefresh;        // Flag pour rafraîchir l'affichage
   unsigned long lastUpdate;   // Dernier rafraîchissement affichage
   bool cursorBlink;           // État du clignotement curseur
+  bool lastCursorBlink;       // Dernier état du clignotement
   unsigned long lastBlink;    // Dernier clignotement
-  char title[21];             // Titre de la saisie
+  uint8_t displayOffset;      // Décalage pour affichage (scroll horizontal)
+  uint8_t lastDisplayOffset;  // Dernier décalage affiché
+  uint8_t lastCursorOffset;   // Dernier offset quand le curseur a été affiché
+  uint8_t displayWidth;       // Largeur d'affichage (nb de caractères visibles)
+  unsigned long lastActivity;    // Dernière activité utilisateur
+  unsigned long timeoutDuration; // Durée du timeout en ms
   bool allowNegative;         // Autoriser les nombres négatifs
-} numberInputContext_t;
+  bool allowDecimal;          // Autoriser les décimales
+  long minValue;              // Valeur minimale autorisée
+  long maxValue;              // Valeur maximale autorisée
+  bool firstDisplay;          // Premier affichage
+  uint8_t lastTimeoutValue;   // Dernière valeur de timeout affichée
+} numInputContext_t;
 */
 void debugSerialPrintNumberStruct(void)
 { // cas d'une saisie numérique:
-  sprintf(serialbuf,"state %d / position : %d / workingNumber %s / maxLength %d / displayRefresh %d\nlastUpdate %d / cursorBlink %d / lastBlink %d / title %s / allowNegative %d ",
-                    numberInputCtx.state,
-                    numberInputCtx.position,
-                    numberInputCtx.workingNumber,
-                    numberInputCtx.maxLength,
-                    numberInputCtx.displayRefresh,
-                    numberInputCtx.lastUpdate,
-                    numberInputCtx.cursorBlink,
-                    numberInputCtx.lastBlink,
-                    numberInputCtx.title,                    
-                    numberInputCtx.allowNegative );
+sprintf(serialbuf,"state %d / position : %d / workingNumber %s / maxLength %d / displayRefresh %d\nlastUpdate %d / cursorBlink %d / lastBlink %d / /*title %s /*/ allowNegative %d ",
+                    numInputCtx.state,
+                    numInputCtx.position,
+                    numInputCtx.workingNum,
+                    numInputCtx.maxLength,
+                    numInputCtx.displayRefresh,
+                    numInputCtx.lastUpdate,
+                    numInputCtx.cursorBlink,
+                    numInputCtx.lastBlink,
+//                    numInputCtx.title,                    
+                    numInputCtx.allowNegative );
   debugSerial.println(serialbuf); 
 }
 

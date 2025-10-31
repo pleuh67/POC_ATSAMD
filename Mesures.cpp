@@ -75,7 +75,7 @@ void take_All_Measure()  // durée de la proc?
   }
   else
     OLEDDebugDisplay("DHT: Error");
- */ 
+ // ---------------------------------------------------------------------------* 
   
   read_DHT(dht); // initialise : Data_LoRa.DHT_Temp et Data_LoRa.DHT_Hum
   
@@ -240,8 +240,8 @@ delay (10);
   sprintf(serialbuf," HX711 reading: %d , sample %d", readSample[num][i], i);
   debugSerial.println(serialbuf);
 #endif 
- */
-#ifdef debugSerialGetPoids
+*/
+ #ifdef debugSerialGetPoids
   else 
   {
     debugSerial.println("HX711 not found.");
@@ -283,12 +283,12 @@ return(readSample[num][10]);   // valeur du peson brute moyennée sur les 10 der
 }
 
 
-
+// ---------------------------------------------------------------------------*
 //
 //
 //                 TEMP AUTRES
 //
-
+// ---------------------------------------------------------------------------*
 
 // température interne SAMD21G18 + MCP9700AT + SF + RN2483
 

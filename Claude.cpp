@@ -24,13 +24,13 @@ Calib Tens => menu calib => vbat page Vbat, idem Vlum/ VSol
 //                                           |_|   |_|   
 // ---------------------------------------------------------------------------*
 // https://claude.ai/chat/9883784a-b682-4936-8d53-0885169eba94
+// ---------------------------------------------------------------------------*
 /*
-
- 
 On va reprendre un projet en cours, voici ou j'en suis:
 
 utilisation d'une carte SODAQ EXPLORER a base de atsamd21j18 sur arduino avec DS3231 avec la library DS3231 de andrew wickert, 
 CONTRAINTES OBLIGATOIRES :
+- je veux le code en artefact
 - Les prototypes de fonction sont en début de fichier
 - Style d'accolades : alignement vertical 
 - indentation 2 caractères
@@ -39,6 +39,9 @@ CONTRAINTES OBLIGATOIRES :
 - Commentaires : français avec accents
 - Textes affichés : français SANS accents
 - Documentation complète : toutes fonctions commentées avec description, paramètres, codes retour
+- n'utilise pas
+/ completer  /
+pour les commentaires de fonctions mais //
 - Debug : #define debugSerial SerialUSB et #define DEBUG_BAUD 115200
 - Ajouter #define EXPLORER, #define PIN_PE BUTTON, #define RTC_INTERRUPT_PIN 2
 dans setup() on mets:
@@ -57,35 +60,28 @@ J'utilise :
 #include <ArduinoLowPower.h>
 #include <stdint.h>
 
-utilisation d'un clavier 5 touches analogique
+utilisation d'un clavier 5 touches analogique:
+// Alias pour les touches selon usage
+MOINS, PLUS, LEFT , RIGHT, VALIDE , UP, DOWN
 
 L'écran OLED utilise la taille de police 1 donc dispose de 8 lignes de 20 caractères, on ecrit dessus avec
-OLEDDrawText()
+OLEDDrawText(taille, ligne, colonne, texte)
 param 1 : taille = 1
 Param 2 : Ligne de 0 à 7
 param 3 : Colone de 0 à 19
-param 4 : chaine à afficher
-
-
-en continuant sur cette base de code:
-
-
-
-
+param 4 : texte à afficher
 
 
 On ne s'occupe que de la saisie non bloquante, le reste est déja opérationnel.
 
+Le titre de la fenêtre de saisie doit être paramètrable, remplace void startNumInput(const char* initialNum, uint8_t maxLen, bool allowNeg, bool allowDec, long minVal, long maxVal);
+par void startNumInput(const char* title, const char* initialNum, uint8_t maxLen, bool allowNeg, bool allowDec, long minVal, long maxVal);
 
+ajoute     char title[21];             // Titre de la saisie
+a la fin de la struct numInputContext_t;
+  
+utilise  cette base de code:
+*/
 
-Supprime sur ce code la partie saisie dans la liste
-
-
  
- 
- 
- 
- 
- 
- 
- */
+// ---------------------------------------------------------------------------*

@@ -51,8 +51,6 @@ debugSerial.println("INIT 2483...");
 //debugSerial.print("LoRaBee.getDefaultBaudRate: ");    debugSerial.println(LoRaBee.getDefaultBaudRate());
 // GETHWEUI
 
-
-/* */
    if (!Init_2483())
       if (Ruche.Num_Carte)
       {
