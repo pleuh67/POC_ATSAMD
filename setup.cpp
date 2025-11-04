@@ -50,8 +50,9 @@ debugSerial.println("INIT 2483...");
   
 //debugSerial.print("LoRaBee.getDefaultBaudRate: ");    debugSerial.println(LoRaBee.getDefaultBaudRate());
 // GETHWEUI
-
+/* remplacé par do
    if (!Init_2483())
+   {
       if (Ruche.Num_Carte)
       {
         debugSerial.print(" Init 2483 done with card : ");
@@ -63,11 +64,44 @@ debugSerial.println("INIT 2483...");
         debugSerial.println(" NO 2483 present.");
         OLEDDebugDisplay("2483A   Failed");
       }
+    }  
     else 
     {
       debugSerial.println(" Init 2483 failed");    
       OLEDDebugDisplay("2483A   Failed");
     }  
+*/
+
+uint8_t tryy = 3 , rc;
+   do
+   { rc = Init_2483();
+ debugSerial.println(rc ? "rc Init_2483() true":"rc Init_2483() false");
+// Reset_LoRa();  // initialise pas sur reset chaud.
+      if (Ruche.Num_Carte)
+      {
+        debugSerial.print(" Init 2483 done with card : ");
+        debugSerial.println(Ruche.Num_Carte);
+        OLEDDebugDisplay("2483A    Initialized");
+      }
+      else
+      {
+        debugSerial.println(" NO 2483 present.");
+        OLEDDebugDisplay("2483A   Failed");
+      }
+      tryy--;
+    }  
+    while (rc && tryy);
+
+  /*  
+    else 
+    {
+      debugSerial.println(" Init 2483 failed");    
+      OLEDDebugDisplay("2483A   Failed");
+    }  
+
+*/
+
+    
 // debugSerialPrintLoRaStatus();
 }
 

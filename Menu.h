@@ -21,9 +21,9 @@
 
 #define LIST_SF 4 // Maintenir dans Define.h
 const char* List_SF[] = {
-  "7",   // 
-  "9",   //
-  "12",  //
+  "SF7",   // 
+  "SF9",   //
+  "SF12",  //
 };
 
 #define LIST_RUCHERS 12 // Maintenir dans Define.h
@@ -67,7 +67,7 @@ const char* m01_ConfigSystem[] = {
 #define M02_ITEM 8 // Maintenir dans Define.h
 const char* m02_ConfigLoRa[] = {
   "INFOS LoRa     (P)",  // m02_0E_PageInfosLoRa() // afficher prochain Payload
-  "DevEUI         (S)",  // m02_1F_DevEUI()
+  "AppKEY         (S)",  // m02_1F_AppKey()
   "AppEUI         (S)",  // m02_2F_AppEUI()
   "Spread Fact    (S)",  // m02_3F_SpreadFact()
   "PayLoad time   (S)",  // m02_4F_PayLoad() // Afficher prochain Payload
@@ -100,8 +100,8 @@ const char* m04_CalibBalances[] = {
   "Calib. Bal #2  (F)",  // m04_1F_CalibBal_2()
   "Calib. Bal #3  (F)",  // m05_2F_CalibBal_3()
   "Calib. Bal #4  (F)",  // m05_3F_CalibBal_4()
-  "info.  Balances(F)",  // m04_4F_CalibBal_1()  /!\ sortie info, c'est la pagaille!!!!
-  "Poids  Balances(F)",  // m04_5F_PoidsBal()  /!\ sortie info, c'est la pagaille!!!!  
+  "info.  Balances(F)",  // m04_4F_InfoBal()  Page info Balances 
+  "Poids  Balances(F)",   // m04_5F_PoidsBal() Affichage rafraichi du poids des balances
   "RET  popMenu  (m0)"   // m05_6M_PopMenu()
 };
 
@@ -124,5 +124,8 @@ extern const char* m03_CalibTensions[];
 extern const char* m033_Reserve[];
 extern const char* m04_CalibBalances[];
 extern const char* m04x_CalibBal[];
+
+extern const char* List_SF[];
+extern const char* List_Ruchers[];
 
 #endif

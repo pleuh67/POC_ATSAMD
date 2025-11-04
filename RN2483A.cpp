@@ -142,7 +142,7 @@ debugSerial.println(serialbuf);
 //OLEDDebugDisplay(OLEDbuf);
 //debugSerial.println("------------------------------------------------------------------");
  
-  for (Ruche.Num_Carte=0;Ruche.Num_Carte<9; Ruche.Num_Carte++)
+  for (Ruche.Num_Carte=0;Ruche.Num_Carte< MAX_HWEUI_List; Ruche.Num_Carte++)
   { 
     if (strncmp(HWEUI_List[Ruche.Num_Carte],Module_ID,16)==0)   // égalité des 2 
     {
@@ -156,7 +156,7 @@ debugSerial.println(serialbuf);
 	  }
  //debugSerial.println("HWEUI non trouvé");
   } 
-  return((Ruche.Num_Carte == 9) ? 1 : 0); 
+  return((Ruche.Num_Carte == MAX_HWEUI_List) ? 1 : 0); 
 }
 
 
@@ -182,7 +182,6 @@ bool setupLoRa()
 { bool result;
  
   result=setupLoRaOTAA();
-//  LoRaBee.setSpreadingFactor(LoRa_Config.SpreadingFactor); // 7, 9 et 12 echec freudeneck
   return(result);
 }
 

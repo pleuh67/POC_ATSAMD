@@ -52,7 +52,7 @@ debugSerial.println(serialbuf);
     currentMenuDepth++;
     
     // Démarrer l'affichage du nouveau menu
-    startListInputWithTimeout(title, menuList, menuSize, initialIndex, 0);
+    startListInput(title, menuList, menuSize, initialIndex, 0);
     
 sprintf(serialbuf,"Menu empile: %s  currentMenuDepth: %d" ,title, currentMenuDepth); 
 debugSerial.println(serialbuf);
@@ -78,7 +78,7 @@ debugSerial.println(serialbuf);
     menuLevel_t* prevMenu = &menuStack[currentMenuDepth - 1];
     
     // Redémarrer l'affichage du menu précédent
-    startListInputWithTimeout(prevMenu->title, prevMenu->menuList, prevMenu->menuSize, prevMenu->selectedIndex, 0);
+    startListInput(prevMenu->title, prevMenu->menuList, prevMenu->menuSize, prevMenu->selectedIndex, 0);
     
     debugSerial.print("Retour menu precedent: ");
     debugSerial.print(prevMenu->title);
@@ -101,26 +101,24 @@ void backMenu(void)
   if (currentMenuDepth > 0)
   {
     menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+    startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
   } 
 }
 
 
-// isListInputActive()FALSE
-// n'est plus vrai dans handle donc teste plus comme si reponse à liste
-// Trouver ou il se devalide (en passant par Fonction())
-//
-//    case VALIDE:
-//        listInputCtx.state = LIST_INPUT_COMPLETED;
-
-// voir aussi apres uint8_t finalizeListInput(void)
-    // Reset du contexte
-//    listInputCtx.state = LIST_INPUT_IDLE;
-//    listInputCtx.selectedIndex = 0;
-//    listInputCtx.scrollOffset = 0;
-//    listInputCtx.maxItems = 0;
-//    listInputCtx.itemList = NULL;
-
+// ---------------------------------------------------------------------------*
+// @brief Réaffiche le menu actuel après execution Fonction.
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
+void backMenuFromList(void)
+{
+  if (currentMenuDepth > 0)
+  {
+    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
+    startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+  } 
+}
 
 
 // ---------------------------------------------------------------------------*
@@ -253,21 +251,21 @@ debugSerial.print("Appel d'un ecran: ");
 debugSerial.println("CONFIG. SYSTEME - Ecran INFOS demandé");   
         break;
       }
-      case 1: // DevEUI => HEX
+      case 1: // AppKey  => HEX  
       {
-debugSerial.println("m02_1F_GetHex demandé");   
-        m02_1F_GetHex();
+debugSerial.println("lancement m02_1F_AppKEY");         
+        m02_1F_AppKEY();
         break;
       }
       case 2: // AppEUI => HEX
       {
-debugSerial.println("m02_2F_GetHex demandé");   
-        m02_2F_GetHex();
+debugSerial.println("lancement m02_2F_AppEUI");         
+        m02_2F_AppEUI();
         break;
       }
       case 3: // SpreadFactor => ListeSF
       {
-debugSerial.println("m02_3L_GetSF demandé");   
+debugSerial.println("lancement m02_3L_GetSF");           
         m02_3L_GetSF();
         break;
       }
@@ -348,6 +346,7 @@ debugSerial.println("m02_6F_SendPayload() demandé");
       case 0: //
       {
         debugSerial.println("m033_0F_xxx - Fonction a implementer");
+        break;
       }  
       case 1: //
       {
@@ -411,7 +410,22 @@ debugSerial.println(serialbuf);
 m04_nM_CalibBal_bal();
         break;
       }
-      case 4:  // Retour m0_Demarrage
+      case 4: 
+      { 
+sprintf(serialbuf,"m04_4F_InfoBal() demandé"); 
+debugSerial.println(serialbuf); 
+m04_4F_InfoBal();
+        break;
+      }
+      case 5: 
+      {
+bal = 4;    
+sprintf(serialbuf,"m04_5F_PoidsBal() demandé"); 
+debugSerial.println(serialbuf); 
+m04_5F_PoidsBal();
+        break;
+      }
+      case 6:  // Retour m0_Demarrage
       {
         popMenu(); // Retour au menu principal
         break;
@@ -429,12 +443,7 @@ m04_nM_CalibBal_bal();
     {
       case 0: // m04x-0
         sprintf(serialbuf,"menu04x-0  demandé avec Bal %d pour Tare Balance", bal);
-// tester cas pour tare Balance
-        m02_1F_GetHex();    // "SAISIE HEXA "
 
-        
-        
-        
         break;
       case 1: // m04x-1
         sprintf(serialbuf,"menu04x-1  demandé avec Bal %d pour Echelle Balance", bal);

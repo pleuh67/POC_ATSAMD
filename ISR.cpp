@@ -59,8 +59,12 @@ displayNextPayload = true;
     alarm1_enabled = false;  // Bloquer alarme 1
     wakeupPayload = true;
     rtc.clearAlarm(1);       
-    rtc.clearAlarm(2);      
-    DS3231setRTCAlarm2(); // Reprogrammer prochaine alarme
+    rtc.clearAlarm(2); 
+
+    if (LoRa_Config.SendingPeriod)     // si 0 pas d'envois par IT
+    {
+      DS3231setRTCAlarm2(); // Reprogrammer prochaine alarme
+    }
 debugSerial.println("\n£");  // £££££££££££££££££££££££££££££££££££££££££££££££££££££££££
   }
 }

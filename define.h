@@ -26,10 +26,10 @@
 #define GREEN_LED_DURATION      100   // Durée d'allumage LED verte 300 ms
 #define BLUE_LED_DURATION       100   // Durée d'allumage LED bleue 300 ms
 #define BUILTIN_LED_DURATION    100   // Durée d'allumage LED builtin 100 ms
-#define WAKEUP_INTERVAL_PAYLOAD 5     // Intervalle de réveil en minutes 
+#define WAKEUP_INTERVAL_PAYLOAD 0     // Intervalle de réveil en minutes 
 #define INTERVAL_1SEC           1000  // Intervalle 1 seconde en ms
-#define DEFAULT_SF              9     // Spread Factor par defaut
-#define TIMEOUT_SAISIE          10000    // Timeout saisies écrans (ms)
+#define DEFAULT_SF              12     // Spread Factor par defaut
+#define TIMEOUT_SAISIE          20000    // Timeout saisies écrans (ms)
 
 
 // I2C Addresses
@@ -185,6 +185,7 @@
 // RN2483A
 #define PAYLOADSIZE     19
 #define HEXPAYLOADSIZE  38
+#define MAX_HWEUI_List 6 
 
 
 // ---------------------------------------------------------------------------*

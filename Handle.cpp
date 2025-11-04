@@ -190,9 +190,36 @@ GestionEnCours("handleProgrammingModeb"); // affiche le type de traitement en co
     {           
       case LIST_INPUT_COMPLETED:
       {
+  
+ // cas sortie list de selection paramètres (SF, Ruchers, ...)
+        switch (saisieActive)
+        {
+          case 23:
+          {
+            
+            m02_3L_GetSFDone();
+debugSerial.println("lancement m02_3L_GetSFDone()");                       
+            saisieActive=0;
+            break;
+          }
+          case 24:
+          {
+            m02_4F_GetPayloadDelayDone();
+debugSerial.println("lancement m02_3L_GetSFDone()");                       
+            saisieActive=0;
+            break;
+          }
+
+         default:  // ne rien faire
+          {
+ debugSerial.println("default dans isListInputActive()/saisieActive/default, pourquoi ???????????????????");           
+            break;      
+          }
+        }
+ // cas sortie list de menu        
         menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-        
-        selectedModeIndex = finalizeListInput(); // Récupérer l'index sélectionné
+char dummy[21] = "";        
+        selectedModeIndex = finalizeListInput(dummy); // Récupérer l'index sélectionné
 
  // Gestion navigation dans les menus       
 
@@ -220,7 +247,7 @@ debugSerial.print("Chaine validée : ");
 //sprintf(stringSaisie,(char *)m0_Demarrage[selectedModeIndex]);    // recopie saisie dans destination
 //debugSerial.println(stringSaisie);
 //debugSerial.println(Data_LoRa.RucherName);
-// err debugSerial.println(m0_Demarrage[selectedModeIndex]);
+// err debugSerial.println([selectedModeIndex]);
 debugSerial.println(currentMenu->title);
           OLEDClear();// Effacer écran
           processMenuSelection(selectedModeIndex);
@@ -261,19 +288,19 @@ debugSerial.println("Cas ELSE");
     {
       refreshScreen = millis();
 // selectionner l'écran cible
-if (PageInfosLoRaRefresh)             // rien à rafraichir
-{
- 
-}
-else if (PageInfosSystRefresh)        // rafraichir Heure
-{
-  OLEDDrawScreenRefreshTime(1, 0);    // refresh Time/Date every second 
-}
+    if (PageInfosLoRaRefresh)             // rien à rafraichir
+    {
+     
+    }
+    else if (PageInfosSystRefresh)        // rafraichir Heure
+    {
+      OLEDDrawScreenRefreshTime(1, 0);    // refresh Time/Date every second 
+    }
 /*
-else if (PageInfosBalRefresh)   // rafraichir les poids temp, hum
-{
-
-}
+    else if (PageInfosBalRefresh)   // rafraichir les poids temp, hum
+    {
+    
+    }
 */
     } 
 
@@ -416,8 +443,8 @@ GestionEnCours("handleProgrammingModee");   // affiche le type de traitement en 
         
       case STRING_INPUT_CANCELLED:
         debugSerial.println("Saisie alphanumérique annulee");
-        backMenu(); 
         cancelStringInput();
+        backMenu(); 
         break;
         
       default:  // Saisie toujours en cours, ne rien faire d'autre
@@ -432,7 +459,7 @@ GestionEnCours("handleProgrammingModee");   // affiche le type de traitement en 
     static char hexBuffer[41] = "0123456789ABCDEF0123456789ABCDEF01234567"; // Buffer pour l'hexa
 GestionEnCours("handleProgrammingModef");   // affiche le type de traitement en cours de gestion par le handler
 #ifdef __SerialDebugPoc    
-debugSerial.print("H");   // HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+//debugSerial.print("H");   // HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 #endif    
     
     hexInputState_t state = processHexInput();
@@ -440,22 +467,43 @@ debugSerial.print("H");   // HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
     {
       case HEX_INPUT_COMPLETED:
       {
-        m02_1F_GetHexDone();
+// trouver pour gestion differents HEX
+        switch (saisieActive)
+        {
+          case 21:
+          {
+            m02_1F_AppKEYDone();
+debugSerial.println("lancement m02_1F_AppKEYDone");                       
+            saisieActive=0;
+            break;
+          }
+          case 22:
+          {
+            m02_2F_AppEUIDone();
+debugSerial.println("lancement m02_1F_AppEUIDone");                       
+            saisieActive=0;
+            break;
+          }
+          default:  // ne rien faire
+          {
+ debugSerial.println("default dans isHexInputActive/saisieActive/default, pourquoi ???????????????????");           
+            break;      
+          }
+        }
     //    finalizeHexInput(hexBuffer); // Récupérer la chaîne finale
       //  debugSerial.print("Nouvelle cle hexadecimale: ");
         //debugSerial.println(hexBuffer);
         // Ici vous pouvez sauvegarder la clé ou autre
+
+
+       
        break;
       }   
       case HEX_INPUT_CANCELLED:
       {
 debugSerial.println("Saisie hexadecimale annulee par timeout");
         cancelHexInput();
-        if (currentMenuDepth > 0)           // Revenir au menu
-        {
-          menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-          startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-        }
+backMenu();
         break;
       }         
       default:  // Saisie toujours en cours, ne rien faire d'autre
@@ -485,6 +533,7 @@ GestionEnCours("handleProgrammingModeg");   // affiche le type de traitement en 
       {
 debugSerial.println("Saisie heure annulee par timeout");
         cancelTimeInput(); // Retour au menu dans fonction             
+backMenu();
         break;   
       }   
       default: // Saisie toujours en cours, ne rien faire d'autre
@@ -515,6 +564,7 @@ GestionEnCours("handleProgrammingModeh");   // affiche le type de traitement en 
       {
 debugSerial.println("Saisie date annulee par timeout");
         cancelDateInput(); // Retour au menu dans fonction
+backMenu();
         break;
       }  
       default:  // Saisie toujours en cours, ne rien faire d'autre
@@ -549,6 +599,7 @@ debugSerial.print("E");   // EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
       {
         debugSerial.println("Saisie email annulee par timeout");
         cancelEmailInput();
+backMenu();
         break;
       }  
       default:
@@ -582,6 +633,7 @@ debugSerial.print("I");   // IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
       case IP_INPUT_CANCELLED:
         debugSerial.println("Saisie IP annulee par timeout");
         cancelIPInput();
+backMenu();
         break;
         
       default:
@@ -676,7 +728,7 @@ infoScreenState_t processInfoScreen(void)
     if (currentMenuDepth > 0)
     {
       menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-      startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
+      startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
       debugSerial.println("Retour du menu infos");
     }
     else

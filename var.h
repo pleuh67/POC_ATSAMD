@@ -24,8 +24,8 @@
 // Flags de communication ISR ↔ loop() : controler wakeup1Sec, alarm1_enabled, alarm2_enabled, wakeupPayload
 
 // ===== FLAGS DEBUG =====
-bool DEBUG_INTERVAL_1SEC = true;       // Activer IRQ1 réveil 1 seconde
-//bool DEBUG_INTERVAL_1SEC = false;     // désactiver IRQ1 réveil 1 seconde
+//bool DEBUG_INTERVAL_1SEC = true;       // Activer IRQ1 réveil 1 seconde
+bool DEBUG_INTERVAL_1SEC = false;     // désactiver IRQ1 réveil 1 seconde
 
 bool DEBUG_WAKEUP_PAYLOAD = true;      // Activer IRQ2 réveil payload
 //bool DEBUG_WAKEUP_PAYLOAD = false;    // désactiver IRQ2 réveil payload
@@ -50,11 +50,11 @@ uint8_t currentMenuDepth = 0;
 
 
 // ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
+char saisieActive=0;
+
 // Contexte de Listes et menus
 bool startupListActivated = false;    // Flag pour activer la liste au démarrage
 char stringSaisie[OLEDBUFLEN]="azerty";   // 128/retour de toutes les fonctions de saisie non bloquantes
-
-//listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 0, 10, false, 0, false, 0, 0, 0, "", NULL};
 bool displayListDebug = false;
 listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 0, 10, 0, 0, false, false, 0, false, 0, 0, 0, "", NULL};
 
@@ -67,7 +67,8 @@ stringInputContext_t stringInputCtx = {STRING_INPUT_IDLE, 0, 0xFF, 20, "", "", f
 bool displayStringDebug = false;
 
 // Contexte de saisie HEXA
-hexInputContext_t hexInputCtx = {HEX_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, 0xFF, 0xFF, 16, 0, TIMEOUT_SAISIE, false, true, 0xFF, ""};
+//hexInputContext_t hexInputCtx = {HEX_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, 0xFF, 0xFF, 16, 0, TIMEOUT_SAISIE, false, true, 0xFF, ""};
+hexInputContext_t hexInputCtx = {HEX_INPUT_IDLE, 0, 0xFF, 40, "", "", "", false, 0, false, false, 0, 0, 0xFF, 0xFF, 16, 0, TIMEOUT_SAISIE, false, true, 0xFF};
 
 // Contexte de saisie d'heure
 timeInputContext_t timeInputCtx = {TIME_INPUT_IDLE, 0, 0xFF, "", "", false, 0, false, false, 0, 0, TIMEOUT_SAISIE, false, true, ""};
@@ -156,8 +157,9 @@ uint8_t *AppKey;    // Orange : kit SodaQ RUCHE 0
 
 // liste des ID LoRa 
 //  "414245494C4C4534", // Orange:HELTEC Wireless Stick => autre projet ESP32S3
-char Module_ID[20] = "55AA55AA55AA55AA";               // A LIRE DANS MODULE
-char HWEUI_List [6][20] = {
+char Module_ID[20] = "HWEUI_NOT_READ_";               // A LIRE DANS MODULE
+// #define MAX_HWEUI_List a maintenir dans define.h 
+char HWEUI_List [MAX_HWEUI_List][20] = {
   "55AA55AA55AA55AA", // Module LoRa pas Lu
   "0004A30B0020300A", // Orange: Carte Explorer HS, puis proto PCB#1, récupérer Chip LoRa pour PCB#2
   "0004A30B0024BF45", // pas connecté chez Orange??? noeud non identifié
@@ -388,6 +390,7 @@ extern menuLevel_t menuStack[];
 extern uint8_t currentMenuDepth;
 
 // ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
+extern char saisieActive;
 extern bool startupListActivated;
 extern char *stringSaisie;
 extern listInputContext_t listInputCtx;

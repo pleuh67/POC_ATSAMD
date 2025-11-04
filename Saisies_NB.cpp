@@ -58,6 +58,7 @@
 // ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SÉLECTION DANS UNE LISTE =====
 // ---------------------------------------------------------------------------*
+
 // @brief Initialise l'affichage de la liste au démarrage
 // @param void
 // @return void
@@ -78,22 +79,19 @@ void initStartupList(void)
 //      startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex);
 }
 
-// ---------------------------------------------------------------------------*
-// ===== FONCTIONS DE SAISIE DANS LISTE =====
+
+
 // ---------------------------------------------------------------------------*
 // @brief Démarre la sélection dans une liste de valeurs avec timeout personnalisé
 // @param title Titre de la sélection à afficher
 // @param itemList Tableau de pointeurs vers les chaînes de caractères
-// @param numItems Nombre d'éléments dans la liste
-// @param initialIndex Index initial sélectionné
+// @param numItems Nombre d'éléments dans la liste      (N)
+// @param initialIndex Index initial sélectionné        (0 .. N-1)
 // @param timeoutMs Timeout en millisecondes (0 = pas de timeout)
 // @return void
 // ---------------------------------------------------------------------------*
-void startListInputWithTimeout(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex, unsigned long timeoutMs)
+void startListInput(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex, unsigned long timeoutMs)
 {
-
-//   ici inseré: void startListInput(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex)
-//debugSerial.print("Param : ");debugSerial.println(itemList[2]);
   if (listInputCtx.state != LIST_INPUT_IDLE)
   {
     return; // Sélection déjà en cours
@@ -107,7 +105,7 @@ void startListInputWithTimeout(const char* title, const char** itemList, uint8_t
   listInputCtx.selectedIndex = initialIndex;
   listInputCtx.maxItems = numItems;
   listInputCtx.itemList = itemList;
-//debugSerial.print("struct: ");debugSerial.println(listInputCtx.itemList[2]);
+  
   strncpy(listInputCtx.title, title, 20);  
   listInputCtx.title[20] = '\0';
   
@@ -129,33 +127,25 @@ void startListInputWithTimeout(const char* title, const char** itemList, uint8_t
   listInputCtx.lastUpdate = millis();
   listInputCtx.cursorBlink = true;
   listInputCtx.lastBlink = millis();
-  listInputCtx.lastActivity = millis();      // Initialiser le timeout
-  listInputCtx.timeoutDuration = 0;          // 0 = pas de timeout par défaut
+  listInputCtx.lastActivity = millis();
+  listInputCtx.timeoutDuration = timeoutMs;
   listInputCtx.lastScrollOffset = 0xFF;      // Forcer le rafraîchissement initial
   listInputCtx.lastSelectedIndex = 0xFF;     // Forcer le rafraîchissement initial
   listInputCtx.lastCursorBlink = false;
     
   debugSerial.print("Selection dans liste demarree: ");
   debugSerial.println(title);
+  debugSerial.print("Timeout: ");
+  debugSerial.print(timeoutMs / 1000);
+  debugSerial.println(" secondes");
+  
   OLEDDisplayMessageL8("Choix d'une valeur", false, false);
- 
-// ---------------  
- // startListInput(title, itemList, numItems, initialIndex);
-  if (timeoutMs > 0)
-  {
-    listInputCtx.timeoutDuration = timeoutMs;
-  }
-    else
-  {
-    listInputCtx.timeoutDuration = 0; // 0 = désactivé
-  }
 }
-
 
 // ---------------------------------------------------------------------------*
 // @brief Traite la sélection dans la liste (à appeler dans loop)
 // @param void
-// @return État actuel de la sélection
+// @return listInputState_t État actuel de la sélection
 // ---------------------------------------------------------------------------*
 listInputState_t processListInput(void)
 {
@@ -166,8 +156,8 @@ listInputState_t processListInput(void)
   
   // Gestion du clignotement du curseur
   updateListInputCursorBlink();
-
- // Vérification du timeout
+  
+  // Vérification du timeout
   if (listInputCtx.timeoutDuration > 0 && (millis() - listInputCtx.lastActivity > listInputCtx.timeoutDuration))
   {
     listInputCtx.state = LIST_INPUT_CANCELLED;
@@ -179,9 +169,11 @@ listInputState_t processListInput(void)
   // Traitement des touches
   if (touche != KEY_NONE)
   {
+    // Réinitialiser le timer d'activité
+    listInputCtx.lastActivity = millis();
+    
     switch (touche)
     {
-//      case LEFT:
       case UP:
         // Remonter dans la liste
         if (listInputCtx.selectedIndex > 0)
@@ -211,11 +203,9 @@ listInputState_t processListInput(void)
         debugSerial.println(listInputCtx.itemList[listInputCtx.selectedIndex]);
         break;
         
-//      case RIGHT:
       case DOWN:
         // Descendre dans la liste
-
-debugSerial.println("Down de processListInput"); 
+        debugSerial.println("Down de processListInput"); 
         
         if (listInputCtx.selectedIndex < listInputCtx.maxItems - 1)
         {
@@ -255,29 +245,54 @@ debugSerial.println("Down de processListInput");
     // Reset de la touche après traitement
     touche = KEY_NONE;
   }
-
-  // Rafraîchissement de l'affichage si nécessaire (clignotement, scrolling liste, ///)
+  
+  // Rafraîchissement de l'affichage si nécessaire
   if (listInputCtx.displayRefresh || (millis() - listInputCtx.lastUpdate > 100))
   {
     refreshListDisplay();
     listInputCtx.displayRefresh = false;
     listInputCtx.lastUpdate = millis();
-  }   
+  }
+  
   return listInputCtx.state;
 }
 
 // ---------------------------------------------------------------------------*
-// @brief Finalise la sélection et récupère l'index choisi
-// @param void
-// @return Index de l'élément sélectionné
+// @brief Finalise la sélection et récupère l'item choisi
+// @param outputItem Buffer pour stocker l'item sélectionné (min 21 octets)
+// @return uint8_t Index de l'élément sélectionné (ou 0xFF si annulé)
+// @note Si annulé par timeout, outputItem contiendra "NONE"
 // ---------------------------------------------------------------------------*
-uint8_t finalizeListInput(void)
+uint8_t finalizeListInput(char* outputItem)
 {
-  uint8_t selectedIndex = 0;
+  uint8_t selectedIndex = 0xFF; // 0xFF = invalide/annulé
+  
+  if (!outputItem)
+  {
+    debugSerial.println("Erreur: outputItem NULL");
+    return 0xFF;
+  }
   
   if (listInputCtx.state == LIST_INPUT_COMPLETED)
   {
     selectedIndex = listInputCtx.selectedIndex;
+    
+    // Copier l'item sélectionné dans le buffer
+    if (listInputCtx.itemList && selectedIndex < listInputCtx.maxItems)
+    {
+      strncpy(outputItem, listInputCtx.itemList[selectedIndex], 20);
+      outputItem[20] = '\0';
+      
+      debugSerial.print("Item final selectionne [");
+      debugSerial.print(selectedIndex);
+      debugSerial.print("]: ");
+      debugSerial.println(outputItem);
+    }
+    else
+    {
+      strcpy(outputItem, "NONE");
+      debugSerial.println("Erreur: item invalide, retour NONE");
+    }
     
     // Reset du contexte
     listInputCtx.state = LIST_INPUT_IDLE;
@@ -285,10 +300,31 @@ uint8_t finalizeListInput(void)
     listInputCtx.scrollOffset = 0;
     listInputCtx.maxItems = 0;
     listInputCtx.itemList = NULL;
-    
-    debugSerial.print("Index final List selectionne: ");
-    debugSerial.println(selectedIndex);
   }
+  else if (listInputCtx.state == LIST_INPUT_CANCELLED)
+  {
+    // Timeout ou annulation : retourner "NONE"
+    strcpy(outputItem, "NONE");
+    selectedIndex = 0xFF;
+    
+    debugSerial.println("Selection annulee (timeout), retour: NONE");
+    
+    // Reset du contexte
+    listInputCtx.state = LIST_INPUT_IDLE;
+    listInputCtx.selectedIndex = 0;
+    listInputCtx.scrollOffset = 0;
+    listInputCtx.maxItems = 0;
+    listInputCtx.itemList = NULL;
+  }
+  else
+  {
+    // État inattendu
+    strcpy(outputItem, "NONE");
+    debugSerial.print("Erreur: etat inattendu (");
+    debugSerial.print(listInputCtx.state);
+    debugSerial.println("), retour: NONE");
+  }
+  
   return selectedIndex;
 }
 
@@ -303,14 +339,14 @@ void cancelListInput(void)
   debugSerial.println("Selection dans liste annulee");
   OLEDDisplayMessageL8("Selection annulee", false, false);
   
-  // Reset du contexte après un délai
+  // Reset du contexte
   listInputCtx.state = LIST_INPUT_IDLE;
 }
 
 // ---------------------------------------------------------------------------*
 // @brief Vérifie si une sélection dans une liste est en cours
 // @param void
-// @return true si sélection active
+// @return bool true si sélection active
 // ---------------------------------------------------------------------------*
 bool isListInputActive(void)
 {
@@ -323,7 +359,8 @@ bool isListInputActive(void)
 // @return void
 // ---------------------------------------------------------------------------*
 void refreshListDisplay(void)
-{ char timeoutMsg[21];
+{
+  char timeoutMsg[21];
   bool scrollChanged = (listInputCtx.scrollOffset != listInputCtx.lastScrollOffset);
   bool selectionChanged = (listInputCtx.selectedIndex != listInputCtx.lastSelectedIndex);
   bool cursorBlinkChanged = (listInputCtx.cursorBlink != listInputCtx.lastCursorBlink);
@@ -331,127 +368,119 @@ void refreshListDisplay(void)
   // Afficher le titre seulement au premier affichage
   if (listInputCtx.lastScrollOffset == 0xFF)
   {
-    OLEDDrawText(1, 0, 0, listInputCtx.title);
+    char paddedTitle[21];
+    snprintf(paddedTitle, 21, "%-20s", listInputCtx.title);
+    OLEDDrawText(1, 0, 0, paddedTitle);
   }
   
   // Calcul du nombre d'éléments à afficher (maximum 6 lignes disponibles)
   uint8_t displayCount = (listInputCtx.maxItems < 6) ? listInputCtx.maxItems : 6;
   
-  // Si le scroll a changé, rafraîchir toutes les lignes
+  // Si le scroll a changé, rafraîchir TOUTES les lignes complètement
   if (scrollChanged)
   {
-    for (uint8_t i = 0; i < 6; i++) // Toujours effacer 6 lignes
+    for (uint8_t i = 0; i < 6; i++) // Toujours traiter 6 lignes
     {
       if (i < displayCount)
       {
         uint8_t itemIndex = listInputCtx.scrollOffset + i;
         if (itemIndex < listInputCtx.maxItems)
         {
-          char lineBuffer[21];
+          // Afficher le texte de l'item (colonnes 2-19, 18 caractères)
+          char textBuffer[19];
+          snprintf(textBuffer, 19, "%-18.18s", listInputCtx.itemList[itemIndex]);
+          OLEDDrawText(1, i + 1, 2, textBuffer);
           
-          // Préparer la ligne avec indicateur de sélection (limité à 20 caractères)
+          // Afficher ou non le curseur (colonnes 0-1)
           if (itemIndex == listInputCtx.selectedIndex && listInputCtx.cursorBlink)
           {
-            snprintf(lineBuffer, 21, "> %-18.18s", listInputCtx.itemList[itemIndex]);
+            OLEDDrawText(1, i + 1, 0, "> ");
           }
           else
           {
-            snprintf(lineBuffer, 21, "  %-18.18s", listInputCtx.itemList[itemIndex]);
+            OLEDDrawText(1, i + 1, 0, "  ");
           }
-          
-          // Afficher la ligne (lignes 1 à 6)
-          OLEDDrawText(1, i + 1, 0, lineBuffer);
         }
         else
         {
-          // Effacer les lignes vides
-          OLEDDrawText(1, i + 1, 0, "--------------------");
+          // Effacer complètement les lignes vides
+          OLEDDrawText(1, i + 1, 0, "                    ");
         }
       }
       else
       {
-        // Effacer les lignes non utilisées (passage à menu plus court par ex.)
-        OLEDDrawText(1, i + 1, 0, "++++++++++++++++++++");
+        // Effacer complètement les lignes non utilisées
+        OLEDDrawText(1, i + 1, 0, "                    ");
       }
     }
   }
-  // Sinon, rafraîchir seulement les lignes affectées par la sélection ou le clignotement
-  else if (selectionChanged  || cursorBlinkChanged )
+  // Sinon, gérer uniquement le curseur (colonnes 0-1)
+  else if (selectionChanged || cursorBlinkChanged)
   {
-    // Rafraîchir l'ancienne ligne sélectionnée (si visible)
-    if (listInputCtx.lastSelectedIndex != 0xFF && 
-        listInputCtx.lastSelectedIndex >= listInputCtx.scrollOffset && 
-        listInputCtx.lastSelectedIndex < listInputCtx.scrollOffset + displayCount &&
-        !cursorBlinkChanged ) // moi pour derniere condition
+    // ÉTAPE 1 : Effacer TOUS les curseurs visibles pour éviter les curseurs fantômes
+    if (selectionChanged)
     {
-      uint8_t lineIndex = listInputCtx.lastSelectedIndex - listInputCtx.scrollOffset;
-      char lineBuffer[21];
-      snprintf(lineBuffer, 21, "  "); //%-18.18s", listInputCtx.itemList[listInputCtx.lastSelectedIndex]); // juste efface "> "
-      OLEDDrawText(1, lineIndex + 1, 0, lineBuffer);
+      // Effacer l'ancien curseur uniquement (si visible)
+      if (listInputCtx.lastSelectedIndex != 0xFF && 
+          listInputCtx.lastSelectedIndex >= listInputCtx.scrollOffset && 
+          listInputCtx.lastSelectedIndex < listInputCtx.scrollOffset + displayCount)
+      {
+        uint8_t lineIndex = listInputCtx.lastSelectedIndex - listInputCtx.scrollOffset;
+        OLEDDrawText(1, lineIndex + 1, 0, "  "); // Effacer le curseur (colonnes 0-1)
+      }
+    }
+    else if (cursorBlinkChanged)
+    {
+      // Si clignotement SANS changement de sélection, effacer toutes les lignes visibles
+      // pour être sûr qu'aucun curseur fantôme ne reste
+      for (uint8_t i = 0; i < displayCount; i++)
+      {
+        uint8_t itemIndex = listInputCtx.scrollOffset + i;
+        if (itemIndex < listInputCtx.maxItems && itemIndex != listInputCtx.selectedIndex)
+        {
+          OLEDDrawText(1, i + 1, 0, "  "); // Effacer tous les curseurs sauf celui sélectionné
+        }
+      }
     }
     
-    // Rafraîchir la nouvelle ligne sélectionnée (si visible)
+    // ÉTAPE 2 : Afficher le nouveau curseur (avec clignotement)
     if (listInputCtx.selectedIndex >= listInputCtx.scrollOffset && 
         listInputCtx.selectedIndex < listInputCtx.scrollOffset + displayCount)
     {
       uint8_t lineIndex = listInputCtx.selectedIndex - listInputCtx.scrollOffset;
-      char lineBuffer[21];
       
       if (listInputCtx.cursorBlink)
       {
-        snprintf(lineBuffer, 21, "> "); //%-18.18s", listInputCtx.itemList[listInputCtx.selectedIndex]);
+        OLEDDrawText(1, lineIndex + 1, 0, "> "); // Afficher le curseur (colonnes 0-1)
       }
       else
       {
-        snprintf(lineBuffer, 21, "  "); //%-18.18s", listInputCtx.itemList[listInputCtx.selectedIndex]);
+        OLEDDrawText(1, lineIndex + 1, 0, "  "); // Effacer le curseur (colonnes 0-1)
       }
-//debugSerial.println(lineBuffer);     
-      OLEDDrawText(1, lineIndex + 1, 0, lineBuffer);
     }
   }
-
-/*   
-  // Afficher l'indicateur de position si plus de 6 éléments (toujours rafraîchir si sélection a changé)
-  if (listInputCtx.maxItems > 6 && (selectionChanged || listInputCtx.lastScrollOffset == 0xFF))
-  {
-    char scrollInfo[6];
-    snprintf(scrollInfo, 6, "(%d/%d)", listInputCtx.selectedIndex + 1, listInputCtx.maxItems);
-    OLEDDrawText(1, 6, 15, scrollInfo); // Colonne 15 pour alignement à droite
-  }
-*/  
+  
   // Afficher les instructions en bas (ligne 7) avec indication du timeout si activé
-  // Rafraîchir seulement si le clignotement change ou au premier affichage
-  if (/* cursorBlinkChanged ||*/ listInputCtx.lastScrollOffset == 0xFF)
+  // Rafraîchir à chaque fois pour mettre à jour le countdown
+  if (listInputCtx.timeoutDuration > 0) // Timeout activé
+  { 
+    unsigned long remainingTime = (listInputCtx.timeoutDuration - (millis() - listInputCtx.lastActivity)) / 1000;
+    
+    if (remainingTime <= 5) // Afficher le countdown les 5 dernières secondes
+    {
+      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
+      OLEDDrawText(1, 7, 0, timeoutMsg);
+    }
+    else if (listInputCtx.lastScrollOffset == 0xFF) // Premier affichage uniquement
+    {
+      snprintf(timeoutMsg, 21, "+/-: Nav  VALIDE: OK");
+      OLEDDrawText(1, 7, 0, timeoutMsg);
+    }
+  }
+  else if (listInputCtx.lastScrollOffset == 0xFF) // Pas de timeout, premier affichage uniquement
   {
-   // if (listInputCtx.cursorBlink)
-   // {
-      if (listInputCtx.timeoutDuration > 0) // Timeout activé
-      { 
-        unsigned long remainingTime = (listInputCtx.timeoutDuration - (millis() - listInputCtx.lastActivity)) / 1000;
-        if (remainingTime <= 5) // Afficher le countdown les 5 dernières secondes
-        {
-          snprintf(timeoutMsg, 21, "+/-:Nav VALIDE:OK %lds", remainingTime);
-          OLEDDrawText(1, 7, 0, timeoutMsg);
-        }
-        else
-        {
-          snprintf(timeoutMsg, 21, "+/-: Nav  VALIDE: OK");
-          OLEDDrawText(1, 7, 0, timeoutMsg);
-//          OLEDDrawText(1, 7, 0, "+/-: Nav  VALIDE: OK");
-        }
-      }
-      else // Pas de timeout
-      {
-          snprintf(timeoutMsg, 21, "+/-: Nav  VALIDE: OK");
-          OLEDDrawText(1, 7, 0, timeoutMsg);        
-//        OLEDDrawText(1, 7, 0, "+/-: Nav  VALIDE: OK");
-      }
-//    }
-   // else
-   // {
-   //   OLEDDrawText(1, 7, 0, "********************"); // Effacer pendant le non-clignotement
-   // }
-//debugSerial.println(timeoutMsg);
+    snprintf(timeoutMsg, 21, "+/-: Nav  VALIDE: OK");
+    OLEDDrawText(1, 7, 0, timeoutMsg);
   }
   
   // Sauvegarder les états pour la prochaine comparaison
@@ -459,6 +488,9 @@ void refreshListDisplay(void)
   listInputCtx.lastSelectedIndex = listInputCtx.selectedIndex;
   listInputCtx.lastCursorBlink = listInputCtx.cursorBlink;
 }
+
+
+
 
 // ---------------------------------------------------------------------------*
 // @brief Gère le clignotement du curseur pour la sélection de liste
@@ -474,8 +506,6 @@ void updateListInputCursorBlink(void)
     listInputCtx.displayRefresh = true;
   }
 }
-
-
 
 
 // -------------------------------------------------------------------------------------
@@ -1436,6 +1466,505 @@ bool isStringInputActive(void)
 
 // ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE HEXA =====
+
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une chaîne hexadécimale est valide
+// @param hex Chaîne de caractères hexadécimale
+// @param expectedLength Longueur attendue (1 à 40 caractères)
+// @return bool True si la chaîne est valide
+// ---------------------------------------------------------------------------*
+bool isHexStringValid(const char *hex, uint8_t expectedLength) 
+{
+  uint8_t len = strlen(hex);
+  if (len != expectedLength) return false;
+  
+  for (uint8_t i = 0; i < expectedLength; i++)
+  {
+    char c = hex[i];
+    if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Obtient le caractère hexadécimal suivant/précédent
+// @param current Caractère actuel
+// @param delta Direction (+1 ou -1)
+// @return char Nouveau caractère hexadécimal
+// ---------------------------------------------------------------------------*
+char getNextHexChar(char current, int delta)
+{
+  const char hexChars[] = "0123456789ABCDEF";
+  const int numChars = 16;
+  
+  // Trouver l'index du caractère actuel
+  int currentIndex = -1;
+  char upperCurrent = toupper(current);
+  
+  for (int i = 0; i < numChars; i++)
+  {
+    if (hexChars[i] == upperCurrent)
+    {
+      currentIndex = i;
+      break;
+    }
+  }
+  
+  if (currentIndex == -1) return '0'; // Caractère invalide, retourner '0'
+  
+  // Calculer le nouvel index avec bouclage
+  int newIndex = currentIndex + delta;
+  if (newIndex < 0) newIndex = numChars - 1;
+  if (newIndex >= numChars) newIndex = 0;
+  
+  return hexChars[newIndex];
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Modifie un caractère hexadécimal
+// @param hex Chaîne de caractères hexadécimale
+// @param pos Position du caractère à modifier
+// @param delta Valeur à ajouter (+1 ou -1)
+// @return void
+// ---------------------------------------------------------------------------*
+void modifyHexDigit(char *hex, uint8_t pos, int delta) 
+{
+  if (pos >= hexInputCtx.maxLength)
+  {
+    return;
+  }
+  
+  hex[pos] = getNextHexChar(hex[pos], delta);
+  
+  debugSerial.print("Position hex ");
+  debugSerial.print(pos);
+  debugSerial.print(" modifiee: ");
+  debugSerial.println(hex[pos]);
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Démarre la saisie hexadécimale non-bloquante
+// @param title Titre à afficher en haut de l'écran (max 20 caractères)
+// @param initialHex Chaîne hexadécimale initiale (NULL pour chaîne de '0')
+// @param maxLen Longueur maximale (1 à 40 caractères)
+// @return void
+// ---------------------------------------------------------------------------*
+void startHexInput(const char* title, const char* initialHex, uint8_t maxLen)
+{
+  if (hexInputCtx.state != HEX_INPUT_IDLE)
+  {
+    debugSerial.println("Saisie hexadecimale en cours????");
+    return; // Saisie déjà en cours
+  }
+  
+  // Validation de la longueur
+  if (maxLen < 1) maxLen = 1;
+  if (maxLen > 40) maxLen = 40;
+  
+  // Initialisation du contexte
+  hexInputCtx.state = HEX_INPUT_ACTIVE;
+  hexInputCtx.position = 0;
+  hexInputCtx.lastPosition = 0xFF;
+  hexInputCtx.displayOffset = 0;
+  hexInputCtx.lastDisplayOffset = 0xFF;
+  hexInputCtx.lastCursorOffset = 0xFF;
+  hexInputCtx.displayWidth = 16; // 16 caractères visibles sur l'écran
+  hexInputCtx.maxLength = maxLen;
+  
+  // Copier le titre (max 20 caractères)
+  if (title && strlen(title) > 0)
+  {
+    strncpy(hexInputCtx.title, title, 20);
+    hexInputCtx.title[20] = '\0';
+  }
+  else
+  {
+    strcpy(hexInputCtx.title, "--- SAISIE HEXA: ---");
+  }
+  
+  // Copier la chaîne initiale ou créer une chaîne par défaut
+  if (initialHex && strlen(initialHex) == maxLen && isHexStringValid(initialHex, maxLen))
+  {
+    strncpy(hexInputCtx.workingHex, initialHex, maxLen);
+    hexInputCtx.workingHex[maxLen] = '\0';
+    
+    // Convertir en majuscules
+    for (uint8_t i = 0; i < maxLen; i++)
+    {
+      hexInputCtx.workingHex[i] = toupper(hexInputCtx.workingHex[i]);
+    }
+  }
+  else
+  {
+    // Chaîne par défaut (tous des '0')
+    for (uint8_t i = 0; i < maxLen; i++)
+    {
+      hexInputCtx.workingHex[i] = '0';
+    }
+    hexInputCtx.workingHex[maxLen] = '\0';
+  }
+  
+  strcpy(hexInputCtx.lastDisplayedHex, "");
+  
+  hexInputCtx.displayRefresh = true;
+  hexInputCtx.lastUpdate = millis();
+  hexInputCtx.cursorBlink = true;
+  hexInputCtx.lastCursorBlink = false;
+  hexInputCtx.lastBlink = millis();
+  hexInputCtx.lastActivity = millis();      // Initialiser le timer d'activité
+  hexInputCtx.timeoutDuration = TIMEOUT_SAISIE;      // 30 secondes de timeout
+  hexInputCtx.lastValidity = false;
+  hexInputCtx.firstDisplay = true;
+  hexInputCtx.lastTimeoutValue = 0xFF;
+  
+  debugSerial.print(hexInputCtx.title);
+  debugSerial.print(" => Saisie hexa demarree (longueur: ");
+  debugSerial.print(maxLen);
+  debugSerial.println(")");
+  
+  OLEDDisplayMessageL8("Modifiez la cle hexa", false, false);
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Met à jour le décalage d'affichage selon la position du curseur
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
+void updateHexDisplayOffset(void)
+{
+  // Centrer l'affichage sur la position du curseur
+  int idealOffset = hexInputCtx.position - (hexInputCtx.displayWidth / 2);
+  
+  // Limiter les bornes
+  if (idealOffset < 0) idealOffset = 0;
+  
+  int maxOffset = hexInputCtx.maxLength - hexInputCtx.displayWidth;
+  if (maxOffset < 0) maxOffset = 0;
+  if (idealOffset > maxOffset) idealOffset = maxOffset;
+  
+  if (hexInputCtx.displayOffset != idealOffset)
+  {
+    hexInputCtx.displayOffset = idealOffset;
+    hexInputCtx.displayRefresh = true;
+  }
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Gère le clignotement du curseur pour l'hexadécimal
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
+void updateHexInputCursorBlink(void)
+{
+  if (millis() - hexInputCtx.lastBlink > 500) // Clignotement toutes les 500ms
+  {
+    hexInputCtx.cursorBlink = !hexInputCtx.cursorBlink;
+    hexInputCtx.lastBlink = millis();
+    hexInputCtx.displayRefresh = true;
+  }
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Traite la saisie hexadécimale (à appeler dans loop)
+// @param void
+// @return hexInputState_t État actuel de la saisie
+// ---------------------------------------------------------------------------*
+hexInputState_t processHexInput(void)
+{
+  if (hexInputCtx.state != HEX_INPUT_ACTIVE)
+  {
+    return hexInputCtx.state;
+  }
+  
+  // Gestion du clignotement du curseur
+  updateHexInputCursorBlink();
+  
+  // Vérification du timeout
+  if (hexInputCtx.timeoutDuration > 0 && 
+      (millis() - hexInputCtx.lastActivity > hexInputCtx.timeoutDuration))
+  {
+    hexInputCtx.state = HEX_INPUT_CANCELLED;
+    debugSerial.println("Saisie hexadecimale annulee par timeout");
+    OLEDDisplayMessageL8("Timeout", false, false);
+    return hexInputCtx.state;
+  }
+  
+  // Traitement des touches
+  if (touche != KEY_NONE)
+  {
+    // Réinitialiser le timer d'activité à chaque action utilisateur
+    hexInputCtx.lastActivity = millis();
+    
+    switch (touche)
+    {
+      case LEFT:
+        if (hexInputCtx.position > 0)
+        {
+          hexInputCtx.position--;
+          updateHexDisplayOffset();
+          hexInputCtx.displayRefresh = true;
+          debugSerial.print("Position curseur hex: ");
+          debugSerial.println(hexInputCtx.position);
+        }
+        break;
+        
+      case RIGHT:
+        if (hexInputCtx.position < (hexInputCtx.maxLength - 1))
+        {
+          hexInputCtx.position++;
+          updateHexDisplayOffset();
+          hexInputCtx.displayRefresh = true;
+          debugSerial.print("Position curseur hex: ");
+          debugSerial.println(hexInputCtx.position);
+        }
+        break;
+        
+      case PLUS:
+        modifyHexDigit(hexInputCtx.workingHex, hexInputCtx.position, +1);
+        hexInputCtx.displayRefresh = true;
+        break;
+        
+      case MOINS:
+        modifyHexDigit(hexInputCtx.workingHex, hexInputCtx.position, -1);
+        hexInputCtx.displayRefresh = true;
+        break;
+        
+      case VALIDE:
+        if (isHexStringValid(hexInputCtx.workingHex, hexInputCtx.maxLength))
+        {
+          hexInputCtx.state = HEX_INPUT_COMPLETED;
+          debugSerial.println("Chaine hexadecimale validee");
+          OLEDDisplayMessageL8("Cle hexa acceptee", false, false);
+        }
+        else
+        {
+          debugSerial.println("Chaine hexadecimale invalide");
+          OLEDDisplayMessageL8("Cle hexa invalide !", false, false);
+        }
+        break;
+        
+      default:
+        break;
+    }
+    
+    // Reset de la touche après traitement
+    touche = KEY_NONE;
+  }
+  
+  // Rafraîchissement de l'affichage UNIQUEMENT si nécessaire
+  if (hexInputCtx.displayRefresh)
+  {
+    refreshHexDisplay();
+    hexInputCtx.displayRefresh = false;
+    hexInputCtx.lastUpdate = millis();
+  }
+  
+  return hexInputCtx.state;
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Rafraîchit l'affichage de la chaîne hexadécimale avec curseur (optimisé)
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
+void refreshHexDisplay(void)
+{
+  // Calculer la longueur d'affichage effective
+  uint8_t effectiveDisplayWidth = (hexInputCtx.maxLength < hexInputCtx.displayWidth) ? 
+                                   hexInputCtx.maxLength : hexInputCtx.displayWidth;
+  
+  // Préparer la chaîne d'affichage (portion visible)
+  char displayBuffer[17]; // 16 chars + '\0'
+  strncpy(displayBuffer, &hexInputCtx.workingHex[hexInputCtx.displayOffset], effectiveDisplayWidth);
+  displayBuffer[effectiveDisplayWidth] = '\0';
+  
+  bool hexChanged = (strcmp(displayBuffer, hexInputCtx.lastDisplayedHex) != 0);
+  bool offsetChanged = (hexInputCtx.displayOffset != hexInputCtx.lastDisplayOffset);
+  bool positionChanged = (hexInputCtx.position != hexInputCtx.lastPosition);
+  bool cursorBlinkChanged = (hexInputCtx.cursorBlink != hexInputCtx.lastCursorBlink);
+  bool currentValidity = isHexStringValid(hexInputCtx.workingHex, hexInputCtx.maxLength);
+  bool validityChanged = (currentValidity != hexInputCtx.lastValidity);
+  
+  // Afficher le titre seulement au premier affichage (ligne 0)
+  if (hexInputCtx.firstDisplay)
+  {
+    char paddedTitle[21];
+    snprintf(paddedTitle, 21, "%-20s", hexInputCtx.title);
+    OLEDDrawText(1, 0, 0, paddedTitle);
+    OLEDDrawText(1, 7, 0, "+/- Modif VALIDE OK"); // Instructions fixes
+    hexInputCtx.firstDisplay = false;
+  }
+  
+  // Afficher la portion visible seulement si elle a changé (ligne 2)
+  if (hexChanged || offsetChanged)
+  {
+    char padded[21];
+    snprintf(padded, 21, "%-16s", displayBuffer);
+    OLEDDrawText(1, 2, 0, padded);
+    strcpy(hexInputCtx.lastDisplayedHex, displayBuffer);
+  }
+  
+  // Gestion du curseur (ligne 3) - OPTIMISÉ
+  if (positionChanged || cursorBlinkChanged || offsetChanged)
+  {
+    // Si l'offset a changé, effacer toute la ligne 3 pour supprimer tous les curseurs fantômes
+    if (offsetChanged)
+    {
+      OLEDDrawText(1, 3, 0, "                "); // 16 espaces
+      hexInputCtx.lastCursorOffset = 0xFF; // Invalider l'ancien offset
+    }
+    else
+    {
+      // Sinon, effacer uniquement l'ancienne position du curseur
+      if (hexInputCtx.lastPosition != 0xFF && hexInputCtx.lastCursorOffset != 0xFF)
+      {
+        int lastRelativePos = hexInputCtx.lastPosition - hexInputCtx.lastCursorOffset;
+        if (lastRelativePos >= 0 && lastRelativePos < 16)
+        {
+          OLEDDrawText(1, 3, lastRelativePos, " ");
+        }
+      }
+    }
+    
+    // Calculer la position relative du curseur dans l'affichage actuel
+    int relativePos = hexInputCtx.position - hexInputCtx.displayOffset;
+    
+    // Afficher le curseur ^ si visible et dans la zone d'affichage
+    if (hexInputCtx.cursorBlink && relativePos >= 0 && relativePos < effectiveDisplayWidth)
+    {
+      OLEDDrawText(1, 3, relativePos, "^");
+    }
+    
+    // TOUJOURS mémoriser l'offset actuel (même si curseur invisible)
+    hexInputCtx.lastCursorOffset = hexInputCtx.displayOffset;
+    hexInputCtx.lastPosition = hexInputCtx.position;
+  }
+  
+  // Afficher la position et scroll info seulement si changé (ligne 4)
+  if (positionChanged || offsetChanged)
+  {
+    char posInfo[21];
+    sprintf(posInfo, "Pos: %02d/%02d", hexInputCtx.position + 1, hexInputCtx.maxLength);
+    
+    // Afficher les informations de scroll si nécessaire
+    if (hexInputCtx.maxLength > hexInputCtx.displayWidth)
+    {
+      if (hexInputCtx.displayOffset > 0 || 
+          hexInputCtx.displayOffset < (hexInputCtx.maxLength - hexInputCtx.displayWidth))
+      {
+        char scrollInfo[9];
+        uint8_t endPos = hexInputCtx.displayOffset + effectiveDisplayWidth;
+        if (endPos > hexInputCtx.maxLength) endPos = hexInputCtx.maxLength;
+        
+        sprintf(scrollInfo, " <%02d-%02d>", 
+                hexInputCtx.displayOffset + 1, 
+                endPos);
+        strcat(posInfo, scrollInfo);
+      }
+    }
+    
+    // Compléter avec des espaces
+    while (strlen(posInfo) < 20)
+    {
+      strcat(posInfo, " ");
+    }
+    
+    OLEDDrawText(1, 4, 0, posInfo);
+    hexInputCtx.lastDisplayOffset = hexInputCtx.displayOffset;
+  }
+  
+  // Afficher le statut de validité seulement s'il a changé (ligne 5)
+  if (validityChanged)
+  {
+    if (currentValidity)
+    {
+      OLEDDrawText(1, 5, 0, "Cle valide          ");
+    }
+    else
+    {
+      OLEDDrawText(1, 5, 0, "Cle invalide        ");
+    }
+    hexInputCtx.lastValidity = currentValidity;
+  }
+  
+  // Afficher le countdown du timeout seulement si < 5s (ligne 7)
+  if (hexInputCtx.timeoutDuration > 0)
+  {
+    unsigned long remainingTime = (hexInputCtx.timeoutDuration - (millis() - hexInputCtx.lastActivity)) / 1000;
+    
+    // N'afficher le timeout que dans les 5 dernières secondes
+    if (remainingTime <= 5 && remainingTime != hexInputCtx.lastTimeoutValue)
+    {
+      char timeoutMsg[21];
+      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
+      OLEDDrawText(1, 7, 0, timeoutMsg);
+      hexInputCtx.lastTimeoutValue = remainingTime;
+    }
+    else if (remainingTime > 5 && hexInputCtx.lastTimeoutValue <= 5)
+    {
+      // Restaurer les instructions si on sort du mode timeout
+      OLEDDrawText(1, 7, 0, "+/- Modif VALIDE OK");
+      hexInputCtx.lastTimeoutValue = 255;
+    }
+  }
+  
+  // Sauvegarder les états pour la prochaine comparaison
+  hexInputCtx.lastCursorBlink = hexInputCtx.cursorBlink;
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Finalise la saisie et récupère la chaîne hexadécimale
+// @param outputHex Buffer pour stocker la chaîne finale (41 chars minimum)
+// @return void
+// ---------------------------------------------------------------------------*
+void finalizeHexInput(char* outputHex)
+{
+  if (hexInputCtx.state == HEX_INPUT_COMPLETED)
+  {
+    strncpy(outputHex, hexInputCtx.workingHex, hexInputCtx.maxLength);
+    outputHex[hexInputCtx.maxLength] = '\0';
+    
+    // Reset du contexte
+    hexInputCtx.state = HEX_INPUT_IDLE;
+    hexInputCtx.position = 0;
+    hexInputCtx.displayOffset = 0;
+    hexInputCtx.firstDisplay = true;
+    
+    debugSerial.print("Chaine hexadecimale finale: ");
+    debugSerial.println(outputHex);
+  }
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Annule la saisie hexadécimale
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
+void cancelHexInput(void)
+{
+  hexInputCtx.state = HEX_INPUT_CANCELLED;
+  debugSerial.println("Saisie hexadecimale annulee");
+  OLEDDisplayMessageL8("Saisie annulee", false, false);
+  
+  // Reset du contexte
+  hexInputCtx.state = HEX_INPUT_IDLE;
+  hexInputCtx.firstDisplay = true;
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Vérifie si une saisie hexadécimale est en cours
+// @param void
+// @return bool true si saisie active
+// ---------------------------------------------------------------------------*
+bool isHexInputActive(void)
+{
+  return (hexInputCtx.state == HEX_INPUT_ACTIVE);
+}
+
+/*
 // ---------------------------------------------------------------------------*
 // @brief Vérifie si une chaîne hexadécimale est valide
 // @param hex Chaîne de caractères hexadécimale (40 caractères)
@@ -1511,7 +2040,18 @@ void startHexInput(const char* title, const char* initialHex)
   hexInputCtx.lastDisplayOffset = 0xFF;
   hexInputCtx.lastCursorOffset = 0xFF;
   hexInputCtx.displayWidth = 16; // 16 caractères visibles sur l'écran
-  
+
+// Copier le titre (max 20 caractères)
+  if (title && strlen(title) > 0)
+  {
+    strncpy(hexInputCtx.title, title, 20);
+    hexInputCtx.title[20] = '\0';
+  }
+  else
+  {
+    strcpy(hexInputCtx.title, "--- SAISIE HEXA: ---");
+  }
+
   // Copier la chaîne initiale ou créer une chaîne par défaut
   if (initialHex && strlen(initialHex) == 40)
   {
@@ -1537,8 +2077,8 @@ void startHexInput(const char* title, const char* initialHex)
   hexInputCtx.timeoutDuration = TIMEOUT_SAISIE;      // 30 secondes de timeout
   hexInputCtx.lastValidity = false;
   hexInputCtx.firstDisplay = true;
-  
-  debugSerial.println("Saisie hexadecimale demarree");
+//debugSerial.print(hexInputCtx.title);
+//debugSerial.println("=> Saisie hexadecimale demarree");
   OLEDDisplayMessageL8("Modifiez la cle hexa", false, false);
 }
 
@@ -1733,7 +2273,9 @@ void refreshHexDisplay(void)
   // Afficher le titre seulement au premier affichage (ligne 0)
   if (hexInputCtx.firstDisplay)
   {
-    OLEDDrawText(1, 0, 0, "CLE HEXADECIMALE:");
+    OLEDDrawText(1, 0, 0, hexInputCtx.title);
+//debugSerial.print(hexInputCtx.title);
+//debugSerial.println("=> dans refresh");  
     OLEDDrawText(1, 7, 0, "+/- Modif VALIDE OK"); // Instructions fixes
     hexInputCtx.firstDisplay = false;
   }
@@ -1876,7 +2418,7 @@ void modifyHexDigit(char *hex, uint8_t pos, int delta)
   debugSerial.print(" modifiee: ");
   debugSerial.println(hex[pos]);
 }
-
+*/
 
 // ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SAISIE TIME =====
@@ -2064,13 +2606,6 @@ void cancelTimeInput(void)
   OLEDDisplayMessageL8("Saisie annulee", false, false);  
   // Reset du contexte
   timeInputCtx.state = TIME_INPUT_IDLE;
-
-// retour dans l'affichage et traitement du menu "Père"              
-  if (currentMenuDepth > 0)           // Revenir au menu
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
 }
 
 // ---------------------------------------------------------------------------*
@@ -2522,13 +3057,6 @@ void cancelDateInput(void)
   
   // Reset du contexte
   dateInputCtx.state = DATE_INPUT_IDLE;
-  
-// Revenir au menu, déplacé de Handle.cpp, après cancelDateInput();
-  if (currentMenuDepth > 0)
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
 }
 
 // ---------------------------------------------------------------------------*

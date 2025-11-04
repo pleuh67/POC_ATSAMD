@@ -709,7 +709,7 @@ void OLEDdisplayInfoScreenLoRa(void)
   OLEDClear();
   OLEDDrawText(1, 0, 0, "==== INFOS LoRa ====");
 
-  snprintf(localOLEDbuf, 21,"#%2d %15s",Ruche.Num_Carte,Data_LoRa.RucherName);  // ConfigApplicatif_t =>   uint8_t Balance_ID + char    RucherName [20]; 
+  snprintf(localOLEDbuf, 21,"#%2d %15s",Ruche.Num_Carte,ConfigApplicatif.RucherName);  // ConfigApplicatif_t =>   uint8_t Balance_ID + char    RucherName [20]; 
   OLEDDrawText(1, 2, 0,localOLEDbuf);
 // Affichage SF
   snprintf(localOLEDbuf, 21,"SF: %d  Tx: %d min.",LoRa_Config.SpreadingFactor,LoRa_Config.SendingPeriod);  // SF + Tx Interval (min)  

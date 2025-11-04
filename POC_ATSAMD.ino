@@ -79,7 +79,7 @@ Data_LoRa.ProcessorTemp = 21.18;   // temp µC, ne sera pas conservé
   // Initialisation configuration
   initConfig();
   OLEDDebugDisplay("initConfig OK");
-
+delay(1000);
   init2483A();
   sprintf(OLEDbuf,"ID: %s",Module_ID);
   OLEDDebugDisplay(OLEDbuf);
@@ -314,8 +314,8 @@ debugSerial.print("4");   // 444444444444444444444444444444
   {    
     loopWDT  = millis();
 //#ifdef __SerialDebugPoc     
-debugSerial.print("I1$ WDT:");   //   I1$ I1$ I1$ I1$ I1$ I1$ I1$ I1$
-debugSerial.println(loopWDT);
+//debugSerial.print("I1$ WDT:");   //   I1$ I1$ I1$ I1$ I1$ I1$ I1$ I1$
+//debugSerial.println(loopWDT);
 //#endif
     wakeup1Sec = false;   
     counter1s++;
@@ -330,15 +330,15 @@ debugSerial.println(loopWDT);
     {
       case 0 :    // Rafraichir OLED
   //             OLEDDisplayHivesDatas();  // pas quand saisies en cours....
-debugSerial.println("Case0");
+//debugSerial.println("Case0");
                break;
       case 1 :   //  read_DHT(dht);  
 // Reading temperature or humidity takes about 250 milliseconds!
-debugSerial.println("Case1");
+//debugSerial.println("Case1");
                read_DHT(dht); // init: Data_LoRa.DHT_Temp, Data_LoRa.DHT_Hum
                break;
      case 2 :
-debugSerial.println("Case2");
+//debugSerial.println("Case2");
 
                
                Data_LoRa.Brightness = getLuminance();
@@ -349,31 +349,31 @@ debugSerial.println("Case2");
 
                break;
      case 3 :
-debugSerial.println("Case3");
+//debugSerial.println("Case3");
               if (Peson[Ruche.Num_Carte][0])
                 Poids_Peson(0) = GetPoids(1,1);
               break;
      case 4 :
-debugSerial.println("Case4");
+//debugSerial.println("Case4");
               if (Peson[Ruche.Num_Carte][1])
                 Poids_Peson(1) = GetPoids(2,1);
               break;
      case 5 :
-debugSerial.println("Case5");
+//debugSerial.println("Case5");
               if (Peson[Ruche.Num_Carte][2])
                 Poids_Peson(2) = GetPoids(3,1);
               break;
      case 6 :
-debugSerial.println("Case6");
+//debugSerial.println("Case6");
               if (Peson[Ruche.Num_Carte][0])
                 Poids_Peson(3) = GetPoids(4,1);
               break;
      case 7 :
-debugSerial.println("Case7");
+//debugSerial.println("Case7");
               readingT=getTemperature();
                break;
       case 8 :
-debugSerial.println("Case8");
+//debugSerial.println("Case8");
               break;
       case 9 :      // Alive: '.' sur OLED
               debugSerial.print(".");

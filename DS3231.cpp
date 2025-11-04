@@ -50,7 +50,29 @@ OLEDDebugDisplay("RTC introuvable");
 #ifdef debugSerialinitRTC
   debugSerial.println("RTC a perdu l'heure, mise à jour avec l'heure de compilation");
 #endif  
+   DateTime now = rtc.now();
+
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+    debugSerial.print(now.year(), DEC);
+    debugSerial.print('/');
+    debugSerial.print(now.month(), DEC);
+    debugSerial.print('/');
+    debugSerial.print(now.day(), DEC);
+    debugSerial.print(" (");
+    debugSerial.print(daysOfTheWeek[now.dayOfTheWeek()]);
+    debugSerial.print(") ");
+    debugSerial.print(now.hour(), DEC);
+    debugSerial.print(':');
+    debugSerial.print(now.minute(), DEC);
+    debugSerial.print(':');
+    debugSerial.print(now.second(), DEC);
+    debugSerial.println();
+
+     //rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0)); 
       rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));  
+
+      
     }
 #ifdef debugSerialinitRTC
     debugSerial.println("RTC initialisé");
@@ -96,6 +118,10 @@ debugSerial.println("=== 1s DONE ===");
 // ---------------------------------------------------------------------------*
 void DS3231setRTCAlarm2(void) 
 {
+
+  if (LoRa_Config.SendingPeriod)     // si 0 pas d'envois par IT
+    return;  
+
 // Désactiver TOUTES les interruptions temporairement
     noInterrupts();
     

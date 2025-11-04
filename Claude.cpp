@@ -81,7 +81,56 @@ ajoute     char title[21];             // Titre de la saisie
 a la fin de la struct numInputContext_t;
   
 utilise  cette base de code:
+
+
+
+//
+// Exemple de sélection de Spreading Factor avec liste
+//
+void selectSpreadingFactorFromList(void)
+{
+  static char selectedSF[21] = "";
+  
+  // Liste des SF valides uniquement
+  const char* sfList[] = {
+    "SF7",
+    "SF9",
+    "SF12"
+  };
+  
+  // Lancer la sélection sans timeout
+  startListInput("SPREADING FACTOR:", sfList, 3, 1); // SF9 par défaut (index 1)
+  
+  // Dans loop()
+  listInputState_t state = processListInput();
+  
+  if (state == LIST_INPUT_COMPLETED)
+  {
+    uint8_t index = finalizeListInput(selectedSF);
+    
+    debugSerial.print("SF selectionne: ");
+    debugSerial.println(selectedSF);
+    
+    // Extraire la valeur numérique
+    uint8_t sfValue = 0;
+    if (strcmp(selectedSF, "SF7") == 0)
+      sfValue = 7;
+    else if (strcmp(selectedSF, "SF9") == 0)
+      sfValue = 9;
+    else if (strcmp(selectedSF, "SF12") == 0)
+      sfValue = 12;
+    
+    if (sfValue > 0)
+    {
+      lorawan.setSpreadingFactor(sfValue);
+      debugSerial.print("SF configure: ");
+      debugSerial.println(sfValue);
+    }
+  }
+}
+
 */
+
 
  
 // ---------------------------------------------------------------------------*

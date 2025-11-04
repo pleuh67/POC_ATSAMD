@@ -142,21 +142,21 @@ typedef struct {
 // ---------------------------------------------------------------------------*
 typedef struct 
 {
-  listInputState_t state;     // État actuel
-  uint8_t selectedIndex;      // Index de l'élément sélectionné
-  uint8_t scrollOffset;       // Décalage de défilement pour l'affichage
-  uint8_t maxItems;           // Nombre maximum d'éléments dans la liste
-  uint8_t lastScrollOffset;   // Dernier décalage affiché (pour détecter changement)
-  uint8_t lastSelectedIndex;  // Dernier index sélectionné (pour détecter changement)
-  bool lastCursorBlink;       // Dernier état du clignotement
-  bool displayRefresh;        // Flag pour rafraîchir l'affichage
-  unsigned long lastUpdate;   // Dernier rafraîchissement affichage
-  bool cursorBlink;           // État du clignotement curseur
-  unsigned long lastBlink;    // Dernier clignotement
+  listInputState_t state;        // État actuel
+  uint8_t selectedIndex;         // Index de l'élément sélectionné
+  uint8_t scrollOffset;          // Décalage de défilement pour l'affichage
+  uint8_t maxItems;              // Nombre maximum d'éléments dans la liste
+  uint8_t lastScrollOffset;      // Dernier décalage affiché (pour détecter changement)
+  uint8_t lastSelectedIndex;     // Dernier index sélectionné (pour détecter changement)
+  bool lastCursorBlink;          // Dernier état du clignotement
+  bool displayRefresh;           // Flag pour rafraîchir l'affichage
+  unsigned long lastUpdate;      // Dernier rafraîchissement affichage
+  bool cursorBlink;              // État du clignotement curseur
+  unsigned long lastBlink;       // Dernier clignotement
   unsigned long lastActivity;    // Dernière activité utilisateur
-  unsigned long timeoutDuration;  // Durée du timeout en ms
-  char title[21];             // Titre de la sélection (20 caractères + \0)
-  const char** itemList;      // Pointeur vers la liste des éléments
+  unsigned long timeoutDuration; // Durée du timeout en ms
+  char title[21];                // Titre de la sélection (20 caractères + \0)
+  const char** itemList;         // Pointeur vers la liste des éléments
 } listInputContext_t;
 
 // ---------------------------------------------------------------------------*
@@ -233,26 +233,27 @@ typedef struct
 // ---------------------------------------------------------------------------*
 typedef struct 
 {
-  hexInputState_t state;      // État actuel
-  uint8_t position;           // Position du curseur (0-39)
-  uint8_t lastPosition;       // Dernière position affichée
-  char workingHex[41];        // Chaîne hexa de travail (40 chars + '\0')
-  char lastDisplayedHex[17];  // Dernière portion affichée (16 chars + '\0')
-  bool displayRefresh;        // Flag pour rafraîchir l'affichage
-  unsigned long lastUpdate;   // Dernier rafraîchissement affichage
-  bool cursorBlink;           // État du clignotement curseur
-  bool lastCursorBlink;       // Dernier état du clignotement
-  unsigned long lastBlink;    // Dernier clignotement
-  uint8_t displayOffset;      // Décalage pour affichage (scroll horizontal)
-  uint8_t lastDisplayOffset;  // Dernier décalage affiché
-  uint8_t lastCursorOffset;   // Dernier offset quand le curseur a été affiché
-  uint8_t displayWidth;       // Largeur d'affichage (nb de caractères visibles)
+  hexInputState_t state;         // État actuel
+  uint8_t position;              // Position du curseur
+  uint8_t lastPosition;          // Dernière position affichée
+  uint8_t maxLength;             // Longueur maximale autorisée (1-40)
+  char workingHex[41];           // Chaîne hexa de travail (40 chars max + '\0')
+  char lastDisplayedHex[17];     // Dernière portion affichée (16 chars + '\0')
+  char title[21];                // Titre de la saisie
+  bool displayRefresh;           // Flag pour rafraîchir l'affichage
+  unsigned long lastUpdate;      // Dernier rafraîchissement affichage
+  bool cursorBlink;              // État du clignotement curseur
+  bool lastCursorBlink;          // Dernier état du clignotement
+  unsigned long lastBlink;       // Dernier clignotement
+  uint8_t displayOffset;         // Décalage pour affichage (scroll horizontal)
+  uint8_t lastDisplayOffset;     // Dernier décalage affiché
+  uint8_t lastCursorOffset;      // Dernier offset quand le curseur a été affiché
+  uint8_t displayWidth;          // Largeur d'affichage (16 caractères visibles)
   unsigned long lastActivity;    // Dernière activité utilisateur
   unsigned long timeoutDuration; // Durée du timeout en ms
-  bool lastValidity;          // Dernière validité affichée
-  bool firstDisplay;          // Premier affichage
-  uint8_t lastTimeoutValue;   // Dernière valeur de timeout affichée
-  char title[21];             // Titre de la saisie
+  bool lastValidity;             // Dernière validité affichée
+  bool firstDisplay;             // Premier affichage
+  uint8_t lastTimeoutValue;      // Dernière valeur de timeout affichée
 } hexInputContext_t;
 
 // ---------------------------------------------------------------------------*

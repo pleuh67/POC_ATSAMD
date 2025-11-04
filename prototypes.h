@@ -94,11 +94,11 @@ void m01_6M_PopMenu(void);  // Retour menu précédent m0_Demarrage
 void m02_0E_PageInfosLoRa(void);     // Page info
 void m02_0E_PageInfosLoRaDone(void);
 
-void m02_1F_GetHex(void);       // DevEUI
-void m02_1F_GetHexDone(void);
+void m02_1F_AppKEY(void);       // AppKEY
+void m02_1F_AppKEYDone(void);
 
-void m02_2F_GetHex(void);       // AppEUI
-void m02_2F_GetHexDone(void);
+void m02_2F_AppEUI(void);       // AppEUI
+void m02_2F_AppEUIDone(void);
 
 void m02_3L_GetSF(void);        // SF d'après ListeSF
 void m02_3L_GetSFDone(void);
@@ -144,7 +144,9 @@ void m04_0F_CalibBal_1(void); // appel menu calib#1 des paramètre
 void m04_1F_CalibBal_2(void); // appel menu calib#2 des paramètre
 void m04_2F_CalibBal_3(void); // appel menu calib#3 des paramètre
 void m04_3F_CalibBal_4(void); // appel menu calib#4 des paramètre
-void m04_4M_PopMenu(void);    // Retour menu précédent m0_Demarrage
+void m04_4F_InfoBal(void);    // 
+void m04_5F_PoidsBal(void);   //
+void m04_6M_PopMenu(void);    // Retour menu précédent m0_Demarrage
 
 // ---------------------------------------------------------------------------*
 // Appels du menu m04x => appel écrans de calibrations
@@ -177,11 +179,11 @@ infoScreenState_t processInfoScreen(void);
 bool isInfoScreenActive(void);
 
 // ---------------------------------------------------------------------------*
-// Fonctions de sélection dans une liste
-void initStartupList(void);      // Fonction d'initialisation
-void startListInputWithTimeout(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex, unsigned long timeoutMs);
+// Fonctions de sélection dans liste
+void initStartupList(void);
+void startListInput(const char* title, const char** itemList, uint8_t numItems, uint8_t initialIndex, unsigned long timeoutMs);
 listInputState_t processListInput(void);
-uint8_t finalizeListInput(void);   // Timeout de 30 s sans actions Kbd lors de la saisie
+uint8_t finalizeListInput(char* outputItem);
 void cancelListInput(void);
 bool isListInputActive(void);
 void refreshListDisplay(void);
@@ -240,7 +242,7 @@ void modifyStringChar(char* str, uint8_t pos, int delta);
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie hexadécimale
-void startHexInput(const char* title, const char* initialHex);
+void startHexInput(const char* title, const char* initialHex, uint8_t maxLen);
 hexInputState_t processHexInput(void);
 void finalizeHexInput(char* outputHex);
 void cancelHexInput(void);
@@ -248,9 +250,9 @@ bool isHexInputActive(void);
 void refreshHexDisplay(void);
 void updateHexInputCursorBlink(void);
 void updateHexDisplayOffset(void);
-bool isHexStringValid(const char *hex);
-void modifyHexDigit(char *hex, uint8_t pos, int delta);
 char getNextHexChar(char current, int delta);
+void modifyHexDigit(char *hex, uint8_t pos, int delta);
+bool isHexStringValid(const char *hex, uint8_t expectedLength);
 
 // ---------------------------------------------------------------------------*
 // Fonctions de saisie Time
@@ -336,6 +338,26 @@ void LEDStartBlue(void);
 void LEDStartGreen(void);
 void demarrerLEDBuiltin(void);
 void gererLEDsNonBloquant(void);
+
+
+// ---------------------------------------------------------------------------*
+// Fonctions de conversions
+void TestConvert(void);
+// Conversions hexadécimales
+uint8_t hexCharToNibble(char c);
+char nibbleToHexChar(uint8_t nibble);
+bool hexStringToByteArray(const char* hexString, uint8_t* byteArray, uint8_t maxBytes);
+bool byteArrayToHexString(const uint8_t* byteArray, uint8_t numBytes, char* hexString, uint8_t maxChars);
+
+// Conversions décimales uint8_t ↔ char buffer
+bool uint8ToDecimalString(uint8_t value, char* buffer, uint8_t maxChars);
+bool decimalStringToUint8(const char* buffer, uint8_t* value);
+bool isValidLoRaWanSF(uint8_t sf);
+bool validateLoRaWanSF(const char* sfString, uint8_t* sfValue);
+
+// Affichage
+void printByteArray(const uint8_t* byteArray, uint8_t length);
+void printHexString(const char* hexString);
 
 
 // ---------------------------------------------------------------------------*

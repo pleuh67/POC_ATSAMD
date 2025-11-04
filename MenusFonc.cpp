@@ -161,11 +161,23 @@ debugSerial.println(dateBuffer);        // Ici vous pouvez traiter la date et re
   annee = ((byte)dateBuffer[8] -48)*10;
   annee += (byte)dateBuffer[9] -48;
   
-  systemTime = rtc.now();
+// Lecture avant modif pour init hh:mm:ss
+ systemTime = rtc.now();
+  // mise à date yy/mm/dd du DS3231
   rtc.adjust(DateTime(annee, mois, jour, systemTime.hour(), systemTime.minute(), systemTime.second()));  
-/*
+  // mise à date modifiée du µc
+  systemTime = rtc.now();
+  
+  /*
   rtc.adjust(DateTime(systemTime.year()-2000, systemTime.month(), systemTime.day(), hour, minute, second));  
+
+
+  // This line sets the RTC with an explicit date & time, for example to set
+  // January 21, 2014 at 3am you would call:
+rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
 */
+  
+
 sprintf(serialbuf, "mise à la date DS3231 %d/%d/%d",annee,mois,jour);
 debugSerial.println(serialbuf);
   copyDS3231TimeToMicro(1);
@@ -210,8 +222,19 @@ debugSerial.println(timeBuffer);        // Ici vous pouvez traiter l'heure et re
   minute += (byte)timeBuffer[4] -48;
   second = ((byte)timeBuffer[6] -48)*10;
   second += (byte)timeBuffer[7] -48;
-  systemTime = rtc.now();
+
+  
+// Lecture avant modif pour init hh:mm:ss
+ systemTime = rtc.now();
+  // mise à l'heure hh:mm:ss du DS3231
   rtc.adjust(DateTime(systemTime.year()-2000, systemTime.month(), systemTime.day(), hour, minute, second));  
+  // mise à date modifiée du µc
+  systemTime = rtc.now();
+
+//   rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+  
+//  systemTime = rtc.now();
+//  rtc.adjust(DateTime(systemTime.year()-2000, systemTime.month(), systemTime.day(), hour, minute, second));  
 debugSerial.println("mise à l'heure DS3231");
   copyDS3231TimeToMicro(1);
   synchronizeDS3231TimeToMicro();
@@ -221,12 +244,6 @@ debugSerial.println("Reprogramme IRQ2");
   DS3231setRTCAlarm2(); // Reprogrammer prochaine alarme dans n min
 // Activer la liste de démarrage quand fin saisie TIME : void finalizeTimeInput(char* outputTime)
   backMenu(); 
-/*  if (currentMenuDepth > 0)
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
-*/  
 }
 
 // Saisie de ConfigMateriel.Noeud_LoRa
@@ -291,13 +308,6 @@ void m01_4F_readConfig()
 // Si pas fonction_Done();
 // Activer la liste de démarrage quand fin saisie
   backMenu(); 
-  /*
-  if (currentMenuDepth > 0)
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }
-*/  
 }
 
 void m01_4F_readConfigDone()  
@@ -365,124 +375,112 @@ void m02_0E_PageInfosLoRaDone()
   PageInfosLoRaRefresh = false;
 }
 
-
-
-
-// doit on saisir AppKey ????? Plutot que DevEUI (N° du Module LoRa) !!!!!!!!!!!!
 // AppKey => {0x50,0x48,0x49,0x4C,0x49,0x50,0x50,0x45,0x4C,0x4F,0x56,0x45,0x42,0x45,0x45,0x53,0x00} 
 // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
 // AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
-void m02_1F_GetHex()  // DevEUI  (N° du Module LoRa)
-{ static char hexBuffer[41] = "0123456789ABCDEF0123456789ABCDEF01234567"; // Buffer pour l'hexa
+// appel de Menus.cpp
+void m02_1F_AppKEY()  // AppKEY
+{ static char hexBuffer[33]; // Buffer pour l'hexa
 
-debugSerial.println("Lancement saisie HEXA");
-debugSerial.println("CONFIG. SYSTEME - Demande saisie HEXA DevEUI");
-strcpy(hexBuffer,"0004A30B00EEEE01");
-  startHexInput(" titre fenetre", hexBuffer); 
+  saisieActive=21;
+debugSerial.println("CONFIG. SYSTEME - Demande saisie HEXA AppKEY");
+  byteArrayToHexString(&AppKey_List [Ruche.Num_Carte][0], 16, hexBuffer, 33);
+  startHexInput("-- SAISIR APPKEY ---", hexBuffer,32); 
 }           
 
-void m02_1F_GetHexDone()    // DevEUI  (N° du Module LoRa)
-{ static char hexBuffer[41] = "0123456789ABCDEF0123456789ABCDEF01234567"; // Buffer pour l'hexa
-
-// INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
-//   DevEUI = (uint8_t *)SN2483_List[Ruche.Num_Carte];
+// appel de Handle.cpp avec saisieActive=21;
+void m02_1F_AppKEYDone()    // AppKEY
+{ static char hexBuffer[33] = ""; // Buffer pour l'hexa
 
   finalizeHexInput(hexBuffer); // Récupérer chaine HEXA
-debugSerial.print("Nouvelle chaine DevEUI: ");
-debugSerial.println(hexBuffer);        // Ici vous pouvez traiter l'heure et revenir au menu
+debugSerial.print("Nouvelle chaine AppKEY: ");
+debugSerial.println(hexBuffer);        // Ici vous pouvez traiter AppKEY et revenir au menu
+  hexStringToByteArray(hexBuffer, &AppKey_List [Ruche.Num_Carte][0], strlen(hexBuffer));
   backMenu(); 
 }
 
-
-
 // AppEUI => {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x35, 0x00} = ABEILLE5
-void m02_2F_GetHex() // AppEUI
-{
-debugSerial.println("Appel m02_2F_GetHex AppEUI - a implementer");   
+// appel de Menus.cpp
+void m02_2F_AppEUI() // AppEUI
+{ static char hexBuffer[10]; // Buffer pour l'hexa
 
-// Init AppEUI
-//      AppEUI = (uint8_t *)AppEUI_List[Ruche.Num_Carte];
-
-
-
-  if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }  
+  saisieActive=22;
+debugSerial.println("CONFIG. SYSTEME - Demande saisie HEXA AppEUI");
+  byteArrayToHexString(&AppEUI_List [Ruche.Num_Carte][0], 8, hexBuffer, 17);
+  startHexInput("-- SAISIR APPEUI ---", hexBuffer,16); 
 }
 
-void m02_2F_GetHexDone()    // AppEUI
-{
-debugSerial.println("Appel m02_2F_GetHexDone AppEUI - a implementer");   
+// appel de Handle.cpp avec saisieActive=22;
+void m02_2F_AppEUIDone()    // AppEUI
+{  static char hexBuffer[17] = ""; // Buffer pour l'hexa
 
-  if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }    
+  finalizeHexInput(hexBuffer); // Récupérer chaine HEXA
+debugSerial.print("Nouvelle chaine AppEUI: ");
+debugSerial.println(hexBuffer);        // Ici vous pouvez traiter AppEUI et revenir au menu
+  hexStringToByteArray(hexBuffer, &AppEUI_List [Ruche.Num_Carte][0], strlen(hexBuffer));
+  backMenu(); 
 }
 
+// appel de Menus.cpp
 void m02_3L_GetSF() // Spread Factor, saisir dans la liste List_SF[], 3 elements
 {
- debugSerial.println("Appel m02_3L_GetSF - a implementer");   
+  saisieActive=23;   // 
+debugSerial.println("Appel m02_3L_GetSF");   
+int i;
+ i = LoRa_Config.SpreadingFactor;
 
-  if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }   
+ i = i == 7 ? 0 : i == 9 ? 1 : 2 ;
+
+static char hexBuffer[17] = ""; // Buffer pour l'hexa
+sprintf(hexBuffer,"SF: %d  i: %d",LoRa_Config.SpreadingFactor,i);
+debugSerial.println(hexBuffer);   
+
+  startListInput("---- SELECT SF -----", List_SF, 3, i, TIMEOUT_SAISIE);
 }
 
 void m02_3L_GetSFDone()    // Spread Factor
-{
- debugSerial.println("Appel m02_3L_GetSFDone - a implementer");   
+{ static char selectedSF[21] = "";
+  static char localBuffer[40] = "";
+  
+debugSerial.println("Appel m02_3L_GetSFDone");   
+    uint8_t index = finalizeListInput(selectedSF);
+    
+debugSerial.print("SF selectionne: ");
+debugSerial.println(selectedSF);
+    
+    // Extraire la valeur numérique
+    if (strcmp(selectedSF, "SF7") == 0)
+      LoRa_Config.SpreadingFactor = 7;
+    else if (strcmp(selectedSF, "SF9") == 0)
+      LoRa_Config.SpreadingFactor = 9;
+    else if (strcmp(selectedSF, "SF12") == 0)
+      LoRa_Config.SpreadingFactor = 12;
 
-  if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }     
+sprintf(localBuffer,"Nouvelle chaine RC: %d / item: %s / SF: %d", index, selectedSF, LoRa_Config.SpreadingFactor );
+debugSerial.println(localBuffer);        // Ici vous pouvez traiter SF et revenir au menu
+  backMenu(); 
 }
-
 
 void m02_4F_GetPayloadDelay() // Delais Payload
 {
  debugSerial.println("Appel m02_4F_GetPayloadDelay - a implementer");   
+  saisieActive=23;   // pas de cas d'usage
 
-  if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }     
 }
 
 void m02_4F_GetPayloadDelayDone()    // Delais Payload
-{
+{  static char numBuffer[21] = ""; // Buffer pour le Num
 debugSerial.println("Appel m02_4F_GetPayloadDelayDone - a implementer");   
 
-  if (currentMenuDepth > 0) // Relance la navigation menu après saisie  ou timeout
-  {
-    menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
-    startListInputWithTimeout(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex, 0);
-  }       
+  finalizeNumInput(numBuffer);
+  backMenu();       
 }
 
 
 void m02_5F_Join() // Connexion LoRa
 {
 debugSerial.println("Appel m02_5F_Join - a tester");   
-/*
-// INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
-      DevEUI = (uint8_t *)SN2483_List[Ruche.Num_Carte];
-// Init AppEUI
-      AppEUI = (uint8_t *)AppEUI_List[Ruche.Num_Carte];
-// Init AppKey
-      AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
-       break;  // sortie du for() quand trouvé egalité.... pas terrible!!!  
 
-
-*/
 GestionEnCours("m02_5Fa");
   init2483A();  // Réinitialise DevEUI, AppEUI et AppKey
 debugSerial.println("Fin init2483A");   
@@ -617,13 +615,7 @@ void m04_nM_CalibBal_bal()
 }
 
 
-//  "Calib. Bal #1  (F)",      // 0: Calibration Balance 1
-// HX711#0 parameters    
-//  uint8_t Ruche.HX711Clk_0;           
-//  uint8_t Ruche.HX711Dta_0;
-//  float   Ruche.HX711ZeroValue_0;
-//  float   Ruche.HX711Scaling_0;
-//  float   Ruche.HX711Cor_Temp_0;
+
 void m04_0F_CalibBal_1()  // 
 {
 debugSerial.println("Appel m04_nM_CalibBal_1 - a implementer");   
@@ -644,6 +636,10 @@ void m04_1F_CalibBal_2()  //
   debugSerial.println("m04_1F_CalibBal_2 - a implementer");   
 
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
+
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
+ 
+  
 }
 
 
@@ -654,7 +650,9 @@ void m04_2F_CalibBal_3()  //
   debugSerial.println("m04_2F_CalibBal_3 - a implementer");   
 
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
-}
+
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
+ }
 
 
 //  "Calib. Bal #4  (F)",      // 3:  Calibration Balance 4
@@ -664,10 +662,28 @@ void m04_3F_CalibBal_4()  //
   debugSerial.println("m04_3F_CalibBal_4 - a implementer");    
 
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
+ }
+
+//  "info.  Balances(F)",      //   Page info Balances 
+void m04_4F_InfoBal(void)    // 
+{
+
+  OLEDDrawText(1, 7, 0, "VALIDE pour retour");
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
+}
+
+ 
+// "Poids  Balances(F)"   // Affichage rafraichi du poids des balances
+void m04_5F_PoidsBal(void)   //
+{
+  
+  OLEDDrawText(1, 7, 0, "VALIDE pour retour");
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
 //  "RET  popMenu(M000)"       // 4: Retour menu principal
-void m04_4M_PopMenu()  // retour menu000Demarrage
+void m04_6M_PopMenu()  // retour menu000Demarrage
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("PopMenu()");    
@@ -678,12 +694,19 @@ void m04_4M_PopMenu()  // retour menu000Demarrage
 // ---------------------------------------------------------------------------*
 // --------------------------------- menu04x_CalibBal ------------------------
 // ---------------------------------------------------------------------------*
-
+//  "Calib. Bal #1  (F)",      // 0: Calibration Balance 1
+// HX711#0 parameters    
+//  uint8_t Ruche.HX711Clk_0;           
+//  uint8_t Ruche.HX711Dta_0;
+//  float   Ruche.HX711ZeroValue_0;
+//  float   Ruche.HX711Scaling_0;
+//  float   Ruche.HX711Cor_Temp_0;
 
 void m04x_0F_tareBal_1(void)    // appel écran de calibration
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("m04x_0F_tareBal_1()");      
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
 
@@ -691,12 +714,14 @@ void m04x_1F_echelleBal_2(void) // appel écran de calibration
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("m04x_1F_echelleBal_2()");        
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }  
   
 void m04x_2F_tempBal_3(void)    // appel écran de calibration
 {
   debugSerial.print("Appel d'une Fonction: ");      
   debugSerial.println("m04x_2F_tempBal_3()");      
+  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
 void m04x_3M_PopMenu(void)   // Retour menu précédent m04_CalibBalances
