@@ -14,8 +14,9 @@
 // ---------------------------------------------------------------------------*
 #define __INIT_DONE
 #include "define.h"
-
 // ---------------------------------------------------------------------------*
+
+/*
 // Fonctions de conversions
 void TestConvert(void);
 // Conversions hexadécimales
@@ -33,7 +34,7 @@ bool validateLoRaWanSF(const char* sfString, uint8_t* sfValue);
 // Affichage
 void printByteArray(const uint8_t* byteArray, uint8_t length);
 void printHexString(const char* hexString);
-
+*/
 
 // ---------------------------------------------------------------------------*
 // @brief Convertit un caractère hexadécimal en valeur numérique (nibble)
@@ -364,6 +365,47 @@ bool validateLoRaWanSF(const char* sfString, uint8_t* sfValue)
 }
 
 // ---------------------------------------------------------------------------*
+// @brief Convertit une chaîne hexadécimale en tableau d'octets
+// @param source Chaîne de caractères contenant les valeurs hexadécimales
+// @param destination Tableau d'octets où stocker le résultat
+// @param len Nombre d'octets à convertir (longueur du tableau destination)
+// @return void
+// ---------------------------------------------------------------------------*
+void convertByteArray(const char *source, uint8_t *destination, uint8_t len)
+{
+  for (uint8_t i = 0; i < len; i++)
+  {
+    // Extraire deux caractères hexadécimaux de la source
+    char hexByte[3] = {source[i * 2], source[i * 2 + 1], '\0'};
+    
+    // Convertir en valeur numérique et stocker dans destination
+    destination[i] = (uint8_t)strtol(hexByte, NULL, 16);
+  }
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Convertit un tableau d'octets en chaîne hexadécimale
+// @param source Tableau d'octets à convertir
+// @param destination Chaîne de caractères où stocker le résultat 
+//        (doit contenir 2 * len + 1 caractères)
+// @param len Nombre d'octets à convertir
+// @return void
+// ---------------------------------------------------------------------------*
+void convertToHexString(const uint8_t *source, char *destination, uint8_t len)
+{
+  for (uint8_t i = 0; i < len; i++)
+  {
+    // Convertir chaque octet en deux caractères hexadécimaux
+    sprintf(&destination[i * 2], "%02X", source[i]);
+  }
+  // Terminer la chaîne avec un caractère nul
+  destination[len * 2] = '\0';
+}
+
+
+
+
+// ---------------------------------------------------------------------------*
 // @brief Affiche un tableau d'octets en hexadécimal sur le port série
 // @param byteArray Tableau d'octets à afficher
 // @param length Nombre d'octets à afficher
@@ -460,15 +502,15 @@ void TestConvert(void)
   // ===== TEST 3 : DevEUI LoRaWAN (16 caractères hexa = 8 octets) =====
   debugSerial.println("\n--- TEST 3 : DevEUI LoRaWAN ---");
   const char* hexString3 = "0004A30B001A2B3C";
-  uint8_t devEUI[9] = {0};
+  // uint8_t devEUI[9] = {0};
   
   debugSerial.print("Chaine hexa source: ");
   debugSerial.println(hexString3);
   
-  if (hexStringToByteArray(hexString3, devEUI, 9))
+  if (hexStringToByteArray(hexString3, ConfigMateriel.DevEUI, 9))
   {
     debugSerial.println("Resultat de la conversion:");
-    printByteArray(devEUI, 8);
+    printByteArray(ConfigMateriel.DevEUI, 8);
   }
   
   // ===== TEST 4 : Adresse MAC (12 caractères hexa = 6 octets) =====

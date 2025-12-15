@@ -162,13 +162,79 @@ void GestionEnCours(char *from)
   else
     encours = 0;
 
-if (encours != oldencours)
+  if (encours != oldencours)
+  {
+    debugSerial.print(serialbuf);
+    sprintf(serialbuf, "from %s: %d", from, dtobin(encours));
+    debugSerial.println(serialbuf);
+    oldencours = encours;
+  }  
+}
+
+
+
+void HandleSaisieActive()
 {
-  debugSerial.print(serialbuf);
-  sprintf(serialbuf, "from %s: %d", from, dtobin(encours));
-  debugSerial.println(serialbuf);
-  oldencours = encours;
-}  
+// cas sortie list de selection paramètres (SF, Ruchers, ...)
+        switch (saisieActive) // 12, 21-, 22-, 23-, 24-, 32-, 40
+        {
+          case 21:
+          {
+            m02_1F_AppKEYDone();
+debugSerial.println("lancement m02_1F_AppKEYDone");                       
+            saisieActive=0;
+            break;
+          }
+          case 22:
+          {
+            m02_2F_AppEUIDone();
+debugSerial.println("lancement m02_1F_AppEUIDone");                       
+            saisieActive=0;
+            break;
+          }
+
+        
+          case 23:
+          {
+             m02_3L_GetSFDone();
+debugSerial.println("lancement m02_3L_GetSFDone()");                       
+            saisieActive=0;
+            break;
+          }
+          case 24:
+          {
+            m02_4F_GetPayloadDelayDone();
+debugSerial.println("lancement m02_3L_GetSFDone()");                       
+            saisieActive=0;
+            break;
+          }
+          case 30:
+          {
+            m03_0F_CalibVBatDone();
+debugSerial.println("lancement m03_2F_CalibVBatDone()");                       
+            saisieActive=0;
+            break;
+          }     
+          case 31:
+          {
+            m03_1F_CalibVSolDone();
+debugSerial.println("lancement m03_1F_CalibVSolDone()");                       
+            saisieActive=0;
+            break;
+          }     
+          case 32:
+          {
+            m03_2F_CalibVLumDone();
+debugSerial.println("lancement m03_2F_CalibVLumDone()");                       
+            saisieActive=0;
+            break;
+          }     
+          default:  // ne rien faire
+          {
+ debugSerial.println("default dans isListInputActive()/saisieActive/default, pourquoi ???????????????????");           
+            break;      
+          }
+        }
 }
 
 
@@ -250,29 +316,10 @@ GestionEnCours("handleProgrammingModeb"); // affiche le type de traitement en co
     {           
       case LIST_INPUT_COMPLETED:
       {
-// cas sortie list de selection paramètres (SF, Ruchers, ...)
-        switch (saisieActive)
-        {
-          case 23:
-          {
-             m02_3L_GetSFDone();
-debugSerial.println("lancement m02_3L_GetSFDone()");                       
-            saisieActive=0;
-            break;
-          }
-          case 24:
-          {
-            m02_4F_GetPayloadDelayDone();
-debugSerial.println("lancement m02_3L_GetSFDone()");                       
-            saisieActive=0;
-            break;
-          }
-          default:  // ne rien faire
-          {
- debugSerial.println("default dans isListInputActive()/saisieActive/default, pourquoi ???????????????????");           
-            break;      
-          }
-        }
+
+ HandleSaisieActive();
+
+
  // cas sortie list de menu        
         menuLevel_t* currentMenu = &menuStack[currentMenuDepth - 1];
 char dummy[21] = "";        
@@ -317,7 +364,8 @@ debugSerial.println("Cas ELSE");
         break;        
       }
       case LIST_INPUT_CANCELLED:
-                debugSerial.println("Selection mode annulee par timeout");
+debugSerial.println("Selection LISTE annulee par timeout");
+
        // Si on était dans un sous-menu, revenir au menu précédent
         if (currentMenuDepth > 1)
         {
@@ -401,6 +449,9 @@ GestionEnCours("handleProgrammingModed");   // affiche le type de traitement en 
     switch (state)
     {
       case NUM_INPUT_COMPLETED:
+
+HandleSaisieActive();
+      
   //      finalizeNumInput(numBuffer);
   //      debugSerial.print("Nouveau nombre: ");
    //     debugSerial.println(numBuffer);
@@ -411,21 +462,42 @@ sprintf(stringSaisie,(char *)numBuffer);    // recopie saisie dans destination !
 debugSerial.println(stringSaisie);
 debugSerial.println(Data_LoRa.RucherName);
 */
+
+/*
+ICI traiter SaisieActive des NUM
+
+
+
+
+
         switch (saisieActive)
         {
           case 12:
           {
             m01_2F_GetNumRucherDone(); // retour au menu        
           }
+          case 23:
+          {
+            m02_4F_GetPayloadDelayDone(); // retour au menu        
+          }
+
+
           default:
             break; 
         }
+
+*/
        
 // peut être on peut enlever break??? pour executer le valid suivi du TMT 
 // en veillant a ne pas annuler laa saisie validée ;-)
 // ceci peut éviter de doubler les tests 
         break;        
       case NUM_INPUT_CANCELLED:
+
+//HandleSaisieCanceled()   // stoppe les rafraichissement données OLED et debugSerial
+  InfoVLumScreenRefresh = false;           // desactive rafraichissement de Vlum
+
+      
         debugSerial.println("Saisie numerique annulee par timeout");
         cancelNumInput();
 
@@ -437,6 +509,9 @@ m01_2F_GetNumRucherDone(); // retour au menu
         return;
     }
   }
+
+
+  
 // ---------------------------------------------------------------------------*
 // Vérifier si une saisie alphanumérique est en cours
 // ---------------------------------------------------------------------------*
@@ -457,7 +532,10 @@ GestionEnCours("handleProgrammingModee");   // affiche le type de traitement en 
     switch (state)
     {
       case STRING_INPUT_COMPLETED:
-          m01_3F_GetNameRucherDone();
+
+HandleSaisieActive();
+      
+          m01_3F_GetNameRucherDone();           // SaisieActive??????????????????
 /*        finalizeStringInput(stringBuffer);
         debugSerial.print("Nouvelle chaine: ");
         debugSerial.println(stringBuffer);
@@ -491,29 +569,10 @@ GestionEnCours("handleProgrammingModef");   // affiche le type de traitement en 
     {
       case HEX_INPUT_COMPLETED:
       {
-// trouver pour gestion differents HEX
-        switch (saisieActive)
-        {
-          case 21:
-          {
-            m02_1F_AppKEYDone();
-debugSerial.println("lancement m02_1F_AppKEYDone");                       
-            saisieActive=0;
-            break;
-          }
-          case 22:
-          {
-            m02_2F_AppEUIDone();
-debugSerial.println("lancement m02_1F_AppEUIDone");                       
-            saisieActive=0;
-            break;
-          }
-          default:  // ne rien faire
-          {
- debugSerial.println("default dans isHexInputActive/saisieActive/default, pourquoi ???????????????????");           
-            break;      
-          }
-        }
+
+HandleSaisieActive();
+
+        
     //    finalizeHexInput(hexBuffer); // Récupérer la chaîne finale
       //  debugSerial.print("Nouvelle cle hexadecimale: ");
         //debugSerial.println(hexBuffer);
@@ -549,10 +608,10 @@ GestionEnCours("handleProgrammingModeg");   // affiche le type de traitement en 
     switch (state)
     {
       case TIME_INPUT_COMPLETED:
-      {
-        m01_1F_GetTimeDone(); // Retour au menu dans fonction
+        HandleSaisieActive();      
+m01_1F_GetTimeDone();                                                                                     // affecter un saisie active : 11
         break;   
-      }    
+          
       case TIME_INPUT_CANCELLED:
       {
 debugSerial.println("Saisie heure annulee par timeout");
@@ -581,7 +640,10 @@ GestionEnCours("handleProgrammingModeh");   // affiche le type de traitement en 
     {
       case DATE_INPUT_COMPLETED:
       {
-         m01_0F_GetDateDone(); // Retour au menu dans fonction
+
+        HandleSaisieActive();
+
+m01_0F_GetDateDone();                                                                                                // affecter un saisie active : 10
          break;
       }  
       case DATE_INPUT_CANCELLED:
@@ -613,6 +675,9 @@ debugSerial.print("E");   // EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
     {
       case EMAIL_INPUT_COMPLETED:
       {
+
+        HandleSaisieActive();
+        
         finalizeEmailInput(emailBuffer);
         debugSerial.print("Nouvel email: ");
         debugSerial.println(emailBuffer);
@@ -648,6 +713,8 @@ debugSerial.print("I");   // IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     switch (state)
     {
       case IP_INPUT_COMPLETED:
+        HandleSaisieActive();
+
         finalizeIPInput(ipBuffer);
         debugSerial.print("Nouvelle IP: ");
         debugSerial.println(ipBuffer);

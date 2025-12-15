@@ -90,21 +90,26 @@ infoScreenState_t infoScreenState = INFO_SCREEN_IDLE;
 bool ScreenRefreshed = false;  // info generale de maj ecran info pour desactiver dans Handle.cpp
 
 // Système
-bool InfoScreenRefreshTime = false;
+bool InfoScreenRefreshTime = false;         // rafraichissement heure ecran Info
 
 // LoRa
-bool LoRaScreenRefreshTime = false;
+bool LoRaScreenRefreshTime = false;         // rafraichissement heure ecran LoRa
 bool LoraScreenRefreshNextPayload = false;
 // Balances
-bool InfoBalScreenRefreshTime = false;
+bool InfoBalScreenRefreshTime = false;      // rafraichissement heure ecran Balances
 bool WeightScreenRefreshTime = false;
 bool WeightScreenRefreshWeights = false;
+// Analogiques
+bool InfoVBatScreenRefreshTime = false;     // rafraichissement heure ecran VBAT
+bool InfoVBatScreenRefresh = false;         // rafraichissement mesures ecran VBAT
+bool InfoVLumScreenRefreshTime = false;     // rafraichissement heure ecran VLUM
+bool InfoVLumScreenRefresh= false;          // rafraichissement mesures ecran VLUM
+bool InfoVSolScreenRefreshTime = false;     // rafraichissement heure ecran VSol
+bool InfoVSolScreenRefresh = false;         // rafraichissement mesures ecran VSol
+// 
 
-
-
-bool PvageInfosLoRaRefresh = false;  // utile?
-bool PvageInfosSystRefresh = false;  // utile?
-
+//bool PvageInfosLoRaRefresh = false;  // utile?
+//bool PvageInfosSystRefresh = false;  // utile?
 //bool displayInfoScreenSystTimeRefresh = false;
 
 #ifdef OLED096
@@ -165,15 +170,12 @@ char hexPayload[HEXPAYLOADSIZE];
 // char hexPayload[PAYLOADSIZE// 2 + 1];
 // int hexPayloadSize = PAYLOADSIZE// 2 + 1;
 
-uint8_t *DevEUI;    // Orange : kit SodaQ RUCHE 0: 00 04 A3 0B 00 20 30 0A
-uint8_t *AppEUI;    // Orange : kit SodaQ RUCHE 0 
-uint8_t *AppKey;    // Orange : kit SodaQ RUCHE 0 
 
 // liste des ID LoRa 
 //  "414245494C4C4534", // Orange:HELTEC Wireless Stick => autre projet ESP32S3
-char Module_ID[20] = "HWEUI_NOT_READ_";               // A LIRE DANS MODULE
+
 // #define MAX_HWEUI_List a maintenir dans define.h 
-char HWEUI_List [MAX_HWEUI_List][20] = {
+char HWEUI_List [MAX_HWEUI_List][20] = {                      // renommer en DeviceID_List
   "55AA55AA55AA55AA", // Module LoRa pas Lu
   "0004A30B0020300A", // Orange: Carte Explorer HS, puis proto PCB#1, récupérer Chip LoRa pour PCB#2
   "0004A30B0024BF45", // pas connecté chez Orange??? noeud non identifié
@@ -182,7 +184,7 @@ char HWEUI_List [MAX_HWEUI_List][20] = {
   "0004A30B00F547CF" // Orange: Proto CAVE PCB#2
  };
 
-uint8_t SN2483_List [6][9] = {   // donne le DevEUI (Module_ID)
+uint8_t SN2483_List [6][9] = {   // donne le DevEUI (Module_ID)   // renommer en HexDeviceID_List
   {  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },  // Module pas Lu
   {  0x00, 0x04, 0xA3, 0x0B, 0x00, 0x20, 0x30, 0x0A, 0x00 },  // Proto PCB#1-1 RN à récuperer
   {  0x00, 0x04, 0xA3, 0x0B, 0x00, 0x24, 0xBF, 0x45, 0x00 },  // SodaQ RUCHE 1 
@@ -190,6 +192,9 @@ uint8_t SN2483_List [6][9] = {   // donne le DevEUI (Module_ID)
   {  0x00, 0x04, 0xA3, 0x0B, 0x00, 0xEE, 0xA5, 0xD5, 0x00 },  // Proto PCB#2-3 Ruches Verger
   {  0x00, 0x04, 0xA3, 0x0B, 0x00, 0xF5, 0x47, 0xCF, 0x00 }   // Proto PCB#2-1 Cave
 };
+
+
+
 
 uint8_t AppEUI_List [6][9] ={ 
   {0x4C, 0x4F, 0x56, 0x45, 0x4C, 0x41, 0x4B, 0x4F, 0x00},     // Module pas Lu
@@ -270,17 +275,76 @@ int Peson [10][4] = {
 
 // Structures de données des configurations
 
+
+
 // maintenir table de valeurs de correction pesons
-ConfigMateriel_t ConfigMateriel = // valeurs par défaut proto 03
+/*
+typedef struct 
+{
+  uint16_t version;       // version matérielle : 3 = PCB2
+  uint8_t adresseRTC;     // DS3231_ADDRESS 0x68
+  uint8_t adresseOLED;    //
+  uint8_t adresseEEPROM;  // EEPROM_ADDRESS 0x57
+
+  uint8_t Num_Carte;  // Numéro de carte 
+  uint8_t Noeud_LoRa;
+  uint8_t Rtc;        // True or False, autodetect?
+  uint8_t KBD_Ana;    // True or False
+  uint8_t Oled;       // True or False OLED096 ou OLED130
+  uint8_t SDHC;       // True or False
+  uint8_t LiPo;       // True or False
+  uint8_t Solaire;    // True or False Aabandonné?
+
+// HX711#0 parameters    
+  uint8_t Peson_0; //  N° Peson
+  uint8_t HX711Clk_0;           
+  uint8_t HX711Dta_0;
+  float   HX711ZeroValue_00;
+  float   HX711Scaling_0;
+  float   HX711Cor_Temp_0;
+// HX711#1 parameters  
+  uint8_t Peson_1; //  N° Peson
+  uint8_t HX711Clk_1;           
+  uint8_t HX711Dta_1;
+  float   HX711ZeroValue_1;
+  float   HX711Scaling_1;
+  float   HX711Cor_Temp_1;
+// HX711#2 parameters
+  uint8_t Peson_2; //  N° Peson
+  uint8_t HX711Clk_2;           
+  uint8_t HX711Dta_2;
+  float   HX711ZeroValue_2;
+  float   HX711Scaling_2;
+  float   HX711Cor_Temp_2;
+// HX711#3 parameters
+  uint8_t Peson_3; //  N° Peson
+  uint8_t HX711Clk_3;           
+  uint8_t HX711Dta_3;
+  float   HX711ZeroValue_3;
+  float   HX711Scaling_3;
+  float   HX711Cor_Temp_3;
+// Analog scaling  
+  float   LDRBrightnessScale;   // 
+  float   VSolScale;            //  
+  float   VBatScale;
+} ConfigMateriel_t;
+*/
+
+ConfigMateriel_t ConfigMateriel;
+/* init faitee dans POC_ATSAMD.ino
+= // valeurs par défaut proto 03
 { 3, 0x68, 0x3C, 0x57,
   0, 3, 1, 1, 1, 0, 1, 1, 
   19, 3, 4, 7929.70, 97.49, 0,   // N° Peson, CLK, DTA, Tare, scale, temp
   18, 3, 6, 34134.50, 103.77, 0,
   0, 3, 8, 0, 0, 0,
-  0, 3, 10, 0, 0, 0    
+  0, 3, 10, 0.123, 0, 0    
 };
+*/
 
-ConfigApplicatif_t ConfigApplicatif =
+ConfigApplicatif_t ConfigApplicatif;
+/*
+=
 { 1000101, RED_LED_DURATION, GREEN_LED_DURATION, BLUE_LED_DURATION, BUILTIN_LED_DURATION,    // version, RED, GREEN, BLUE, BUILTIN duration
   91, "FREUDENECK",
   "0004A30B00EEEE01", 
@@ -289,9 +353,7 @@ ConfigApplicatif_t ConfigApplicatif =
                  // "5048494C495050454C4F564542454553", PHILIPPELOVEBEES
   DEFAULT_SF, WAKEUP_INTERVAL_PAYLOAD, INTERVAL_1SEC     // SF, Delai Payload, Refresh OLED
 };
-
-HW_equipement Ruche;
-LoRa_configuration LoRa_Config = {"","","",9,WAKEUP_INTERVAL_PAYLOAD};      /// => sous IT !!!!!
+*/
 LoRa_Var Data_LoRa;
 
 
@@ -444,6 +506,13 @@ extern bool LoraScreenRefreshNextPayload;
 extern bool InfoBalScreenRefreshTime;
 extern bool WeightScreenRefreshTime;
 extern bool WeightScreenRefreshWeights;
+// Analogiques
+extern bool InfoVBatScreenRefreshTime;
+extern bool InfoVBatScreenRefresh;
+extern bool InfoVLumScreenRefreshTime;
+extern bool InfoVLumScreenRefresh;
+extern bool InfoVSolScreenRefreshTime;
+extern bool InfoVSolScreenRefresh;
 
 //bool displayInfoScreenSystTimeRefresh = false;
 
@@ -457,7 +526,8 @@ extern clavier_context_t clavierContext;
 
 extern char *OLEDbuf; //[];
 extern char serialbuf[];
-extern char Module_ID[];
+
+//extern char Module_ID_HWEUI[];   
 
 extern uint8_t payloadSize; 
 extern uint8_t payload[];
@@ -468,9 +538,7 @@ extern char HWEUI_List [][20];
 extern uint8_t SN2483_List [][9];
 extern uint8_t AppEUI_List [][9];
 extern uint8_t AppKey_List [][17];
-extern uint8_t *DevEUI;    // Orange : kit SodaQ RUCHE 0: 00 04 A3 0B 00 20 30 0A
-extern uint8_t *AppEUI;    // Orange : kit SodaQ RUCHE 0 
-extern uint8_t *AppKey;    // Orange : kit SodaQ RUCHE 0 
+
 
 // Variables config
 extern bool setupDone;
@@ -492,8 +560,6 @@ extern int Peson [][4];
 // Structures de données des configurations
 extern ConfigMateriel_t ConfigMateriel;
 extern ConfigApplicatif_t ConfigApplicatif;
-extern HW_equipement Ruche;
-extern LoRa_configuration LoRa_Config; 
 extern LoRa_Var Data_LoRa;
 extern float Contrainte_List [];
 

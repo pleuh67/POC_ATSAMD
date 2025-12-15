@@ -80,14 +80,146 @@ Data_LoRa.ProcessorTemp = 21.18;   // temp µC, ne sera pas conservé
   initConfig();
   OLEDDebugDisplay("initConfig OK");
 delay(1000);
-  init2483A();
-  sprintf(OLEDbuf,"ID: %s",Module_ID);
+
+
+
+// initialiser les Structures, lecture EEPROM I2C@0x57,  si echec val par défaut
+// Si echec tester autre adresse I2C si existe
+// initialiser par lecture EEPROM I2C
+
+// initialisation aux valeurs par défaut
+debugSerial.println("Initialisation aux valeurs par défaut");
+
+
+  ConfigMateriel.version = 3;       // version matérielle : 3 = PCB2
+  ConfigMateriel.adresseRTC = DS3231_ADDRESS;     
+  ConfigMateriel.adresseOLED = OLED_ADDRESS;   
+  ConfigMateriel.adresseEEPROM = EEPROM_ADDRESS;  
+
+
+
+  
+  ConfigMateriel.Num_Carte = init2483A(ConfigMateriel.DevEUI);
+debugSerial.print("ConfigMateriel.Num_Carte <= "); debugSerial.println(ConfigMateriel.Num_Carte);  // OK
+
+//  ConfigMateriel.HWEUI [20] = {  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // "0004A30B00EEEE01";         // ID RN2483: "0004A30B00EEEE01"
+  
+  
+  
+  ConfigMateriel.Rtc = true;        // True or False, autodetect?
+  ConfigMateriel.KBD_Ana = true;    // True or False
+  ConfigMateriel.Oled = 96;       // True or False OLED096 ou OLED130
+  ConfigMateriel.SDHC = false;       // True or False
+  ConfigMateriel.LiPo = true;       // True or False
+  ConfigMateriel.Solaire = true;    // True or False Abandonné?
+
+// /!\ la carte doit être identifiée => de ConfigMateriel.Num_Carte /!\
+// #0
+  ConfigMateriel.Peson_0 = Peson[ConfigMateriel.Num_Carte][0];  //  N° Peson
+//                          N° de peson : num ruche        0 .. 3      
+  ConfigMateriel.HX711Clk_0 = HX711_SENSOR_SCK;           
+  ConfigMateriel.HX711Dta_0 = HX711_ASENSOR_DOUT;
+// les données sont extraites de la base de données des pesons
+  ConfigMateriel.HX711NoloadValue_0 = Jauge[ConfigMateriel.Peson_0][0];
+  ConfigMateriel.HX711Tare_Temp_0 = Jauge[ConfigMateriel.Peson_0][2];
+  ConfigMateriel.HX711Scaling_0 = Jauge[ConfigMateriel.Peson_0][1];
+  ConfigMateriel.HX711Cor_Temp_0 = Jauge[ConfigMateriel.Peson_0][3];
+// #1
+  ConfigMateriel.Peson_1 = Peson[ConfigMateriel.Num_Carte][1];  //  N° Peson
+  ConfigMateriel.HX711Clk_1 = HX711_SENSOR_SCK;           
+  ConfigMateriel.HX711Dta_1 = HX711_BSENSOR_DOUT;
+  ConfigMateriel.HX711NoloadValue_1 = Jauge[ConfigMateriel.Peson_1][0];
+  ConfigMateriel.HX711Tare_Temp_1 = Jauge[ConfigMateriel.Peson_1][2];
+  ConfigMateriel.HX711Scaling_1 = Jauge[ConfigMateriel.Peson_1][1];
+  ConfigMateriel.HX711Cor_Temp_1 = Jauge[ConfigMateriel.Peson_1][3];
+// #2
+  ConfigMateriel.Peson_2 = Peson[ConfigMateriel.Num_Carte][2];  //  N° Peson
+  ConfigMateriel.HX711Clk_2 = HX711_SENSOR_SCK;           
+  ConfigMateriel.HX711Dta_2 = HX711_CSENSOR_DOUT;
+  ConfigMateriel.HX711NoloadValue_2 = Jauge[ConfigMateriel.Peson_2][0];
+  ConfigMateriel.HX711Tare_Temp_2 = Jauge[ConfigMateriel.Peson_2][2];
+  ConfigMateriel.HX711Scaling_2 = Jauge[ConfigMateriel.Peson_2][1];
+  ConfigMateriel.HX711Cor_Temp_2 = Jauge[ConfigMateriel.Peson_2][3];
+// #3
+  ConfigMateriel.Peson_3 = Peson[ConfigMateriel.Num_Carte][3];  //  N° Peson
+  ConfigMateriel.HX711Clk_3 = HX711_SENSOR_SCK;           
+  ConfigMateriel.HX711Dta_3 = HX711_DSENSOR_DOUT;
+  ConfigMateriel.HX711NoloadValue_3 = Jauge[ConfigMateriel.Peson_3][0];
+  ConfigMateriel.HX711Tare_Temp_3 = Jauge[ConfigMateriel.Peson_3][2];
+  ConfigMateriel.HX711Scaling_3 = Jauge[ConfigMateriel.Peson_3][1];
+  ConfigMateriel.HX711Cor_Temp_3 = Jauge[ConfigMateriel.Peson_3][3];
+
+// Analog scaling  
+  ConfigMateriel.LDRBrightnessScale;   // 
+  ConfigMateriel.VSolScale;            //  
+  ConfigMateriel.VBatScale;
+// FIN initialisation aux valeurs par défaut
+
+  sprintf(OLEDbuf,"ID: %s",ConfigMateriel.DevEUI);
   OLEDDebugDisplay(OLEDbuf);
+
+
+// ConfigApplicatif: initialisation aux valeurs par défaut
+  ConfigApplicatif.version = 1000101;  // version logicielle
+// paramètres cosmétiques  
+  ConfigApplicatif.redLedDuration = RED_LED_DURATION;      //  100
+  ConfigApplicatif.greenLedDuration = GREEN_LED_DURATION;    //  100
+  ConfigApplicatif.blueLedDuration = BLUE_LED_DURATION;     //  100   
+  ConfigApplicatif.builtinLedDuration = BUILTIN_LED_DURATION;  //  100  
+// paramètres Rucher
+  ConfigApplicatif.RucherID = 91;         // ID Rucher           xx  uint8_t
+  strcpy(ConfigApplicatif.RucherName, "FREUDENECK");    // Localisation Rucher (saisir direct ou liste + "autre") 
+// paramètres LoRa
+// HX :  uint8_t HWEUI [20] = "0004A30B00EEEE01";         // ID RN2483: "0004A30B00EEEE01"
+
+  uint8_t AppEUI[] = {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31, 0x00};
+  memcpy(ConfigApplicatif.AppEUI, AppEUI, sizeof(AppEUI));
+//  ConfigApplicatif.AppEUI /*[10]*/ = {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31, 0x00};      
+
+  uint8_t AppKey[] = {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00};   
+  memcpy(ConfigApplicatif.AppKey, AppKey, sizeof(AppKey)); 
+//  ConfigApplicatif.AppKey /*[18]*/ = {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00};      
+  ConfigApplicatif.SpreadingFactor = DEFAULT_SF;    // 7, 9 et 12 echec freudeneck
+  ConfigApplicatif.SendingPeriod = WAKEUP_INTERVAL_PAYLOAD;      // WAKEUP_INTERVAL_PAYLOAD 5
+  ConfigApplicatif.OLEDRefreshPeriod = INTERVAL_1SEC;  // INTERVAL_1SEC 1000 
+
+
+
+
+/*
+
+typedef struct 
+{
+    uint16_t version;  // version logicielle
+// paramètres cosmétiques    
+    uint16_t redLedDuration;      // RED_LED_DURATION 100
+    uint16_t greenLedDuration;    // GREEN_LED_DURATION 100
+    uint16_t blueLedDuration;     // BLUE_LED_DURATION 100   
+    uint16_t builtinLedDuration;  // BUILTIN_LED_DURATION 100  
+// paramètres Rucher
+  uint8_t RucherID;         // ID Rucher           xx  uint8_t
+  char    RucherName [20];    // Localisation Rucher (saisir direct ou liste + "autre") 
+// paramètres LoRa
+  uint8_t HWEUI [20];         // ID RN2483: "0004A30B00EEEE01"
+  uint8_t AppEUI [10];        // AppEUI: {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31, 0x00}
+  uint8_t AppKey [18];        // AppKEY: // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
+// {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00} 
+  uint8_t SpreadingFactor;    // 7, 9 et 12 echec freudeneck
+  uint8_t SendingPeriod;      // WAKEUP_INTERVAL_PAYLOAD 5
+  uint8_t OLEDRefreshPeriod;  // INTERVAL_1SEC 1000 
+} ConfigApplicatif_t;
+
+  */
+
+
+
+
+  
 
 // config balance connue 10 lecture + moyenne
 // poids peson doit être de 0 à 3 et GetPoids de 1..4 confirmé 06/06/2025
 
-  if (Peson[Ruche.Num_Carte][z])
+  if (Peson[ConfigMateriel.Num_Carte][z])
   {
     Poids_Peson(z) = GetPoids(z+1,10);
     sprintf(OLEDbuf,"getWeight %d Done",z);
@@ -109,21 +241,21 @@ delay(1000);
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Rappel:
 // #define Poids_Peson(num)      Data_LoRa.HX711Weight[num]   //  Data_LoRa de type LoRa_Var (ligne 38)
-// #define Tare_Peson(num)       Jauge[Peson[Ruche.Num_Carte][num]][0]
-// #define Echelle_Peson(num)    Jauge[Peson[Ruche.Num_Carte][num]][1]
+// #define Tare_Peson(num)       Jauge[Peson[ConfigMateriel.Num_Carte][num]][0]
+// #define Echelle_Peson(num)    Jauge[Peson[ConfigMateriel.Num_Carte][num]][1]
 // #define BalPoids(num) (Contrainte_List[num]-Tare_Peson(num))/Echelle_Peson(num)/1000 //retourne float
 // float GetPoids(int num)  // ?????   
 // lecture brute => poids en gr
 int num = 0;
-float pesonTare  = Jauge[Peson[Ruche.Num_Carte][num]][0];  // correction pour avoir valeur balance sans charge.
-float pesonScale = Jauge[Peson[Ruche.Num_Carte][num]][1];  // Mise à l'Echelle de pesonValue vers peson Poids
+float pesonTare  = Jauge[Peson[ConfigMateriel.Num_Carte][num]][0];  // correction pour avoir valeur balance sans charge.
+float pesonScale = Jauge[Peson[ConfigMateriel.Num_Carte][num]][1];  // Mise à l'Echelle de pesonValue vers peson Poids
 float pesonValue = Poids_Peson(num) - pesonTare;           // valeur à convertir
 float pesonPoids = pesonValue / pesonScale;                // poids correspondant
 float pesee;                                               // 
   //  Poids_List [num] = pesee*(1-Jauge[Peson[carte][num]][3]*(Jauge[Peson[carte][num]][2]/temp));
   Contrainte_List [num] = pesee; // *(1-Jauge[Peson[carte][num]][3]*(Jauge[Peson[carte][num]][2]/temp));
   // (peson-tare)/echelle
-  pesee = BalPoids(num);   // ( pesee - Jauge[Peson[Ruche.Num_Carte][num]][0] ) / Jauge[Peson[Ruche.Num_Carte][num]][1] / 1000; 
+  pesee = BalPoids(num);   // ( pesee - Jauge[Peson[ConfigMateriel.Num_Carte][num]][0] ) / Jauge[Peson[Ruche.Num_Carte][num]][1] / 1000; 
   sprintf(serialbuf,"temp %5.2f, lu %5.2f, tare %5.2f, echelle %5.2f,  tare en moins %5.2f, poids %5.2f ",
           temp,Poids_Peson(num) , pesonTare, pesonScale,  pesonValue, pesonPoids  );
   debugSerial.println(serialbuf);
@@ -138,7 +270,7 @@ float pesee;                                               //
 
   for ( z=1;z<4;z++)
   {
-    if (Peson[Ruche.Num_Carte][z])
+    if (Peson[ConfigMateriel.Num_Carte][z])
     {
       Poids_Peson(z) = GetPoids(z+1,10);
       sprintf(OLEDbuf,"getWeight %d Done",z);
@@ -150,6 +282,8 @@ float pesee;                                               //
      OLEDDebugDisplay(OLEDbuf);
     }
   }
+
+  
   initLoRa();
 
 // void DS3231CompleteReset() si DS3231 out!
@@ -338,23 +472,23 @@ debugSerial.print("3");   // 333333333333333333333333333
                break;
      case 3 :
 //debugSerial.println("Case3");
-              if (Peson[Ruche.Num_Carte][0])
+              if (Peson[ConfigMateriel.Num_Carte][0])
                 Poids_Peson(0) = GetPoids(1,1);
 // afficher poids bal(1) sur fenêtre OLEDdisplayWeightBal(void)
               break;
      case 4 :
 //debugSerial.println("Case4");
-              if (Peson[Ruche.Num_Carte][1])
+              if (Peson[ConfigMateriel.Num_Carte][1])
                 Poids_Peson(1) = GetPoids(2,1);
               break;
      case 5 :
 //debugSerial.println("Case5");
-              if (Peson[Ruche.Num_Carte][2])
+              if (Peson[ConfigMateriel.Num_Carte][2])
                 Poids_Peson(2) = GetPoids(3,1);
               break;
      case 6 :
 //debugSerial.println("Case6");
-              if (Peson[Ruche.Num_Carte][0])
+              if (Peson[ConfigMateriel.Num_Carte][0])
                 Poids_Peson(3) = GetPoids(4,1);
               break;
      case 7 :

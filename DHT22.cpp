@@ -25,7 +25,7 @@
 char read_DHT(DHT dht)
 {
 
-  if (Peson[Ruche.Num_Carte][0])                   // le DHT est sur Peson[0]
+  if (Peson[ConfigMateriel.Num_Carte][0])                   // le DHT est sur Peson[0]
   {
     // Reading temperature or humidity takes about 250 milliseconds!
     // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)

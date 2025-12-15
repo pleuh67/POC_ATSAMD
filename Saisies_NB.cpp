@@ -525,7 +525,226 @@ void updateListInputCursorBlink(void)
 // ===== FONCTIONS DE SAISIE NUMÉRIQUE =====
 // -------------------------------------------------------------------------------------
 
+// -------------------------------------------------------------------------------------
+// @brief Démarre la saisie numérique non-bloquante avec titre personnalisé
+// @param title Titre à afficher en haut de l'écran (max 20 caractères)
+// @param initialNum Nombre initial à afficher
+// @param maxLen Longueur maximale du nombre (max 20 caractères)
+// @param allowNeg Autoriser les nombres négatifs
+// @param allowDec Autoriser les nombres décimaux
+// @param minVal Valeur minimale autorisée
+// @param maxVal Valeur maximale autorisée
+// @return void
+// ---------------------------------------------------------------------------*
+// startNumInput("-Sending Period LoRa",, 4, false, false, 0, 360); // 0 à 6h
+void startNumInput(const char* title, const char* initialNum, uint8_t maxLen, bool allowNeg, bool allowDec, long minVal, long maxVal)
+{
+  if (numInputCtx.state != NUM_INPUT_IDLE)
+  {
+    return; // Saisie déjà en cours
+  }
+  
+  // Initialisation du contexte
+  numInputCtx.state = NUM_INPUT_ACTIVE;
+  numInputCtx.position = 0;
+  numInputCtx.lastPosition = 0xFF;
+  numInputCtx.displayOffset = 0;
+  numInputCtx.lastDisplayOffset = 0xFF;
+  numInputCtx.lastCursorOffset = 0xFF;
+  numInputCtx.displayWidth = 16; // 16 caractères visibles
+  numInputCtx.maxLength = (maxLen > 20) ? 20 : maxLen;
+  numInputCtx.allowNegative = allowNeg;
+  numInputCtx.allowDecimal = allowDec;
+  numInputCtx.minValue = minVal;
+  numInputCtx.maxValue = maxVal;
+  
+  // Copier le titre (max 20 caractères)
+  if (title && strlen(title) > 0)
+  {
+    strncpy(numInputCtx.title, title, 20);
+    numInputCtx.title[20] = '\0';
+  }
+  else
+  {
+    strcpy(numInputCtx.title, "SAISIE NUMERIQUE:");
+  }
+  
+  // Copier le nombre initial ou créer une chaîne vide
+  if (initialNum && strlen(initialNum) > 0 && strlen(initialNum) <= numInputCtx.maxLength)
+  {
+    strncpy(numInputCtx.workingNum, initialNum, numInputCtx.maxLength);
+    numInputCtx.length = strlen(initialNum);
+  }
+  else
+  {
+    numInputCtx.workingNum[0] = '0';
+    numInputCtx.workingNum[1] = '\0';
+    numInputCtx.length = 1;
+  }
+  numInputCtx.workingNum[20] = '\0';
+  numInputCtx.lastLength = 0xFF;
+  strcpy(numInputCtx.lastDisplayedNum, "");
+  
+  numInputCtx.displayRefresh = true;
+  numInputCtx.lastUpdate = millis();
+  numInputCtx.cursorBlink = true;
+  numInputCtx.lastCursorBlink = false;
+  numInputCtx.lastBlink = millis();
+  numInputCtx.lastActivity = millis();
+  numInputCtx.timeoutDuration = TIMEOUT_SAISIE; // 30 secondes
+  numInputCtx.firstDisplay = true;
+  numInputCtx.lastTimeoutValue = 0xFF;
+  
+  debugSerial.println("Saisie numerique demarree");
+  OLEDDisplayMessageL8("Saisissez nombre    ", false, false);
+}
 
+
+// @brief Rafraîchit l'affichage OLED du nombre avec curseur (optimisé anti-clignotement)
+// @param void
+// @return void
+
+// ligne 0: Title
+// ligne 1: Reserver Date / Time ???
+// ligne 2: Num en cours de modification
+// ligne 3: Gestion du curseur
+// ligne 4: Variable dépendante du Num en cours de saisie à rafraichir
+// ligne 5: Afficher le statut de validité => Masqué > passer à 6 ????
+// ligne 6: 
+// ligne 7: OLEDDrawText(1, 7, 0, "+/- Char VALIDE: OK"); ou timeout // Instructions fixes
+// ---------------------------------------------------------------------------*
+void refreshNumDisplay(void)
+{
+  // Préparer la chaîne d'affichage (portion visible)
+  char displayBuffer[17]; // 16 chars + '\0'
+  uint8_t displayLen = (numInputCtx.length < 16) ? numInputCtx.length : 16;
+  
+  strncpy(displayBuffer, &numInputCtx.workingNum[numInputCtx.displayOffset], displayLen);
+  displayBuffer[displayLen] = '\0';
+  
+  bool numChanged = (strcmp(displayBuffer, numInputCtx.lastDisplayedNum) != 0);
+  bool offsetChanged = (numInputCtx.displayOffset != numInputCtx.lastDisplayOffset);
+  bool positionChanged = (numInputCtx.position != numInputCtx.lastPosition);
+  bool lengthChanged = (numInputCtx.length != numInputCtx.lastLength);
+  bool cursorBlinkChanged = (numInputCtx.cursorBlink != numInputCtx.lastCursorBlink);
+  bool currentValidity = isNumValid(numInputCtx.workingNum, numInputCtx.allowNegative, 
+                                    numInputCtx.allowDecimal, numInputCtx.minValue, numInputCtx.maxValue);
+  
+  // Afficher le titre personnalisé seulement au premier affichage (ligne 0)
+  if (numInputCtx.firstDisplay)
+  {
+    char paddedTitle[21];
+    snprintf(paddedTitle, 21, "%-20s", numInputCtx.title);
+    OLEDDrawText(1, 0, 0, paddedTitle);
+    OLEDDrawText(1, 7, 0, "+/- Char VALIDE: OK"); // Instructions fixes
+    numInputCtx.firstDisplay = false;
+  }
+  
+  // Afficher la portion visible seulement si elle a changé (ligne 2)
+  if (numChanged || offsetChanged)
+  {
+    char padded[21];
+    snprintf(padded, 21, "%-16s", displayBuffer);
+    OLEDDrawText(1, 2, 0, padded);
+    strcpy(numInputCtx.lastDisplayedNum, displayBuffer);
+  }
+  
+  // Gestion du curseur (ligne 3) - OPTIMISÉ
+  if (positionChanged || cursorBlinkChanged || offsetChanged)
+  {
+    // Si l'offset a changé (scroll), EFFACER TOUTE LA LIGNE 3
+    if (offsetChanged)
+    {
+      OLEDDrawText(1, 3, 0, "                ");
+      numInputCtx.lastCursorOffset = 0xFF;
+    }
+    else
+    {
+      // Sinon, effacer uniquement l'ancienne position du curseur
+      if (numInputCtx.lastPosition != 0xFF && numInputCtx.lastCursorOffset != 0xFF)
+      {
+        int lastRelativePos = numInputCtx.lastPosition - numInputCtx.lastCursorOffset;
+        if (lastRelativePos >= 0 && lastRelativePos < 16)
+        {
+          OLEDDrawText(1, 3, lastRelativePos, " ");
+        }
+      }
+    }
+    
+    // Calculer la position relative du curseur
+    int relativePos = numInputCtx.position - numInputCtx.displayOffset;
+    
+    // Afficher le curseur ^ si visible
+    if (numInputCtx.cursorBlink && relativePos >= 0 && relativePos <= displayLen)
+    {
+      OLEDDrawText(1, 3, relativePos, "^");
+    }
+    
+    // TOUJOURS mémoriser l'offset actuel
+    numInputCtx.lastCursorOffset = numInputCtx.displayOffset;
+    numInputCtx.lastPosition = numInputCtx.position;
+  }
+  
+  // Afficher la position et longueur (ligne 4)
+  if (positionChanged || lengthChanged || offsetChanged)
+  {
+ /*      
+    char posInfo[21];
+    sprintf(posInfo, "Pos:%02d Len:%02d/%02d   ", 
+            numInputCtx.position + 1, 
+            numInputCtx.length,
+            numInputCtx.maxLength);
+    OLEDDrawText(1, 4, 0, posInfo);
+*/    
+    numInputCtx.lastDisplayOffset = numInputCtx.displayOffset;
+    numInputCtx.lastLength = numInputCtx.length;
+  }
+  
+  // Afficher le statut de validité (ligne 5)
+/* 
+  if (numChanged || lengthChanged)
+  {
+    if (currentValidity)
+    {
+      OLEDDrawText(1, 5, 0, "Nombre valide       ");
+    }
+    else
+    {
+      OLEDDrawText(1, 5, 0, "Nombre invalide     ");
+    }
+  }
+*/
+  
+  // Afficher le countdown du timeout (ligne 7)
+  if (numInputCtx.timeoutDuration > 0)
+  {
+    unsigned long remainingTime = (numInputCtx.timeoutDuration - (millis() - numInputCtx.lastActivity)) / 1000;
+    
+    if (remainingTime <= 5 && remainingTime != numInputCtx.lastTimeoutValue)
+    {
+      char timeoutMsg[21];
+      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
+      OLEDDrawText(1, 7, 0, timeoutMsg);
+      numInputCtx.lastTimeoutValue = remainingTime;
+    }
+    else if (remainingTime > 5 && numInputCtx.lastTimeoutValue <= 5)
+    {
+      OLEDDrawText(1, 7, 0, "+/- Char VALIDE: OK");
+      numInputCtx.lastTimeoutValue = 255;
+    }
+  }
+  
+  // Sauvegarder l'état du clignotement
+  numInputCtx.lastCursorBlink = numInputCtx.cursorBlink;
+}
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------------------
 // @brief Vérifie si un nombre est valide
 // @param num Chaîne de caractères numérique à vérifier
 // @param allowNeg Autoriser les nombres négatifs (true/false)
@@ -533,6 +752,7 @@ void updateListInputCursorBlink(void)
 // @param minVal Valeur minimale autorisée
 // @param maxVal Valeur maximale autorisée
 // @return bool True si le nombre est valide, false sinon
+// -------------------------------------------------------------------------------------
 bool isNumValid(const char *num, bool allowNeg, bool allowDec, long minVal, long maxVal) 
 {
   uint8_t len = strlen(num);
@@ -576,13 +796,14 @@ bool isNumValid(const char *num, bool allowNeg, bool allowDec, long minVal, long
 }
 
 
+// -------------------------------------------------------------------------------------
 // @brief Obtient le caractère numérique suivant/précédent
 // @param current Caractère actuel sous le curseur
 // @param delta Direction de déplacement (+1 pour suivant, -1 pour précédent)
 // @param allowNeg Autoriser le signe moins dans le jeu de caractères
 // @param allowDec Autoriser le point décimal dans le jeu de caractères
 // @return char Nouveau caractère après rotation
- 
+// -------------------------------------------------------------------------------------
 char getNextNumChar(char current, int delta, bool allowNeg, bool allowDec)
 {
   // Construire le jeu de caractères autorisés
@@ -663,79 +884,6 @@ void deleteCharAtPosition(char *num, uint8_t *length, uint8_t pos)
   
   (*length)--;
   num[*length] = '\0';
-}
-
-
-// @brief Démarre la saisie numérique non-bloquante avec titre personnalisé
-// @param title Titre à afficher en haut de l'écran (max 20 caractères)
-// @param initialNum Nombre initial à afficher
-// @param maxLen Longueur maximale du nombre (max 20 caractères)
-// @param allowNeg Autoriser les nombres négatifs
-// @param allowDec Autoriser les nombres décimaux
-// @param minVal Valeur minimale autorisée
-// @param maxVal Valeur maximale autorisée
-// @return void
- // ---------------------------------------------------------------------------*
-void startNumInput(const char* title, const char* initialNum, uint8_t maxLen, bool allowNeg, bool allowDec, long minVal, long maxVal)
-{
-  if (numInputCtx.state != NUM_INPUT_IDLE)
-  {
-    return; // Saisie déjà en cours
-  }
-  
-  // Initialisation du contexte
-  numInputCtx.state = NUM_INPUT_ACTIVE;
-  numInputCtx.position = 0;
-  numInputCtx.lastPosition = 0xFF;
-  numInputCtx.displayOffset = 0;
-  numInputCtx.lastDisplayOffset = 0xFF;
-  numInputCtx.lastCursorOffset = 0xFF;
-  numInputCtx.displayWidth = 16; // 16 caractères visibles
-  numInputCtx.maxLength = (maxLen > 20) ? 20 : maxLen;
-  numInputCtx.allowNegative = allowNeg;
-  numInputCtx.allowDecimal = allowDec;
-  numInputCtx.minValue = minVal;
-  numInputCtx.maxValue = maxVal;
-  
-  // Copier le titre (max 20 caractères)
-  if (title && strlen(title) > 0)
-  {
-    strncpy(numInputCtx.title, title, 20);
-    numInputCtx.title[20] = '\0';
-  }
-  else
-  {
-    strcpy(numInputCtx.title, "SAISIE NUMERIQUE:");
-  }
-  
-  // Copier le nombre initial ou créer une chaîne vide
-  if (initialNum && strlen(initialNum) > 0 && strlen(initialNum) <= numInputCtx.maxLength)
-  {
-    strncpy(numInputCtx.workingNum, initialNum, numInputCtx.maxLength);
-    numInputCtx.length = strlen(initialNum);
-  }
-  else
-  {
-    numInputCtx.workingNum[0] = '0';
-    numInputCtx.workingNum[1] = '\0';
-    numInputCtx.length = 1;
-  }
-  numInputCtx.workingNum[20] = '\0';
-  numInputCtx.lastLength = 0xFF;
-  strcpy(numInputCtx.lastDisplayedNum, "");
-  
-  numInputCtx.displayRefresh = true;
-  numInputCtx.lastUpdate = millis();
-  numInputCtx.cursorBlink = true;
-  numInputCtx.lastCursorBlink = false;
-  numInputCtx.lastBlink = millis();
-  numInputCtx.lastActivity = millis();
-  numInputCtx.timeoutDuration = TIMEOUT_SAISIE; // 30 secondes
-  numInputCtx.firstDisplay = true;
-  numInputCtx.lastTimeoutValue = 0xFF;
-  
-  debugSerial.println("Saisie numerique demarree");
-  OLEDDisplayMessageL8("Saisissez nombre    ", false, false);
 }
 
 
@@ -900,8 +1048,8 @@ void finalizeNumInput(char* outputNum)
     numInputCtx.length = 0;
     numInputCtx.displayOffset = 0;
     
-    debugSerial.print("Nombre final: ");
-    debugSerial.println(outputNum);
+debugSerial.print("Nombre final: ");
+debugSerial.println(outputNum);
   }
 }
 
@@ -928,133 +1076,6 @@ void cancelNumInput(void)
 bool isNumInputActive(void)
 {
   return (numInputCtx.state == NUM_INPUT_ACTIVE);
-}
-
-
-// @brief Rafraîchit l'affichage OLED du nombre avec curseur (optimisé anti-clignotement)
-// @param void
-// @return void
- // ---------------------------------------------------------------------------*
-void refreshNumDisplay(void)
-{
-  // Préparer la chaîne d'affichage (portion visible)
-  char displayBuffer[17]; // 16 chars + '\0'
-  uint8_t displayLen = (numInputCtx.length < 16) ? numInputCtx.length : 16;
-  
-  strncpy(displayBuffer, &numInputCtx.workingNum[numInputCtx.displayOffset], displayLen);
-  displayBuffer[displayLen] = '\0';
-  
-  bool numChanged = (strcmp(displayBuffer, numInputCtx.lastDisplayedNum) != 0);
-  bool offsetChanged = (numInputCtx.displayOffset != numInputCtx.lastDisplayOffset);
-  bool positionChanged = (numInputCtx.position != numInputCtx.lastPosition);
-  bool lengthChanged = (numInputCtx.length != numInputCtx.lastLength);
-  bool cursorBlinkChanged = (numInputCtx.cursorBlink != numInputCtx.lastCursorBlink);
-  bool currentValidity = isNumValid(numInputCtx.workingNum, numInputCtx.allowNegative, 
-                                    numInputCtx.allowDecimal, numInputCtx.minValue, numInputCtx.maxValue);
-  
-  // Afficher le titre personnalisé seulement au premier affichage (ligne 0)
-  if (numInputCtx.firstDisplay)
-  {
-    char paddedTitle[21];
-    snprintf(paddedTitle, 21, "%-20s", numInputCtx.title);
-    OLEDDrawText(1, 0, 0, paddedTitle);
-    OLEDDrawText(1, 7, 0, "+/- Char VALIDE: OK"); // Instructions fixes
-    numInputCtx.firstDisplay = false;
-  }
-  
-  // Afficher la portion visible seulement si elle a changé (ligne 2)
-  if (numChanged || offsetChanged)
-  {
-    char padded[21];
-    snprintf(padded, 21, "%-16s", displayBuffer);
-    OLEDDrawText(1, 2, 0, padded);
-    strcpy(numInputCtx.lastDisplayedNum, displayBuffer);
-  }
-  
-  // Gestion du curseur (ligne 3) - OPTIMISÉ
-  if (positionChanged || cursorBlinkChanged || offsetChanged)
-  {
-    // Si l'offset a changé (scroll), EFFACER TOUTE LA LIGNE 3
-    if (offsetChanged)
-    {
-      OLEDDrawText(1, 3, 0, "                ");
-      numInputCtx.lastCursorOffset = 0xFF;
-    }
-    else
-    {
-      // Sinon, effacer uniquement l'ancienne position du curseur
-      if (numInputCtx.lastPosition != 0xFF && numInputCtx.lastCursorOffset != 0xFF)
-      {
-        int lastRelativePos = numInputCtx.lastPosition - numInputCtx.lastCursorOffset;
-        if (lastRelativePos >= 0 && lastRelativePos < 16)
-        {
-          OLEDDrawText(1, 3, lastRelativePos, " ");
-        }
-      }
-    }
-    
-    // Calculer la position relative du curseur
-    int relativePos = numInputCtx.position - numInputCtx.displayOffset;
-    
-    // Afficher le curseur ^ si visible
-    if (numInputCtx.cursorBlink && relativePos >= 0 && relativePos <= displayLen)
-    {
-      OLEDDrawText(1, 3, relativePos, "^");
-    }
-    
-    // TOUJOURS mémoriser l'offset actuel
-    numInputCtx.lastCursorOffset = numInputCtx.displayOffset;
-    numInputCtx.lastPosition = numInputCtx.position;
-  }
-  
-  // Afficher la position et longueur (ligne 4)
-  if (positionChanged || lengthChanged || offsetChanged)
-  {
-    char posInfo[21];
-    sprintf(posInfo, "Pos:%02d Len:%02d/%02d   ", 
-            numInputCtx.position + 1, 
-            numInputCtx.length,
-            numInputCtx.maxLength);
-    OLEDDrawText(1, 4, 0, posInfo);
-    
-    numInputCtx.lastDisplayOffset = numInputCtx.displayOffset;
-    numInputCtx.lastLength = numInputCtx.length;
-  }
-  
-  // Afficher le statut de validité (ligne 5)
-  if (numChanged || lengthChanged)
-  {
-    if (currentValidity)
-    {
-      OLEDDrawText(1, 5, 0, "Nombre valide       ");
-    }
-    else
-    {
-      OLEDDrawText(1, 5, 0, "Nombre invalide     ");
-    }
-  }
-  
-  // Afficher le countdown du timeout (ligne 7)
-  if (numInputCtx.timeoutDuration > 0)
-  {
-    unsigned long remainingTime = (numInputCtx.timeoutDuration - (millis() - numInputCtx.lastActivity)) / 1000;
-    
-    if (remainingTime <= 5 && remainingTime != numInputCtx.lastTimeoutValue)
-    {
-      char timeoutMsg[21];
-      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-      OLEDDrawText(1, 7, 0, timeoutMsg);
-      numInputCtx.lastTimeoutValue = remainingTime;
-    }
-    else if (remainingTime > 5 && numInputCtx.lastTimeoutValue <= 5)
-    {
-      OLEDDrawText(1, 7, 0, "+/- Char VALIDE: OK");
-      numInputCtx.lastTimeoutValue = 255;
-    }
-  }
-  
-  // Sauvegarder l'état du clignotement
-  numInputCtx.lastCursorBlink = numInputCtx.cursorBlink;
 }
 
 
@@ -1892,6 +1913,7 @@ void refreshHexDisplay(void)
   // Afficher le statut de validité seulement s'il a changé (ligne 5)
   if (validityChanged)
   {
+/*
     if (currentValidity)
     {
       OLEDDrawText(1, 5, 0, "Cle valide          ");
@@ -1900,6 +1922,7 @@ void refreshHexDisplay(void)
     {
       OLEDDrawText(1, 5, 0, "Cle invalide        ");
     }
+*/
     hexInputCtx.lastValidity = currentValidity;
   }
   

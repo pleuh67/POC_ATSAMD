@@ -15,6 +15,7 @@
 #define __INIT_DONE
 #include "define.h"
 
+
 // ---------------------------------------------------------------------------*
 // @brief Initialise l'écran OLED selon le type sélectionné
 // @param Aucun
@@ -148,7 +149,8 @@ debugSerial.println(localOLEDbuf);
 }
 
 // ---------------------------------------------------------------------------*
-// @brief Affiche l'heure et la date sur l'écran OLED
+// @brief Rafraichi l'heure /* et la date */ sur l'écran OLED 
+//        après appel OLEDDrawScreenTime()
 // @param col Colonne de départ
 // @param lig Ligne de départ
 // @return void
@@ -414,7 +416,7 @@ void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse)
   }
   display.setTextColor(WHITE);
 */
-    delay(500);
+    delay(500);  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 
@@ -547,6 +549,9 @@ void OLEDDisplayTime(char *h, uint8_t pos)
 } LoRa_Var;
 */
 // ---------------------------------------------------------------------------*
+
+// Modifier pour avoir données dynamiques ++++ tout +++++++++++++++++++++++++++
+
 void OLEDDisplayHivesDatas(void)
 { char localOLEDbuf[21] = "12345678901234567890";
   OLEDClear();
@@ -555,7 +560,7 @@ void OLEDDisplayHivesDatas(void)
     //OLEDDrawText(1,0, 0, );  // conserver rafraichissement Heure/Date
 
   OLEDDrawText(1,1, 0, "=== INFOS Ruches ===");
-      
+// faire Fonction()
   snprintf(localOLEDbuf, 21, "Tem: %4.1f - Hum: %4.1f", Data_LoRa.DHT_Temp , Data_LoRa.DHT_Hum);
   OLEDDrawText(1,2, 0, localOLEDbuf );
         
@@ -586,6 +591,9 @@ void OLEDDisplayHivesDatas(void)
 //        OLEDDrawText(1,7, 0, OLEDbuf);
   OLEDDrawScreenNextPayload(7, 0, nextPayload );
 // Attendre une touche pour continuer
+// fin Fonction()
+
+
 /*     
     while (readKey() == KEY_NONE)
     {
@@ -642,6 +650,9 @@ void nonOLEDDisplaySystemInfo(void)
 // @param void
 // @return void
 // ---------------------------------------------------------------------------*
+
+// Modifier pour avoir données dynamiques ++++ DHT ou TµC +++++++++++++++++++++
+
 void OLEDdisplayInfoScreenSyst(void)
 { char localOLEDbuf[21] = "12345678901234567890";
   infoScreenState = INFO_SCREEN_ACTIVE;   // pour eviter KKKKKKKK
@@ -658,6 +669,8 @@ void OLEDdisplayInfoScreenSyst(void)
   OLEDDrawText(1, 2, 0, "     POC ATSAMD     ");
   OLEDDrawText(1, 3, 0, "Version: " VERSION);
   OLEDDrawText(1, 4, 0, "Build: 20250924");
+
+// faire Fonction()  
   if  (!read_DHT(dht))  // temp et hum. DHT22
   {
     snprintf(localOLEDbuf, 21,"T: %.2f C H: %.f %%",Data_LoRa.DHT_Temp ,Data_LoRa.DHT_Hum);
@@ -670,7 +683,8 @@ void OLEDdisplayInfoScreenSyst(void)
 //debugSerial.println("OLEDdisplayInfoScreenSyst() DHT KO");
   } 
   OLEDDrawText(1, 5, 0, localOLEDbuf);
-        
+// fin Fonction()        
+
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
   
  // infoScreenState = INFO_SCREEN_ACTIVE;   // pour eviter KKKKKKKK
@@ -707,32 +721,34 @@ void OLEDdisplayInfoScreenLoRa(void)
   LoRaScreenRefreshTime = true;   // active rafraichissement date/heure
   LoraScreenRefreshNextPayload = true;  // active rafraichissement heure payload
   
+  
   debugSerial.print("OLEDdisplayInfoScreenSyst - currentMenuDepth: ");
   debugSerial.println(currentMenuDepth);
 
   OLEDClear();
   OLEDDrawText(1, 0, 0, "==== INFOS LoRa ====");
   OLEDDrawScreenTime(1, 0); // Affiche Time/Date au complet
-  snprintf(localOLEDbuf, 21,"#%2d %15s",Ruche.Num_Carte,ConfigApplicatif.RucherName);  // ConfigApplicatif_t =>   uint8_t Balance_ID + char    RucherName [20]; 
+  snprintf(localOLEDbuf, 21,"#%2d %15s",ConfigApplicatif.RucherID,ConfigApplicatif.RucherName);  // ConfigApplicatif_t =>   uint8_t Balance_ID + char    RucherName [20]; 
   OLEDDrawText(1, 2, 0,localOLEDbuf);
 // Affichage SF
-  snprintf(localOLEDbuf, 21,"SF: %d  Tx: %d min.",LoRa_Config.SpreadingFactor,LoRa_Config.SendingPeriod);  // SF + Tx Interval (min)  
+  snprintf(localOLEDbuf, 21,"SF: %d  Tx: %d min.",config.applicatif.SpreadingFactor,config.applicatif.SendingPeriod);  // SF + Tx Interval (min)  
   OLEDDrawText(1, 3, 0,localOLEDbuf);
 // Affichage DevEUI
+char Module_ID[17];
+  convertToHexString(ConfigMateriel.DevEUI, Module_ID, 8);
   snprintf(localOLEDbuf, 21,"SN: %16s",Module_ID);  // DevEUI (N° RN 16 car) 
-  // ou HWEUI_List[Ruche.Num_Carte] à vérifier
   OLEDDrawText(1, 4, 0, localOLEDbuf);
   
 // AK => AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];  
 // 5048494C49505045 4C4F56454C414B4F != PHILIPPELOVEBEES
-  snprintf(localOLEDbuf, 21,"AK: %s",AppKey_List[Ruche.Num_Carte]); 
+  snprintf(localOLEDbuf, 21,"AK: %s",ConfigApplicatif.AppKey); 
   OLEDDrawText(1, 5, 0,localOLEDbuf);
 
 //  snprintf(localOLEDbuf, 21,"+ %s",&AppKey_List[Ruche.Num_Carte][16]);  // AppKey 1/2 => "5048494C49505045"
 //  OLEDDrawText(1, 5, 0,localOLEDbuf);
 
 // AE => AppEUI => 414245494C4C4533  (16 char vers 8 uint8_t )
-  snprintf(localOLEDbuf, 21,"AE: %s",AppEUI_List[Ruche.Num_Carte]);  
+  snprintf(localOLEDbuf, 21,"AE: %s",ConfigApplicatif.AppEUI);  
   OLEDDrawText(1, 6, 0,localOLEDbuf);
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
 debugSerial.println("Ecran infos affiche");
@@ -744,6 +760,9 @@ debugSerial.println("Ecran infos affiche");
 // @param void
 // @return void
 // ---------------------------------------------------------------------------*
+
+// Modifier pour avoir données dynamiques ++++ Poids, Tare, Echelle, CompTemp +
+
 void OLEDdisplayInfoBal(void)
 { char localOLEDbuf[21] = "12345678901234567890";
   int num = 1;
@@ -771,18 +790,19 @@ float Jauge[21][4] = {                // Tare , Echelle , TareTemp , CompTemp
 Tare : Jauge[Peson [Ruche.Num_Carte  ][Bal-1]][0] 
 
 */
-
+// faire Fonction()
   snprintf(localOLEDbuf, 21,"Poids   : %d ", BalPoids(num-1) );
   OLEDDrawText(1, 2, 0, localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"Tare    : %d ", Jauge[Peson[Ruche.Num_Carte][bal-1]][0]);
+  snprintf(localOLEDbuf, 21,"Tare    : %d ", Jauge[Peson[ConfigMateriel.Num_Carte][bal-1]][0]);
   OLEDDrawText(1, 3, 0, localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"Echelle : %d ", Jauge[Peson[Ruche.Num_Carte][bal-1]][1]);
+  snprintf(localOLEDbuf, 21,"Echelle : %d ", Jauge[Peson[ConfigMateriel.Num_Carte][bal-1]][1]);
   OLEDDrawText(1, 4, 0, localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"Comp. T : %d ", Jauge[Peson[Ruche.Num_Carte][bal-1]][3]);
+  snprintf(localOLEDbuf, 21,"Comp. T : %d ", Jauge[Peson[ConfigMateriel .Num_Carte][bal-1]][3]);
   OLEDDrawText(1, 5, 0, localOLEDbuf);
 
-  snprintf(localOLEDbuf, 21, "#%1d - Num Pes:%2d", Ruche.Num_Carte,Peson[Ruche.Num_Carte][bal-1]);
+  snprintf(localOLEDbuf, 21, "#%1d - Num Pes:%2d", ConfigMateriel.Num_Carte,Peson[ConfigMateriel.Num_Carte][bal-1]);
   OLEDDrawText(1, 6, 0, localOLEDbuf);
+// fin Fonction()
 
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
 }
@@ -793,6 +813,9 @@ Tare : Jauge[Peson [Ruche.Num_Carte  ][Bal-1]][0]
 // @param void
 // @return void
 // ---------------------------------------------------------------------------*
+
+// Modifier pour avoir données dynamiques ++++ 4 x Poids +++++++++++++++++++++
+
 void OLEDdisplayWeightBal(void)
 { char localOLEDbuf[21] = "12345678901234567890";
   infoScreenState = INFO_SCREEN_ACTIVE;   // pour eviter KKKKKKKK
@@ -804,7 +827,8 @@ void OLEDdisplayWeightBal(void)
 snprintf(localOLEDbuf, 21,"== POIDS BALANCES ==", bal);
   OLEDDrawText(1, 0, 0, localOLEDbuf);
   OLEDDrawScreenTime(1, 0); // Affiche Time/Date au complet
-  
+
+// faire Fonction()  
   snprintf(localOLEDbuf, 21,"Bal1 : %4.2d kg ", BalPoids(0) );
   OLEDDrawText(1, 2, 0, localOLEDbuf);
   snprintf(localOLEDbuf, 21,"Bal1 : %4.2d kg ", BalPoids(1) );
@@ -813,6 +837,7 @@ snprintf(localOLEDbuf, 21,"== POIDS BALANCES ==", bal);
   OLEDDrawText(1, 4, 0, localOLEDbuf);
   snprintf(localOLEDbuf, 21,"Bal1 : %4.2d kg ", BalPoids(3) );
   OLEDDrawText(1, 5, 0, localOLEDbuf);
+// fin Fonction()
 
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
 }
@@ -832,14 +857,16 @@ void OLEDdisplayCalibBal(void)
 snprintf(localOLEDbuf, 21,"=== CALIB. BAL:%d ===", bal);
   OLEDDrawText(1, 0, 0, localOLEDbuf);
 
-  snprintf(localOLEDbuf, 21,"Bal%d : %4.2d kg ", bal, Peson[Ruche.Num_Carte][bal] );
+// faire Fonction()
+  snprintf(localOLEDbuf, 21,"Bal%d : %4.2d kg ", bal, Peson[ConfigMateriel.Num_Carte][bal] );
   OLEDDrawText(1, 2, 0, localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"Scale%d : %4.2d kg ", bal, Jauge[Peson[Ruche.Num_Carte][bal]][1] );
+  snprintf(localOLEDbuf, 21,"Scale%d : %4.2d kg ", bal, Jauge[Peson[ConfigMateriel.Num_Carte][bal]][1] );
   OLEDDrawText(1, 3, 0, localOLEDbuf);
   snprintf(localOLEDbuf, 21,"Temp%d : %4.2d kg ", bal, BalPoids(2) );
   OLEDDrawText(1, 4, 0, localOLEDbuf);
-  snprintf(localOLEDbuf, 21,"Tare%D : %4.2d kg ", bal, Jauge[Peson[Ruche.Num_Carte][bal]][0] );
+  snprintf(localOLEDbuf, 21,"Tare%D : %4.2d kg ", bal, Jauge[Peson[ConfigMateriel.Num_Carte][bal]][0] );
   OLEDDrawText(1, 5, 0, localOLEDbuf);
+// fin Fonction()
 
 /*
  * Peson[Ruche.Num_Carte][num] // num. peson
@@ -885,13 +912,21 @@ void OLEDRefreshDisplay(void)
   {
     OLEDDrawScreenRefreshTime(1, 0);    // refresh Time/Date every second 
   }
+    else if (InfoVSolScreenRefreshTime)        // rafraichir VSol
+  {
+ //   OLEDDrawScreenRefreshTime(1, 0);    // refresh Time/Date every second 
+  }
+
+// fin des rafraichissement d'heures
+
+  
 // Weight INFOS
   else if (WeightScreenRefreshWeights)   // rafraichir les poids temp, hum
   { char localOLEDbuf[21] = "";
     int num = 0;
     do
     {
-      if (Peson[Ruche.Num_Carte][0])
+      if (Peson[ConfigMateriel.Num_Carte][0])
       { 
         snprintf(localOLEDbuf, 21,"Bal1 : %4.2d kg ",Poids_Peson(0)); // BalPoids(0) );
         OLEDDrawText(1, 2, 0, localOLEDbuf);
@@ -899,6 +934,29 @@ void OLEDRefreshDisplay(void)
     }
     while (num < NB_RUCHES);  // 4
   } 
+  else if (InfoVBatScreenRefreshTime)        // rafraichir VBat
+  {
+// appel à la fonction dédiée
+    OLEDDrawScreenRefreshTime(1, 0);    // refresh Time/Date every second 
+  }
+  else if (InfoVLumScreenRefresh)        // rafraichir VLum                            // tester en premier
+  {
+// appel à la fonction dédiée
+
+// ligne 0: Title
+// ligne 1: Reserver Date / Time ???  => message type saisie : Saisir mise a Ech.
+// ligne 2: Num en cours de modification
+// ligne 3: Gestion du curseur
+// ligne 4: Variable dépendante du Num en cours de saisie à rafraichir
+// ligne 5: Afficher le statut de validité => Masqué > passer à 6 ????
+// ligne 6: 
+// ligne 7: OLEDDrawText(1, 7, 0, "+/- Char VALIDE: OK"); ou timeout // Instructions fixes
+
+    OLEDRefreshVlum(4,8);   // Affiche Vlum formaté 1,23V (%3.2fV) en pos Ligne 4, colonne 10
+    OLEDRefreshlum(5,8);        // readingL * echelle = luminosité de 0 à 99%
+  }
+
+  
 // FIN Gestion rafraichissement écrans (System\INFOS, )
 }
 
@@ -913,4 +971,55 @@ void OLEDRefreshDisplay(void)
 void OLEDSetDebug(bool actif) 
 {
   OLEDModeDebugActif = actif;
+}
+
+
+/*
+Le rafraichissement n'est pas executé.
+pas appelé dans loop()=> OLEDRefreshDisplay();
+*/
+
+// ---------------------------------------------------------------------------*
+// @brief Rafraichi l'affichage de Lum 0..99%
+// @param actif True pour activer, false pour désactiver
+// @param ligne Ligne de départ
+// @param colonne Colonne de départ
+// @return void
+// ---------------------------------------------------------------------------*
+void OLEDRefreshlum(uint8_t ligne, uint8_t colonne)        // readingL * numInputCtx.workingNum
+{ char localOLEDbuf[81] = "12345678901234567890";
+  int echelle = atoi(numInputCtx.workingNum);
+  int brightness = getLuminance();
+char outputNum[21];
+
+    strcpy(outputNum, numInputCtx.workingNum);
+    
+    debugSerial.print("Nombre en cours: ");
+    debugSerial.println(outputNum);
+ 
+//getLuminance
+
+int ana;
+ana = analogRead(LUM_SENSOR);
+
+sprintf(localOLEDbuf,"ANA: *%d* getLum: *%4.1f*  ECH : *%f*  fin", ana, (float)4/*getLuminance */,  atof(outputNum));
+debugSerial.println(localOLEDbuf);
+
+  sprintf(localOLEDbuf,"%02d %%", brightness * atoi(outputNum));
+  OLEDDrawText(1, ligne, colonne, localOLEDbuf);
+}
+
+
+// ---------------------------------------------------------------------------*
+// @brief Rafraichi l'affichage de VLum ("%3.2fV")
+// @param actif True pour activer, false pour désactiver
+// @param ligne Ligne de départ
+// @param colonne Colonne de départ
+// @return void
+// ---------------------------------------------------------------------------*
+void OLEDRefreshVlum(uint8_t ligne, uint8_t colonne)
+{ char localOLEDbuf[21] = "12345678901234567890";
+
+  sprintf(localOLEDbuf,"%3.2f", analogRead(LUM_SENSOR) / 10.23);
+  OLEDDrawText(1, ligne, colonne, localOLEDbuf);
 }

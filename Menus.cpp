@@ -310,9 +310,7 @@ debugSerial.println("m02_6F_SendPayload() demandé");
     {
       case 0: // "Calib. VBAT"
       {
-        debugSerial.println("m03_0F_CalibVBat - Fonction a implementer");
         m03_0F_CalibVBat();
-//        popMenu(); // Retour au menu principal
         break;
       }  
       case 1: // "Calib. VSOL"

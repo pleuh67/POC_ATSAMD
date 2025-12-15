@@ -372,9 +372,9 @@ void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)
 void debugSerialPrintLoRaStatus()  
 {
   debugSerial.println("\n=== STATUS LoRa ===");
-  sprintf(serialbuf," => RN2483#%02d",Ruche.Num_Carte);        // affiche N° de carte
+  sprintf(serialbuf," => RN2483#%02d",ConfigMateriel.Num_Carte);        // affiche N° de carte
   debugSerial.println(serialbuf);
-//debugSerial.print("DevEUI = ");debugSerial.println((char *)DevEUI,8);
+//debugSerial.print("DevEUI = ");debugSerial.println((char *)ConfigMateriel_t.DevEUI,8);
 //debugSerial.print("AppEUI = ");debugSerial.println((char *)AppEUI,8);
 //debugSerial.print("AppKey = ");debugSerial.println((char *)AppKey,16); 
 // print...()

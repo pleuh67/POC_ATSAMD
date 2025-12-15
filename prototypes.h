@@ -122,7 +122,7 @@ void m03_0F_CalibVBatDone(void);
 void m03_1F_CalibVSol(void);      // appel écran de calibration
 void m03_1F_CalibVSolDone(void);
 void m03_2F_CalibVLum(void);      // appel écran de calibration
-void m03_2F_CalibVLumDone(void); 
+void m03_2F_CalibVLumDone(void);   // 
 void m03_3F_Reserve(void);  
 void m03_3F_ReserveDone(void); 
 
@@ -348,6 +348,8 @@ uint8_t hexCharToNibble(char c);
 char nibbleToHexChar(uint8_t nibble);
 bool hexStringToByteArray(const char* hexString, uint8_t* byteArray, uint8_t maxBytes);
 bool byteArrayToHexString(const uint8_t* byteArray, uint8_t numBytes, char* hexString, uint8_t maxChars);
+void convertByteArray(const char *source, uint8_t *destination, uint8_t len);
+void convertToHexString(const uint8_t *source, char *destination, uint8_t len);
 
 // Conversions décimales uint8_t ↔ char buffer
 bool uint8ToDecimalString(uint8_t value, char* buffer, uint8_t maxChars);
@@ -355,7 +357,7 @@ bool decimalStringToUint8(const char* buffer, uint8_t* value);
 bool isValidLoRaWanSF(uint8_t sf);
 bool validateLoRaWanSF(const char* sfString, uint8_t* sfValue);
 
-// Affichage
+// Affichage sur port Serie
 void printByteArray(const uint8_t* byteArray, uint8_t length);
 void printHexString(const char* hexString);
 
@@ -378,8 +380,8 @@ void OLEDClear(void);
 void nonprintOLED(uint8_t ligne, uint8_t colonne, const char *message);
 void OLEDClearLine(uint8_t ligne);
 void OLEDPrintChar(uint8_t ligne, uint8_t colonne, char c);
-void OLEDPrintVar(uint8_t ligne, uint8_t col, const void *valeur, char type);
-void OLEDPrintFormatted(uint8_t ligne, uint8_t col, const void *valeur, char type, const char *unite, int precision, char align);
+void OLEDPrintVar(uint8_t ligne, uint8_t colonne, const void *valeur, char type);
+void OLEDPrintFormatted(uint8_t ligne, uint8_t colonne, const void *valeur, char type, const char *unite, int precision, char align);
 void OLEDDisplayMessageL8(const char* message, bool defilant, bool inverse);
 void OLEDDebugDisplay(char* message);
 void OLEDDebugDisplayReset(void);
@@ -387,12 +389,14 @@ void OLEDDrawScreenNextPayload(uint8_t ligne, uint8_t colonne, DateTime nextPayl
 void OLEDDrawScreenTime(uint8_t ligne, uint8_t colonne);        // sous format: hh:mm:ss - dd/mm/yyyy
 void OLEDDrawScreenRefreshTime(uint8_t ligne, uint8_t colonne); // que les valeurs modifiées
 void OLEDDrawText(int8_t Txt_Size, uint8_t ligne, uint8_t colonne,const char *text);
-void OLEDEraseText(int16_t col, int16_t lig, int16_t Ncar);
+void OLEDEraseText(int16_t col, int16_t lig, int16_t Ncar);   // !!!!!!!!!!!!!!!!!!! ordre param
 void OLEDDisplayDate(char *d, uint8_t pos);
 void OLEDDisplayTime(char *h, uint8_t pos);
 void OLEDSetDebug(bool actif);
 void OLEDDisplayHivesDatas(void);
 void OLEDRefreshDisplay(void);
+void OLEDRefreshlum(uint8_t ligne, uint8_t colonne);
+void OLEDRefreshVlum(uint8_t ligne, uint8_t colonne);
 
 //void OLEDDisplaySystemInfo(void);  // voir si pas remplacée par suivante.
 void OLEDdisplayInfoScreenSyst(void);
@@ -447,10 +451,18 @@ void configureLowPowerMode(void);
 uint8_t RN2483Version(void);    // Lit les infos du modem
 
 
-void init2483A(void);
-uint8_t Init_2483(void);
+uint8_t init2483A(uint8_t *HWEUI); //   => dans setup.cpp
+uint8_t Init_2483(uint8_t *HWEUI);
 void initLoRa(void);
-void getHWEUI(char *);      // Gets and stores the LoRa module's HWEUI    
+void getHWEUI(char *);      // Gets and stores the LoRa module's HWEUI   
+
+
+
+// tests en cours
+void newgetHWEUI(uint8_t *AppEUI); 
+
+
+
 void Reset_LoRa(void);
 void clearLoRaBuffer(void); // Vide complètement le buffer série du modem
 String readLoRaResponse(int timeoutMs); // Lit la réponse du modem avec timeout

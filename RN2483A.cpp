@@ -114,50 +114,60 @@ debugSerial.print(" car. lus: "); debugSerial.println(serialbuf);
 
 
 // ---------------------------------------------------------------------------*
-//  out : 0 (OK) / 1 (Error)                          
+//  out : 0 (Error ou non référencé) / n (Num de carte)  
+// @brief Find card number
+//                Num_Carte (global) dans fonction
+// @param void
+// @return :  0 error or Card number
 // ---------------------------------------------------------------------------*
-uint8_t Init_2483(void)   
-{
+uint8_t Init_2483(uint8_t *HWEUI)   
+{ 
 /*
-uint8_t len;
-
-  clearLoRaBuffer();
-  loraSerial.println("sys get ver"); // RN2483 1.0.5 Oct 31 2018 15:06:52
-   delay(100);
-  len = loraSerial.readBytesUntil(0x20, serialbuf, 33); //sizeof(Module_ID));
-// envoi sur moniteur RS résultat getHWEUI()
-debugSerial.print("Version: ");  debugSerial.print(len);
-debugSerial.print(" car. lus: "); debugSerial.println(serialbuf);
-*/
- 
-//  clearLoRaBuffer(); // normalement buffer vide.
-// Fin test communic ation avec RN2483A
-
-  getHWEUI(&Module_ID[0]);     // get the Hardware DevEUI
-
-  sprintf(serialbuf,"Init_2483() ID. module: %s",Module_ID ); 
+getHWEUI(Module_ID_HWEUI);     // get the Hardware DevEUI ex: "0004A30B0020300A"               char Module_ID_HWEUI[20] 
+sprintf(serialbuf,"Init_2483()/getHWEUI Module_ID_HWEUI: %s",Module_ID_HWEUI ); 
 debugSerial.println(serialbuf);
+*/
 
+newgetHWEUI(&ConfigMateriel.DevEUI[0]);     // get the Hardware DevEUI ex: "0004A30B0020300A"   uint8_t HWEUI [20];
+
+debugSerial.print("Init_2483()/newgetHWEUI &ConfigMateriel.DevEUI[0]:"); 
+printByteArray(ConfigMateriel.DevEUI, 16);
 
 //OLEDDebugDisplay(OLEDbuf);
 //debugSerial.println("------------------------------------------------------------------");
+
+  char Module_ID[17];
+  convertToHexString(ConfigMateriel.DevEUI, Module_ID, 8);
+debugSerial.println(Module_ID);
  
-  for (Ruche.Num_Carte=0;Ruche.Num_Carte< MAX_HWEUI_List; Ruche.Num_Carte++)
+  for (ConfigMateriel.Num_Carte=0;ConfigMateriel.Num_Carte< MAX_HWEUI_List; ConfigMateriel.Num_Carte++)
   { 
-    if (strncmp(HWEUI_List[Ruche.Num_Carte],Module_ID,16)==0)   // égalité des 2 
+    if (strncmp(HWEUI_List[ConfigMateriel.Num_Carte],Module_ID,16)==0)   // égalité des 2 
     {
 // INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
-      DevEUI = (uint8_t *)SN2483_List[Ruche.Num_Carte];
+  memcpy(ConfigMateriel.DevEUI, SN2483_List[ConfigMateriel.Num_Carte], sizeof(SN2483_List[ConfigMateriel.Num_Carte]));
+
 // Init AppEUI
-      AppEUI = (uint8_t *)AppEUI_List[Ruche.Num_Carte];
+      memcpy(ConfigApplicatif.AppEUI, AppEUI_List[ConfigMateriel.Num_Carte],10);
 // Init AppKey
-      AppKey = (uint8_t *)AppKey_List[Ruche.Num_Carte];
+      memcpy(ConfigApplicatif.AppKey, AppKey_List[ConfigMateriel.Num_Carte],18);
        break;  // sortie du for() quand trouvé egalité.... pas terrible!!!	
 	  }
  //debugSerial.println("HWEUI non trouvé");
   } 
-  return((Ruche.Num_Carte == MAX_HWEUI_List) ? 1 : 0); 
+
+// ConfigMateriel.Noeud_LoRa = ConfigMateriel.Num_Carte;  // par défaut, fonction Module_ID
+  
+  return((ConfigMateriel.Num_Carte == MAX_HWEUI_List) ? 0 : ConfigMateriel.Num_Carte); 
 }
+
+
+
+
+
+
+
+
 
 
 // ---------------------------------------------------------------------------*
@@ -177,6 +187,36 @@ debugSerial.print(" car. lus: "); debugSerial.println(Module_ID);
 // testée OK le 12/02/2020
 
 
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------*
+// Gets and stores the LoRa module's HWEUI                              
+// ---------------------------------------------------------------------------*
+void newgetHWEUI(uint8_t *AppEUI)
+{ uint8_t len;
+  char localModule_ID[20]="";
+
+  clearLoRaBuffer();
+  loraSerial.println("sys get hweui");  
+   delay(200);
+  len = loraSerial.readBytesUntil(0x20, localModule_ID, 16); 
+
+// envoi sur moniteur RS résultat getHWEUI()
+debugSerial.print("newgetHWEUI(): ");  debugSerial.print(len);
+debugSerial.print(" car. lus: "); debugSerial.print(localModule_ID);debugSerial.println(" dans localModule_ID  ");
+
+ convertByteArray(localModule_ID, AppEUI, 16);
+}
+// non testée 
+
+
+
 // appelé par Send_Lora_Mess() et setup()
 bool setupLoRa()
 { bool result;
@@ -185,16 +225,41 @@ bool setupLoRa()
   return(result);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ---------------------------------------------------------------------------*
 // connexion au reseau
 //  in : 
 //  out : 1 OK, 0 Echec                             
 // ---------------------------------------------------------------------------*
 bool setupLoRaOTAA()
-{ if (LoRaBee.initOTA(loraSerial, DevEUI, AppEUI, AppKey, true))
+{ if (LoRaBee.initOTA(loraSerial, ConfigMateriel.DevEUI, ConfigApplicatif.AppEUI, ConfigApplicatif.AppKey, true))
   {
     debugSerial.println("setupLoRaOTAA(), Network connection successfull");
-    LoRaBee.setSpreadingFactor(LoRa_Config.SpreadingFactor); // 7, 9 et 12 echec freudeneck
+    LoRaBee.setSpreadingFactor(ConfigApplicatif.SpreadingFactor); // 7, 9 et 12 echec freudeneck
     return(1);
   }
   else  // ordre des lignes changé le 07/04/25, 
@@ -300,8 +365,8 @@ void sendLoRaPayload(uint8_t *Datas,uint8_t len)
 debugSerialPrintLoraPayload(Datas,len);
 debugSerial.println("appel LoRaBee.send");
 
-    switch (LoRaBee.send(1,Datas,len))
-    {
+  switch (LoRaBee.send(1,Datas,len))
+  {
     case NoError:
       debugSerial.println("\nSuccessful transmission in Send_LoRa_Mess().");
       break;
@@ -342,7 +407,7 @@ debugSerial.println("appel LoRaBee.send");
       break;
     default:
       break;
-    }  // Fin Switch
+  }  // Fin Switch
 }
 
 

@@ -61,7 +61,7 @@ displayNextPayload = true;
     rtc.clearAlarm(1);       
     rtc.clearAlarm(2); 
 
-    if (LoRa_Config.SendingPeriod)     // si 0 pas d'envois par IT
+    if (config.applicatif.SendingPeriod)     // si 0 pas d'envois par IT
     {
       DS3231setRTCAlarm2(); // Reprogrammer prochaine alarme
     }

@@ -37,50 +37,27 @@ void softReset()
 }
 
 // ---------------------------------------------------------------------------*
+//  out : 0 (Error ou non référencé) / n (Num de carte)  
+// @brief Find card number
+//                Num_Carte (global) dans fonction
+// @param void
+// @return :  0 error or Card number
 // ---------------------------------------------------------------------------*
-void init2483A(void)  // Init 2483 ---- Init 2483 ---- Init 2483 ---- Init 2483 
-{
+uint8_t init2483A(uint8_t *HWEUI)  // Init 2483 ---- Init 2483 ---- Init 2483 ---- Init 2483 
+{ uint8_t tryy = 3 , rc;
+
 debugSerial.println("------------------------------------------------------------------");
 debugSerial.println("INIT 2483...");
 
-//  LoRaBee.setDiag(debugSerial);  // Debug des commandes
-//  OLEDDebugDisplay("Initializing 2483");
-  
   loraSerial.begin(LoRaBee.getDefaultBaudRate());
-  
-//debugSerial.print("LoRaBee.getDefaultBaudRate: ");    debugSerial.println(LoRaBee.getDefaultBaudRate());
-// GETHWEUI
-/* remplacé par do
-   if (!Init_2483())
-   {
-      if (Ruche.Num_Carte)
-      {
-        debugSerial.print(" Init 2483 done with card : ");
-        debugSerial.println(Ruche.Num_Carte);
-        OLEDDebugDisplay("2483A    Initialized");
-      }
-      else
-      {
-        debugSerial.println(" NO 2483 present.");
-        OLEDDebugDisplay("2483A   Failed");
-      }
-    }  
-    else 
-    {
-      debugSerial.println(" Init 2483 failed");    
-      OLEDDebugDisplay("2483A   Failed");
-    }  
-*/
-
-uint8_t tryy = 3 , rc;
    do
-   { rc = Init_2483();
- debugSerial.println(rc ? "rc Init_2483() true":"rc Init_2483() false");
+   { rc = Init_2483(HWEUI); // 0 = erreur ou Num de carte
+debugSerial.println(rc ? "rc Init_2483() true":"rc Init_2483() false");
 // Reset_LoRa();  // initialise pas sur reset chaud.
-      if (Ruche.Num_Carte)
+      if (ConfigMateriel.Num_Carte)
       {
         debugSerial.print(" Init 2483 done with card : ");
-        debugSerial.println(Ruche.Num_Carte);
+        debugSerial.println(ConfigMateriel.Num_Carte);
         OLEDDebugDisplay("2483A    Initialized");
       }
       else
@@ -91,18 +68,15 @@ uint8_t tryy = 3 , rc;
       tryy--;
     }  
     while (rc && tryy);
-
   /*  
     else 
     {
       debugSerial.println(" Init 2483 failed");    
       OLEDDebugDisplay("2483A   Failed");
     }  
-
 */
-
-    
 // debugSerialPrintLoRaStatus();
+  return(rc);
 }
 
 

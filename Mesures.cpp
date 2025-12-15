@@ -157,7 +157,7 @@ float Set_Scale_Bal(char num, float poids_en_grammes)    // N° de jauges des ba
 
  // num--;
   debugSerial.print("Bal. num : "); debugSerial.print((int)num);
-  debugSerial.print(" Peson : J"); debugSerial.println(Peson[Ruche.Num_Carte][num]);
+  debugSerial.print(" Peson : J"); debugSerial.println(Peson[ConfigMateriel.Num_Carte][num]);
 
   // marche plus nouvelle version!
   scale.begin(balance[num][0], balance[num][1]); // DOUT, SCK
@@ -179,8 +179,8 @@ float Set_Scale_Bal(char num, float poids_en_grammes)    // N° de jauges des ba
 
   scale.power_down();              // put the ADC in sleep mode
 
-  Jauge[Peson[Ruche.Num_Carte][num]][0] = valAVid; // tera
-  Jauge[Peson[Ruche.Num_Carte][num]][1] = Echelle; // scale 
+  Jauge[Peson[ConfigMateriel.Num_Carte][num]][0] = valAVid; // tera
+  Jauge[Peson[ConfigMateriel.Num_Carte][num]][1] = Echelle; // scale 
   return ((Contrainte_List [num] - valAVid ) / Echelle);
 }
 
@@ -209,7 +209,7 @@ float GetPoids(int num,int sample)    // N° de jauges des balances 1 à 4
   static int numSample[4] = {0,0,0,0};
 
   num--;
-  if (!Peson[Ruche.Num_Carte][num])             // pas de balance connectée
+  if (!Peson[ConfigMateriel.Num_Carte][num])             // pas de balance connectée
   {
 #ifdef debugSerialGetPoids    
   debugSerial.println(" Peson : N/A");
@@ -330,7 +330,7 @@ float getLuminance(void) //
   //10mV per C, 0C is 500mV
  // CS_File1("LDR.start" , "" , "" , "");
   float mVolts = (float)analogRead(LUM_SENSOR) / 10.23; // echelle 0 à 100
-  float lum = (mVolts * VLumScale_List[Ruche.Num_Carte]);
+  float lum = (mVolts * VLumScale_List[ConfigMateriel.Num_Carte]);
   sprintf(serialbuf, "%4.1f %%", lum);
 //  debugSerial.print(" LDR : "); debugSerial.println(serialbuf);
  // CS_File1("LDR.end" , "" , "" , "");
@@ -366,7 +366,7 @@ float getVBatMoy(void)
   VBat[v] = (float)analogRead(VBAT_MEASURE);   // on fait une mesure
   digitalWrite(RD_VBAT, LOW);       // Blocage FET
   VBat[v] *= 43 / 33; //43k/10k+33k aux tolerances des R près... et VGS
-  VBat[v] *= VBatScale_List[Ruche.Num_Carte];  // on applique la résolution
+  VBat[v] *= VBatScale_List[ConfigMateriel.Num_Carte];  // on applique la résolution
  
 
   VBat[10]=0;
@@ -392,7 +392,7 @@ float getVSolMoy(void)
 { char i;
   static char v = 0;
 
-  VSol[v] = analogRead(VSOL_MEASURE) * VSolScale_List[Ruche.Num_Carte]; // on fait une mesure
+  VSol[v] = analogRead(VSOL_MEASURE) * VSolScale_List[ConfigMateriel.Num_Carte]; // on fait une mesure
 
   VSol[10] = 0;
   for (i = 0; i < 10; i++)    // on recalcule la moyenne des 10 mesures

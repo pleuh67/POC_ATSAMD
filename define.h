@@ -15,7 +15,7 @@
 #include <Wire.h>
 #include <RTClib.h>
 #include <ArduinoLowPower.h>
-//#include <stdlib.h>   // pour atoi()
+#include <stdlib.h>   // pour atoi()
 
 // ===== CONSTANTES PROJET =====
 #define PROJECT_NAME "POC IRQ_Payload IRQ_1s LOW_POWER OLED RN2483 DHT22 KEY5"  // len = 55
@@ -31,7 +31,7 @@
 #define BUILTIN_LED_DURATION    100   // Durée d'allumage LED builtin 100 ms
 #define WAKEUP_INTERVAL_PAYLOAD 5     // Intervalle de réveil en minutes 
 #define INTERVAL_1SEC           1000  // Intervalle 1 seconde en ms
-#define DEFAULT_SF              12     // Spread Factor par defaut
+#define DEFAULT_SF              12    // Spread Factor par defaut
 #define TIMEOUT_SAISIE          20000    // Timeout saisies écrans (ms)
 
 
@@ -63,15 +63,15 @@
 // noms courts et explicites, parametrer (num: 0..3) par Macro
 #define Poids_Peson(num)      Data_LoRa.HX711Weight[num]   //  Data_LoRa de type LoRa_Var (ligne 38)
 //#define Temp_Peson(num)       Data_LoRa.Temp_Peson[num]
-#define Tare_Peson(num)       Jauge[Peson[Ruche.Num_Carte][num]][0]
-#define Echelle_Peson(num)    Jauge[Peson[Ruche.Num_Carte][num]][1]
-//#define BalPoids(num)  (Contrainte_List[num]-Jauge[Peson[Ruche.Num_Carte][num]][0])/Jauge[Peson[Ruche.Num_Carte][num]][1]/1000) //retourne float
+#define Tare_Peson(num)       Jauge[Peson[ConfigMateriel.Num_Carte][num]][0]
+#define Echelle_Peson(num)    Jauge[Peson[ConfigMateriel.Num_Carte][num]][1]
+//#define BalPoids(num)  (Contrainte_List[num]-Jauge[Peson[ConfigMateriel.Num_Carte][num]][0])/Jauge[Peson[ConfigMateriel.Num_Carte][num]][1]/1000) //retourne float
 #define BalPoids(num) (Contrainte_List[num]-Tare_Peson(num))/Echelle_Peson(num)/1000 //retourne float
 
 // ?? attention step(num) entre TareTemp et la correespondance
 //         1..4                    0..3
-#define TareTemp(num)   Jauge[Peson[Ruche.Num_Carte][num]][2]  // Ruche de type HW_equipement (ligne 21)
-#define CompTemp(num)   Jauge[Peson[Ruche.Num_Carte][num]][3]
+#define TareTemp(num)   Jauge[Peson[ConfigMateriel.Num_Carte][num]][2]  // Ruche de type HW_equipement (ligne 21)
+#define CompTemp(num)   Jauge[Peson[ConfigMateriel.Num_Carte][num]][3]
 // passer de 0..3 dans l'appelant: fait
 
 
