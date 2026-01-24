@@ -33,7 +33,9 @@ debugSerial.println(loopWDT);
    loopWDT  = millis();
 debugSerial.println(loopWDT);
     
-    softReset();
+//    softReset();
+// Reset immédiat du microcontrôleur, le code ne continue jamais après cette ligne
+//trouver autre chose que MORT
   }
   else
     debugSerial.println(loopWDT);
@@ -52,19 +54,20 @@ debugSerial.print("\n$1$\n");   // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 // ALARME 2 : Payload périodique    
   if (rtc.alarmFired(2)) 
   {
+    alarm1_enabled = false;  // Bloquer alarme 1
+    rtc.clearAlarm(1);       
+    rtc.clearAlarm(2); 
+
     if (!alarm2_enabled) 
     {
-      debugSerial.println("onRTCAlarm() => alarm2_enabled = False");
+      debugSerial.println("onRTCAlarm():alarm2_enabled = False");
       return;     // interruption execution code de IRQ1 pendant IRQ2
     }
     wakeup1Sec = false;    // annule si activée
-displayNextPayload = true;
-    alarm1_enabled = false;  // Bloquer alarme 1
+displayNextPayload = false; //true;
     wakeupPayload = true;
-debugSerial.println("OnRTCAlarm/wakeupPayload = true");
+debugSerial.println("OnRTCAlarm/wakeupPayload set to true");
     
-    rtc.clearAlarm(1);       
-    rtc.clearAlarm(2); 
 
     if (config.applicatif.SendingPeriod)     // si 0 pas d'envois par IT
     {

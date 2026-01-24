@@ -71,7 +71,7 @@ debugSerial.println("Passage en mode EXPLOITATION");
 
 //GestionEnCours("ISR2a");  // Surveillance pour Debug
     wakeupPayload = false;
-debugSerial.println("handleOperationMode/wakeupPayload = false");
+debugSerial.println("handleOperationMode/wakeupPayload set to false");
     
     counterPayload++;  // compte le nombre d'envois Payload
 //#ifdef __SerialDebugPoc    
@@ -121,6 +121,13 @@ unsigned int dtobin(unsigned char h)
  
    return b;
 }
+
+
+
+
+//Trace KKKKK avec from handleProgrammingModea: 0
+// changement de ...Active()vers rienActive()
+
 
 // ---------------------------------------------------------------------------*
 // @brief affiche le type de traitement en cours de gestion par le handler
@@ -256,50 +263,13 @@ void handleProgrammingMode(void)
 // supprimer ligne si pas revu.
 debugSerial.println("Passage en mode PROGRAMMATION");
 
+    restartGestionSaisieOLED();
 
-// faire void Restart_Gestion_Saisie_OLED()
-
-// préciser le statut des menus, retour au PRINCIPAL
-    switchToOperationMode = true;
-    switchToProgrammingMode = false;
-    OLEDClear();
-// Réinit structure à Default
-// listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 0, 10, 0, 0, false, false, 0, false, 0, 0, 0, "", NULL};
-    listInputCtx.state = LIST_INPUT_IDLE;
-    listInputCtx.selectedIndex = 0;
-    listInputCtx.scrollOffset = 0;
-    listInputCtx.maxItems = 5;
-    listInputCtx.lastScrollOffset = 0;
-    listInputCtx.lastSelectedIndex = 0;
-    listInputCtx.lastCursorBlink = false;                    
-    listInputCtx.displayRefresh = false;
-    listInputCtx.lastUpdate = 0;
-    listInputCtx.cursorBlink = false;
-    listInputCtx.lastActivity = 0;
-    listInputCtx.lastActivity = 0;
-    listInputCtx.timeoutDuration = 0;                   
-    strncpy(listInputCtx.title,"",21);
-    listInputCtx.itemList = NULL;                    
- 
- // Reset de tous les rafraichissement OLED
-    InfoScreenRefreshTime = false;  
-    LoRaScreenRefreshTime = false;
-    InfoBalScreenRefreshTime = false;
-    WeightScreenRefreshWeights = false;
-
-// remise Niveau menus à 0
-    currentMenuDepth = 0;  // départ menu PRINCIPAL
- // Activer la liste au démarrage si pas encore fait
-    if (!startupListActivated)
-    {
-debugSerial.println("Lancement Menu principal");
-      initStartupList();  // Initialise l'affichage de la liste au démarrage
-    }
 // fin void Restart_Gestion_Saisie_OLED() 
     
   wakeupPayload = false; // désactive envoi généré pendant PROGRAMMATION
-debugSerial.println("handleProgrammingMode1/wakeupPayload = false");
-}
+debugSerial.println("handleProgrammingMode1/wakeupPayload set to false");
+  }
 
 #ifdef __SendLoRaInProgrammationMode
   if (wakeupPayload)                          // Envoi LoRa, LED Activité LoRa
@@ -307,7 +277,7 @@ debugSerial.println("handleProgrammingMode1/wakeupPayload = false");
 
 //GestionEnCours("ISR2a");  // Surveillance pour Debug
     wakeupPayload = false;
-debugSerial.println("handleProgrammingMode2/wakeupPayload = false");
+debugSerial.println("handleProgrammingMode2/wakeupPayload set to false");
     
     counterPayload++;  // compte le nombre d'envois Payload
 //#ifdef __SerialDebugPoc    
@@ -326,30 +296,46 @@ debugSerial.println("__SendLoRaInOperationMode DEFINED => sendLoRaPayload()");
 debugSerial.println("Fin Payload, Reactive IRQ1");    
     alarm1_enabled = true;   // Réactiver alarme 1 
 #ifdef __SerialDebugPoc  
+
+
+
+
+
+
+
+
 debugSerial.print("7");   // 777777777777777777777777777777777777
+
+//Apparition de KKKKK
+
+
+
+
+
+
+
+
 #endif
 // GestionEnCours("ISR2b");  // Surveillance pour Debug
   }
 #endif    
 
-
-
-
-
-
-   
 #ifdef __SerialDebugPoc    
-// debugSerial.print("P");   // PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+ //debugSerial.print("P");   // PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
 #endif
 // Gestion normale des menus quand pas de saisie
 GestionEnCours("handleProgrammingModea");
+
+//Apparition de KKKKK???
+//18:42:54.010 -> 7 => RN2483#04from handleProgrammingModea: 0
+//18:42:54.010 -> K.KKKKKKK
+
 // ---------------------------------------------------------------------------*
 // Vérifier si une sélection de liste est en cours 
 // ---------------------------------------------------------------------------*
   if (isListInputActive())
   {
     static uint8_t selectedModeIndex = 0; // Index du mode sélectionné
-
 GestionEnCours("handleProgrammingModeb"); // affiche le type de traitement en cours de gestion par le handler
         
 #ifdef __SerialDebugPoc    
@@ -782,10 +768,16 @@ backMenu();
 // ---------------------------------------------------------------------------*
   else
   {
+
+// ne devrait pas y arriver???
+
 GestionEnCours("handleProgrammingModek");     // affiche le type de traitement en cours de gestion par le handler
 #ifdef __SerialDebugPoc    
 debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
-#endif    
+#endif   
+
+restartGestionSaisieOLED();    // solution de sortie d'urgence à valider
+
     if (touche != KEY_NONE)
     {
       switch (touche)
@@ -887,4 +879,50 @@ infoScreenState_t processInfoScreen(void)
 bool isInfoScreenActive(void)
 {
   return (infoScreenState == INFO_SCREEN_ACTIVE);
+}
+
+
+// ---------------------------------------------------------------------------*
+// @brief Entrée dans mode Programmation
+// @param void
+// @return void
+// ---------------------------------------------------------------------------*
+void restartGestionSaisieOLED(void)
+{
+// préciser le statut des menus, retour au PRINCIPAL
+  switchToOperationMode = true;
+  switchToProgrammingMode = false;
+  OLEDClear();
+// Réinit structure à Default
+// listInputContext_t listInputCtx = {LIST_INPUT_IDLE, 0, 0, 10, 0, 0, false, false, 0, false, 0, 0, 0, "", NULL};
+  listInputCtx.state = LIST_INPUT_IDLE;
+  listInputCtx.selectedIndex = 0;
+  listInputCtx.scrollOffset = 0;
+  listInputCtx.maxItems = 5;
+  listInputCtx.lastScrollOffset = 0;
+  listInputCtx.lastSelectedIndex = 0;
+  listInputCtx.lastCursorBlink = false;                    
+  listInputCtx.displayRefresh = false;
+  listInputCtx.lastUpdate = 0;
+  listInputCtx.cursorBlink = false;
+  listInputCtx.lastActivity = 0;
+  listInputCtx.lastActivity = 0;
+  listInputCtx.timeoutDuration = 0;                   
+  strncpy(listInputCtx.title,"",21);
+  listInputCtx.itemList = NULL;                    
+ 
+ // Reset de tous les rafraichissement OLED
+  InfoScreenRefreshTime = false;  
+  LoRaScreenRefreshTime = false;
+  InfoBalScreenRefreshTime = false;
+  WeightScreenRefreshWeights = false;
+
+// remise Niveau menus à 0
+  currentMenuDepth = 0;  // départ menu PRINCIPAL
+ // Activer la liste au démarrage si pas encore fait
+  if (!startupListActivated)
+  {
+debugSerial.println("Lancement Menu principal");
+    initStartupList();  // Initialise l'affichage de la liste au démarrage
+  }
 }

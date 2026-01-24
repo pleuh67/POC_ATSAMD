@@ -245,7 +245,7 @@ void m01_1F_GetTimeDone()   // appel dans Handle.cpp en fonction de saisieActive
   synchronizeDS3231TimeToMicro();
 
 
-  debugSerial.println("Reprogramme IRQ2");
+//debugSerial.println("Reprogramme IRQ2");
   DS3231setRTCAlarm2(); // Reprogrammer prochaine alarme dans n min
   // Activer la liste de démarrage quand fin saisie TIME : void finalizeTimeInput(char* outputTime)
   backMenu();
@@ -415,7 +415,7 @@ void m02_2F_AppEUI() // AppEUI
 
   saisieActive = 22;
   debugSerial.println("CONFIG. SYSTEME - Demande saisie HEXA AppEUI");
-  byteArrayToHexString(&AppEUI_List [config.materiel.Num_Carte][0], 8, hexBuffer, 17);
+  byteArrayToHexString(&AppEUI_List[0], 8, hexBuffer, 17);                                      // &[0]  ???
   startHexInput("-- SAISIR APPEUI ---", hexBuffer, 16);
 }
 
@@ -426,7 +426,7 @@ void m02_2F_AppEUIDone()    // appel dans Handle.cpp en fonction de saisieActive
   finalizeHexInput(hexBuffer); // Récupérer chaine HEXA
   debugSerial.print("Nouvelle chaine AppEUI: ");
   debugSerial.println(hexBuffer);        // Ici vous pouvez traiter AppEUI et revenir au menu
-  hexStringToByteArray(hexBuffer, &AppEUI_List [config.materiel.Num_Carte][0], strlen(hexBuffer));
+  hexStringToByteArray(hexBuffer, &AppEUI_List[0], strlen(hexBuffer));                                      // &[0]  ???
   backMenu();
 }
 

@@ -27,11 +27,28 @@ void initDebugSerial(void)
     debugSerial.println(PROJECT_NAME);
 }
 
+
+// Port Série LoRa ------------ initialisation -------------------------------*
 // ---------------------------------------------------------------------------*
+// ---------------------------------------------------------------------------*
+void initLoRaSerial(void)
+{
+  loraSerial.begin(LoRaBee.getDefaultBaudRate());
+  LoRaBee.setDiag(debugSerial); // to use debug remove //DEBUG inside library
+  LoRaBee.init(loraSerial, LORA_RESET);
+  debugSerial.println("Port Série LoRa initialisé");
+}
+
+
+// ---------------------------------------------------------------------------*
+// out : 0 (Error ou non référencé) / n (Num de carte)  
+// @brief Reset immédiat du microcontrôleur
+
+// @param void
+// @return void
 // ---------------------------------------------------------------------------*
 void softReset() 
 {
-// Reset immédiat du microcontrôleur
   NVIC_SystemReset();
 // Le code ne continue jamais après cette ligne
 }
@@ -43,20 +60,70 @@ void softReset()
 // @param void
 // @return :  0 error or Card number
 // ---------------------------------------------------------------------------*
+
+// appel avec  config.materiel.Num_Carte = init2483A(config.materiel.DevEUI);   // return :  0 error or Card number
+
 uint8_t init2483A(uint8_t *HWEUI)  // Init 2483 ---- Init 2483 ---- Init 2483 ---- Init 2483 
-{ uint8_t tryy = 3 , rc;
+{ uint8_t tryy = 1 , rc;
 
-//debugSerial.print("-----------------------------");
-//debugSerial.print("INIT 2483... with: ");
-//debugSerial.println(config.materiel.Num_Carte);
+  uint8_t DevEUI[8];
+  uint8_t len = LoRaBee.getHWEUI(DevEUI, sizeof(DevEUI));
+   // Print the Hardware EUI
+  debugSerial.print("init2483A()/LoRaBee.getHWEUI => DevEUI: ");
+  for (uint8_t i = 0; i < sizeof(DevEUI); i++) 
+  {
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(HIGH_NIBBLE(DevEUI[i])));
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(LOW_NIBBLE(DevEUI[i])));
+  }
+  debugSerial.println();  
 
 
-  loraSerial.begin(LoRaBee.getDefaultBaudRate());
+/*
    do
-   { rc = Init_2483(HWEUI); // 0 = erreur ou Num de carte
+   { rc = RN2483Init(HWEUI); // 0 = erreur ou Num de carte
 //debugSerial.println(rc ? "rc Init_2483() true":"rc Init_2483() false");
 // Reset_LoRa();  // initialise pas sur reset chaud.
-/*      
+ */     
+// nnnnnnnnnnnnnnnnn
+
+// passer uint_ DEVEUI initialisé en char *Module_ID           DevEUI: 0004A30B00EEEE01
+  char Module_ID[17];
+ 
+ // recopié 
+ //                          source             destination
+  convertToHexString(DevEUI, Module_ID, 8);
+ /*for (uint8_t i = 0; i < len; i++)
+  {
+    // Convertir chaque octet en deux caractères hexadécimaux
+    sprintf(&Module_ID[i * 2], "%02X", DevEUI[i]);
+  }
+  // Terminer la chaîne avec un caractère nul
+  Module_ID[len * 2] = '\0';
+
+// fin recopié
+*/
+debugSerial.print("init2483A()/Module_ID => ");
+debugSerial.println(Module_ID);
+ 
+  for (config.materiel.Num_Carte=0;config.materiel.Num_Carte< MAX_HWEUI_List; config.materiel.Num_Carte++)
+  { 
+    if (strncmp(HWEUI_List[config.materiel.Num_Carte],Module_ID,16)==0)   // égalité des 2 
+    {
+// INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
+  memcpy(config.materiel.DevEUI, SN2483_List[config.materiel.Num_Carte], sizeof(SN2483_List[config.materiel.Num_Carte]));
+
+// Init AppEUI
+      memcpy(config.applicatif.AppEUI, AppEUI_List,9);  //  10 avant le 22/01 KKKKK
+// Init AppKey
+      memcpy(config.applicatif.AppKey, AppKey_List[config.materiel.Num_Carte],17);
+       break;  // sortie du for() quand trouvé egalité.... pas terrible!!!  
+    }
+ //debugSerial.println("HWEUI non trouvé");
+  } 
+
+  rc = config.materiel.Num_Carte == MAX_HWEUI_List ? 0 : config.materiel.Num_Carte; // retourne 0 error or Card number
+
+// nnnnnnnnnnnnnnnnn 
       if (config.materiel.Num_Carte)
       {
         debugSerial.print(" Init 2483 done with card : ");
@@ -68,11 +135,12 @@ uint8_t init2483A(uint8_t *HWEUI)  // Init 2483 ---- Init 2483 ---- Init 2483 --
         debugSerial.println(" NO 2483 present.");
         OLEDDebugDisplay("2483A   Failed");
       }
-*/      
+  /*    
       tryy--;
     }  
     while (!rc && tryy); // erreur et max 4 fois
-  /*  
+ */ 
+ /*  
     else 
     {
       debugSerial.println(" Init 2483 failed");    
@@ -80,6 +148,9 @@ uint8_t init2483A(uint8_t *HWEUI)  // Init 2483 ---- Init 2483 ---- Init 2483 --
     }  
 */
 // debugSerialPrintLoRaStatus();
+
+debugSerial.println("init2483A() => fin Fonction");
+
   return(rc);
 }
 
@@ -89,8 +160,7 @@ uint8_t init2483A(uint8_t *HWEUI)  // Init 2483 ---- Init 2483 ---- Init 2483 --
 void initLoRa(void)
 {
 // INIT LoRa ---- INIT LoRa ---- INIT LoRa ---- INIT LoRa ---- INIT LoRa 
-debugSerial.println("------------------------------------------------------------------");
-debugSerial.println("INIT LoRa...");
+debugSerial.println("--------------------------------- SETUP - INIT LoRa ---------------------------------");
 //  Reset_LoRa();  // initialise pas sur reset chaud.
 
   if (setupLoRa())
@@ -122,8 +192,7 @@ debugSerial.println("Test sending LoRa testPayload (7) (Restart)...");
 // ---------------------------------------------------------------------------*
 void DHTInit(void)
 {
-debugSerial.println("------------------------------------------------------------------");
-debugSerial.println("INIT DHT22...");
+debugSerial.println("--------------------------------- SETUP - INIT DHT22 ---------------------------------");
   dht.begin(); // temperature
   debugSerial.println("done.");
 OLEDDebugDisplay("DHT22   Initialized");
@@ -138,7 +207,7 @@ OLEDDebugDisplay("DHT22   Initialized");
 // exemple appel: setStructDefaultValues();
 void setStructDefaultValues()
 {
-debugSerial.println("////////////////////////////// setStructDefaultValues() ////////////////////////////////////");  
+  debugSerial.println("////////////////////////////// setStructDefaultValues() ////////////////////////////////////");  
 
 // ---------------------------------------------------------------------------
 // ========================= Configuration Applicatif ========================
@@ -153,20 +222,18 @@ debugSerial.println("////////////////////////////// setStructDefaultValues() ///
   
 // Paramètres Rucher
   config.applicatif.RucherID = 11;
-  strcpy(config.applicatif.RucherName, "Rucher Test");
-  
-// Paramètres LoRa - AppEUI
-  uint8_t defaultAppEUI[] = {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31, 0x00};
-  memcpy(config.applicatif.AppEUI, defaultAppEUI, 9);
-  
-// Paramètres LoRa - AppKey: PHILIPPELOVEBEES
-  uint8_t defaultAppKey[] = {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 
-                             0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00};
-  memcpy(config.applicatif.AppKey, defaultAppKey, 17);
-  
+  strcpy(config.applicatif.RucherName, "Rucher Test       *"); // 19 car max
+
+//debugSerial.println("init2483A()"); 
+ config.materiel.Num_Carte = init2483A(config.materiel.DevEUI);   // return :  0 error or Card number
+   
+ memcpy(config.materiel.DevEUI, SN2483_List [config.materiel.Num_Carte], 9);
+ memcpy(config.applicatif.AppEUI, AppEUI_List, 8);
+ memcpy(config.applicatif.AppKey, AppKey_List[config.materiel.Num_Carte], 17);
+
   config.applicatif.SpreadingFactor = DEFAULT_SF;
   config.applicatif.SendingPeriod = WAKEUP_INTERVAL_PAYLOAD;
-  config.applicatif.OLEDRefreshPeriod = 1000; //INTERVAL_1SEC;
+  config.applicatif.OLEDRefreshPeriod = INTERVAL_1SEC;
   
 // ---------------------------------------------------------------------------
 // ========================== Configuration Matériel =========================
@@ -177,14 +244,9 @@ debugSerial.println("////////////////////////////// setStructDefaultValues() ///
   config.materiel.adresseEEPROM = EEPROM_ADDRESS;
 
 //Conditionner que pas déjà lu  
-  config.materiel.Num_Carte = init2483A(config.materiel.DevEUI);   //1;
-
-debugSerial.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ setStructDefaultValues() \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");  
-//debugSerial.print("config.materiel.Num_Carte <= "); debugSerial.println(config.materiel.Num_Carte);  // OK
   
-// DevEUI par défaut
-  uint8_t defaultDevEUI[] = {0x00, 0x04, 0xA3, 0x0B, 0x00, 0xEE, 0xEE, 0x01, 0x00};
-  memcpy(config.materiel.DevEUI, defaultDevEUI, 9);
+// DevEUI par défaut initialisé ci dessus
+// memcpy(config.materiel.DevEUI, defaultDevEUI, 8);
   
 // Détection périphériques
   config.materiel.Rtc = true;
@@ -249,5 +311,9 @@ debugSerial.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ se
   config.magicNumber = CONFIG_MAGIC_NUMBER;  
 // Calcul et stockage du checksum
   config.checksum = calculateChecksum(&config);
+
 debugSerial.println(F("Config par defaut initialisee"));
+// dumpConfigToJSON();
+debugSerial.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ setStructDefaultValues() \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");  
+debugSerial.print("config.materiel.Num_Carte <= "); debugSerial.println(config.materiel.Num_Carte);  // OK
 }

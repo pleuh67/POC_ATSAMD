@@ -18,6 +18,7 @@
 
 // ===== PROTOTYPES DE FONCTIONS DE SETUP.CPP=====
 void initDebugSerial(void);
+void initLoRaSerial(void);
 void softReset(void);
 void DHTInit(void);
 void setStructDefaultValues(void);
@@ -44,10 +45,6 @@ void DS3231CompleteReset(void);
 // Gestion Config et EEPROM
 //void setDefaultConfig(void);
 void initConfig(void);
-//void loadConfigFromEEPROM(void);
-//void readConfigFromEEPROM(void);
-//void saveConfigToEEPROM(void);
-//uint16_t calculateChecksum(ConfigGenerale_t* cfg);
 
 // ===== PROTOTYPES DE FONCTIONS EEPROM =====
 void loadConfigFromEEPROM(void);
@@ -442,7 +439,6 @@ void debugSerialPrint2digits(int number);
 void debugSerialPrintLoraPayload(uint8_t *payload, uint8_t len);
 void debugSerialPrintText(char *txt, char len);
 void debugSerialPrintLoRaStatus();
-void debugSerialPrintReprogNextAlarm(int IRQ);
 void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ);
 void debugSerialPrintKbdKey(void);
 void debugSerialPrintSystemInfo(void); 
@@ -457,7 +453,7 @@ void handleProgrammingMode(void);
 void executeProgrammingMode(void);
 // fonctions debug :
 void GestionEnCours(char *from);   // affiche le type de traitement en cours de gestion par le handler
-
+void restartGestionSaisieOLED(void);  // entrée dans mode Programmation
 void onRTCAlarm(void);
 
 // ---------------------------------------------------------------------------*
@@ -469,17 +465,15 @@ void configureLowPowerMode(void);
 // Gestion RN2483 LoRa
 // RS ?????
 uint8_t RN2483Version(void);    // Lit les infos du modem
-
+uint8_t RN2483GetCardNumber(void);
 
 uint8_t init2483A(uint8_t *HWEUI); //   => dans setup.cpp
-uint8_t Init_2483(uint8_t *HWEUI);
+uint8_t RN2483Init(uint8_t *HWEUI);
 void initLoRa(void);
-void getHWEUI(char *);      // Gets and stores the LoRa module's HWEUI   
-
-
+//void getHWEUI(char *);      // Gets and stores the LoRa module's HWEUI   
 
 // tests en cours
-void newgetHWEUI(uint8_t *AppEUI); 
+void getHWEUI(uint8_t *AppEUI); 
 
 
 

@@ -55,21 +55,25 @@ HiveSensor_Data.HX711Weight[2] = 34.56;
 HiveSensor_Data.HX711Weight[3] = 45.67;
 HiveSensor_Data.ProcessorTemp = 21.18;   // temp µC, ne sera pas conservé 
 
-  
+  // Initialisation de debugSerial et envoi infos compil.
   initDebugSerial(); 
+
+  // Initialisation de LoraSerial
+  initLoRaSerial();
+
   // Initialisation des LEDs
   initLEDs();
     
   // Initialisation du mode selon PIN_PE
   pinMode(PIN_PE, INPUT_PULLUP);
   modeExploitation = digitalRead(PIN_PE);
-    
   debugSerial.print("Mode détecté: ");
   debugSerial.println(modeExploitation ? "EXPLOITATION" : "PROGRAMMATION");
    
   // Initialisation I2C
   Wire.begin();
   debugSerial.println(F("Bus I2C initialise"));
+// scanI2C???
 
   // Initialisation OLED
   OLEDInit();
@@ -82,36 +86,11 @@ display.ssd1306_command(129);    // Column end address (128 + 2 - 1)
 */
   
   OLEDDebugDisplay("OLEDInit OK"); // scrolling lors du setup(); 
-  debugSerial.println("OLEDInit OK");
 
 debugSerial.println(F("-------------------------------- SETUP - Fin OLED et avant-----------------------"));
 
-// Faire le tri des initialisations
- 
-  // Chargement de la configuration
-  loadConfigFromEEPROM();
-  
-  debugSerial.println(F("=== CONFIGURATION CHARGEE ==="));
-  debugSerial.print(F("Rucher: "));
-  debugSerial.println(config.applicatif.RucherName);
-  debugSerial.print(F("Rucher ID: "));
-  debugSerial.println(config.applicatif.RucherID);
-  debugSerial.print(F("Spreading Factor: "));
-  debugSerial.println(config.applicatif.SpreadingFactor);
-
-debugSerial.println(F("-------------------------------- SETUP - Fin loadConfigFromEEPROM() -------------"));
-
- // Dump JSON de la configuration
-  debugSerial.println();
-  debugSerial.println(F("========================================"));
-  debugSerial.println(F("=== DUMP JSON CONFIGURATION EEPROM ==="));
-  debugSerial.println(F("========================================"));
-  dumpConfigToJSON();
-
-debugSerial.println(F("-------------------------------- SETUP - Fin dumpConfigToJSON() -----------------"));
-
   // Initialisation configuration
-  initConfig();
+  initConfig();     // appel loadConfigFromEEPROM();
   OLEDDebugDisplay("initConfig OK");
 delay(1000);
 
@@ -209,7 +188,7 @@ if (DEBUG_INTERVAL_1SEC)
 }
 if (DEBUG_WAKEUP_PAYLOAD)
 {
-  debugSerial.println("Initialisation IRQ2");
+//debugSerial.println("Initialisation IRQ2");
   DS3231setRTCAlarm2();
 }
   OLEDDebugDisplay("Set RTC Alarms OK");
@@ -342,10 +321,9 @@ debugSerial.print("3");   // 333333333333333333333333333
 // rappel toutes les minutes
     if (!(counter1s %60)) 
     {     
-//      debugSerialPrintReprogNextAlarm(2);
       debugSerialPrintNextAlarm(nextPayload,2);
-      debugSerial.print("menuDeep: ");    // MMMMMMMMMMMMMMMMMMMMMMMMMMM
-      debugSerial.println(currentMenuDepth);
+//debugSerial.print("menuDeep: ");    // MMMMMMMMMMMMMMMMMMMMMMMMMMM
+//debugSerial.println(currentMenuDepth);
     }
     switch (counter1s %10)
     {

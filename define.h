@@ -17,6 +17,10 @@
 #include <ArduinoLowPower.h>
 #include <stdlib.h>   // pour atoi()
 
+#define NIBBLE_TO_HEX_CHAR(i) ((i <= 9) ? ('0' + i) : ('A' - 10 + i))
+#define HIGH_NIBBLE(i) ((i >> 4) & 0x0F)
+#define LOW_NIBBLE(i) (i & 0x0F)
+
 // ===== CONSTANTES PROJET =====
 #define PROJECT_NAME "POC IRQ_Payload IRQ_1s LOW_POWER OLED RN2483 DHT22 KEY5"  // len = 55
 #define VERSION "1.1.1-PL"
@@ -58,7 +62,7 @@
 #define CONFIG_VERSION 111   // Version 1.1.1
 // ===== ADRESSE EEPROM CONFIGURATION =====
 #define CONFIG_EEPROM_START 0x0000  // Adresse de début en EEPROM
-#define CONFIG_MAGIC_NUMBER 0xBE69  // Nombre magique pour valider config
+#define CONFIG_MAGIC_NUMBER 0xFF00  // Nombre magique pour valider config
 
 // defines pour raccourcir et clarifier les instructions
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -197,7 +201,7 @@
 
 
 // ---------------------------------------------------------------------------*
-// LoRa
+// LoRa 
 // ---------------------------------------------------------------------------*
 #include <Sodaq_RN2483.h>   // et pas OrangeForRN2483
 #include <Sodaq_wdt.h>

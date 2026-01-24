@@ -135,6 +135,8 @@ uint16_t calculateChecksum(ConfigGenerale_t* cfg)
 // Affichage du checksum
 debugSerial.print(F("\n********************** calculateChecksum() *********************** Checksum calcule: 0x"));
 debugSerial.println(crc, HEX);
+debugSerial.print(F("Checksum en structure: 0x"));
+debugSerial.println(config.checksum, HEX);
    return crc;
 }
 
@@ -165,11 +167,10 @@ void finitDefaultConfig(void)
 // exemple appel: loadConfigFromEEPROM();
 void loadConfigFromEEPROM(void)
 {
-  debugSerial.println(F("Chargement config depuis EEPROM..."));
-  
   // Lecture de la configuration
-  readConfigFromEEPROM();
-  
+  readConfigFromEEPROM();                           // lecture et copie des 176 octets de l'eeprom dans structure
+debugSerial.println(F("FIN : readConfigFromEEPROM()"));
+
   // Vérification du nombre magique
   if (config.magicNumber != CONFIG_MAGIC_NUMBER)
   {
@@ -181,13 +182,15 @@ void loadConfigFromEEPROM(void)
     debugSerial.println(F(" => Chargement config par defaut..."));
     //initDefaultConfig();
     setStructDefaultValues();
+    debugSerial.println(F("FIN : setStructDefaultValues() cas erreur CONFIG_MAGIC_NUMBER"));
     saveConfigToEEPROM();
- //return;
+dumpConfigToJSON();    
+    return;
   }
 
   // Calcul et vérification du checksum
   uint16_t calculatedChecksum = calculateChecksum(&config);
-
+debugSerial.println(calculatedChecksum, HEX);
   if (calculatedChecksum != config.checksum)
   {
     debugSerial.print(F("ERREUR: Checksum invalide!"));
@@ -198,8 +201,10 @@ void loadConfigFromEEPROM(void)
     debugSerial.println(F(" => Chargement config par defaut..."));
     //initDefaultConfig();
     setStructDefaultValues();
+debugSerial.println(F("FIN : setStructDefaultValues() cas erreur chksum"));
     saveConfigToEEPROM();
- //   return;
+dumpConfigToJSON();    
+    return;
   }
   
   debugSerial.println(F("Config chargee avec succes"));
@@ -209,6 +214,13 @@ void loadConfigFromEEPROM(void)
   debugSerial.println(config.applicatif.version);
   debugSerial.print(F("Checksum: 0x"));
   debugSerial.println(config.checksum, HEX);
+
+dumpConfigToJSON();
+
+
+  debugSerial.println("______________________________________________________________________________________________________________________");
+
+  
 }
 
 // ---------------------------------------------------------------------------
@@ -344,10 +356,10 @@ void dumpConfigToJSON(void)
   // LoRa
   debugSerial.println(F("      \"lora\": {"));
   debugSerial.print(F("        \"appEUI\": "));
-  printByteArrayJSON(config.applicatif.AppEUI, 9);
+  printByteArrayJSON(config.applicatif.AppEUI, 8);
   debugSerial.println(F(","));
   debugSerial.print(F("        \"appKey\": "));
-  printByteArrayJSON(config.applicatif.AppKey, 17);
+  printByteArrayJSON(config.applicatif.AppKey, 16);
   debugSerial.println(F(","));
   debugSerial.print(F("        \"spreadingFactor\": "));
   debugSerial.print(config.applicatif.SpreadingFactor);
@@ -385,7 +397,7 @@ void dumpConfigToJSON(void)
   debugSerial.print(config.materiel.Num_Carte);
   debugSerial.println(F(","));
   debugSerial.print(F("        \"devEUI\": "));
-  printByteArrayJSON(config.materiel.DevEUI, 9);
+  printByteArrayJSON(config.materiel.DevEUI, 8);
   debugSerial.println();
   debugSerial.println(F("      },"));
   
@@ -539,19 +551,19 @@ void dumpConfigToJSON(void)
 // ---------------------------------------------------------------------------*
 void non_setDefaultConfig(void) 
 {
-    config.materiel.version = CONFIG_VERSION;
-    config.materiel.adresseRTC = DS3231_ADDRESS;    // Adresse RTC Module DS3231
-    config.materiel.adresseOLED = OLED_ADDRESS;     // Adresse écran OLED
-    config.materiel.adresseEEPROM = EEPROM_ADDRESS; // Adresse EEPROM Module DS3231
+  config.materiel.version = CONFIG_VERSION;
+  config.materiel.adresseRTC = DS3231_ADDRESS;    // Adresse RTC Module DS3231
+  config.materiel.adresseOLED = OLED_ADDRESS;     // Adresse écran OLED
+  config.materiel.adresseEEPROM = EEPROM_ADDRESS; // Adresse EEPROM Module DS3231
    
-    config.applicatif.redLedDuration = RED_LED_DURATION;
-    config.applicatif.greenLedDuration = GREEN_LED_DURATION;
-    config.applicatif.blueLedDuration = BLUE_LED_DURATION;
-    config.applicatif.builtinLedDuration = BUILTIN_LED_DURATION;
-    config.applicatif.SendingPeriod = WAKEUP_INTERVAL_PAYLOAD;    // mieux: wakeupIntervalPayload
-    config.applicatif.OLEDRefreshPeriod = INTERVAL_1SEC;               //
+  config.applicatif.redLedDuration = RED_LED_DURATION;
+  config.applicatif.greenLedDuration = GREEN_LED_DURATION;
+  config.applicatif.blueLedDuration = BLUE_LED_DURATION;
+  config.applicatif.builtinLedDuration = BUILTIN_LED_DURATION;
+  config.applicatif.SendingPeriod = WAKEUP_INTERVAL_PAYLOAD;    // mieux: wakeupIntervalPayload
+  config.applicatif.OLEDRefreshPeriod = INTERVAL_1SEC;               //
     
-    config.checksum = calculateChecksum(&config);
+  config.checksum = calculateChecksum(&config);
 }
 
 
@@ -562,8 +574,9 @@ void non_setDefaultConfig(void)
 // ---------------------------------------------------------------------------*
 void initConfig(void) 
 {
-    loadConfigFromEEPROM();
-    debugSerial.println("Configuration chargée");
+  debugSerial.println("Début lecture configuration EEPROM");
+  loadConfigFromEEPROM();
+  debugSerial.println("Lecture configuration EEPROM executée");
 }
 
 /*
@@ -576,8 +589,8 @@ void initConfig(void)
 // ---------------------------------------------------------------------------*
 void loadConfigFromEEPROM(void) 
 {
-    // Simulation de lecture EEPROM - à implémenter avec bibliothèque I2C EEPROM
-    setDefaultConfig();
+  // Simulation de lecture EEPROM - à implémenter avec bibliothèque I2C EEPROM
+  setDefaultConfig();
 }
 
 // ---------------------------------------------------------------------------*
@@ -587,9 +600,9 @@ void loadConfigFromEEPROM(void)
 // ---------------------------------------------------------------------------*
 void saveConfigToEEPROM(void) 
 {
-    config.checksum = calculateChecksum(&config);
-    // Simulation de sauvegarde EEPROM - à implémenter avec bibliothèque I2C EEPROM
-    debugSerial.println("Configuration sauvegardée");
+  config.checksum = calculateChecksum(&config);
+  // Simulation de sauvegarde EEPROM - à implémenter avec bibliothèque I2C EEPROM
+  debugSerial.println("Configuration sauvegardée");
 }
 
 // ---------------------------------------------------------------------------*
@@ -599,12 +612,12 @@ void saveConfigToEEPROM(void)
 // ---------------------------------------------------------------------------*
 uint16_t calculateChecksum(ConfigGenerale_t* cfg) 
 {
-    uint16_t sum = 0;
-    uint8_t* data = (uint8_t*)cfg;
-    for (int i = 0; i < sizeof(ConfigGenerale_t) - sizeof(uint16_t); i++) 
-    {
-        sum += data[i];
-    }
-    return sum;
+  uint16_t sum = 0;
+  uint8_t* data = (uint8_t*)cfg;
+  for (int i = 0; i < sizeof(ConfigGenerale_t) - sizeof(uint16_t); i++) 
+  {
+      sum += data[i];
+  }
+  return sum;
 }
 */

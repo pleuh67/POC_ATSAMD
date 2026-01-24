@@ -80,7 +80,7 @@ const char* m03_CalibTensions[] = {
   "Calib. VBAT    (F)",  // m03_0F_CalibVBat() appel de scalingVBat() à écrire avec startNumInput("--CALIBRATION VBAT--", char* initialNum (VBatScale_List [10]), 6, 0, 1, 0, 1); ex:0.0032252
   "Calib. VSOL    (F)",  // m03_1F_CalibVSol()
   "Calib. LUM     (F)",  // m03_2F_CalibVLum()
-  "Reserve     (m033)",  // m03_3F_Reserve()
+  "Affiche Tens.  (P)",  // m03_3F_Reserve()
   "RET  popMenu(m0)"     // m03_4M_PopMenu()
 };
 

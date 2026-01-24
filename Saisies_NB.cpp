@@ -143,16 +143,16 @@ void startListInput(const char* title, const char** itemList, uint8_t numItems, 
   debugSerial.println(" secondes");
 
 // afficher itemList
-uint8_t i =0;
-debugSerial.println("startListInput()fin\\Liste des options du menu :");
-for (i=0; i<numItems; i++)
-{
-  debugSerial.print(itemList[i]);
-  debugSerial.print(" - ");
-}
+  uint8_t i =0;
+  debugSerial.println("startListInput()fin\\Liste des options du menu :");
+  for (i=0; i<numItems; i++)
+  {
+    debugSerial.print(itemList[i]);
+    debugSerial.print(" - ");
+  }
 debugSerial.println("");
 
-  OLEDDisplayMessageL8("Choix d'une valeur", false, false);
+//  OLEDDisplayMessageL8("Choix d'une valeur", false, false);
 }
 
 // ---------------------------------------------------------------------------*

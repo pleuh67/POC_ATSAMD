@@ -338,31 +338,10 @@ void debugSerialPrintHEXA(char *txt, char len)
 
 // ---------------------------------------------------------------------------*
 // ---------------------------------------------------------------------------*
-/*
--> Reprogramme IRQ2
-13:07:44.308 -> === CONFIGURATION ALARMES RTC + INTERRUPTIONS ===
-13:07:44.308 -> 
-13:07:44.308 -> IRQ2 Reprogrammée à 13:07:19
-13:07:44.308 -> IRQ2 prévue pour: 13:07:19
-13:07:44.308 -> backMenu()
-*/
-
-
-void debugSerialPrintReprogNextAlarm(int IRQ)  
-{ DateTime systemTime = rtc.now();
-
-  sprintf(serialbuf,"\nIRQ%d Reprogrammée à %02d:%02d:%02d",
-          IRQ, systemTime.hour(),systemTime.minute(),systemTime.second());
-  debugSerial.println(serialbuf); 
-}
-
-
-// ---------------------------------------------------------------------------*
-// ---------------------------------------------------------------------------*
 void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)  
 {   
-  sprintf(serialbuf,"Prochaine IRQ%d prévue pour: %02d:%02d:%02d (dans %d min) ",
-          IRQ, nextPayload.hour(),nextPayload.minute(),nextPayload.second(), config.applicatif.SendingPeriod);
+  sprintf(serialbuf,"Prochaine IRQ%d: %02d:%02d:%02d",            // (dans %d min) ",
+          IRQ, nextPayload.hour(),nextPayload.minute(),nextPayload.second()); //, config.applicatif.SendingPeriod);
   debugSerial.println(serialbuf); 
 }
 
@@ -371,12 +350,36 @@ void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)
 // ---------------------------------------------------------------------------*
 void debugSerialPrintLoRaStatus()  
 {
-  debugSerial.println("\n=== STATUS LoRa ===");
+  debugSerial.println("=== STATUS LoRa ===");
   sprintf(serialbuf," => RN2483#%02d",config.materiel.Num_Carte);        // affiche N° de carte
   debugSerial.println(serialbuf);
-//debugSerial.print("DevEUI = ");debugSerial.println((char *)config.materiel_t.DevEUI,8);
+//debugSerial.print("DevEUI = ");debugSerial.println((char *)config.materiel.DevEUI,8);
+  // Print the Hardware EUI
+  debugSerial.print("LoRa DevEUI: ");
+  for (uint8_t i = 0; i < sizeof(config.materiel.DevEUI); i++) {
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(HIGH_NIBBLE(config.materiel.DevEUI[i])));
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(LOW_NIBBLE(config.materiel.DevEUI[i])));
+  }
+  debugSerial.println();  
+
 //debugSerial.print("AppEUI = ");debugSerial.println((char *)AppEUI,8);
-//debugSerial.print("AppKey = ");debugSerial.println((char *)AppKey,16); 
+debugSerial.print("LoRa APPEUI: ");
+  for (uint8_t i = 0; i < sizeof(config.applicatif.AppEUI); i++) {
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(HIGH_NIBBLE(config.applicatif.AppEUI[i])));
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(LOW_NIBBLE(config.applicatif.AppEUI[i])));
+  }
+  debugSerial.println();  
+
+//debugSerial.print("AppKey = ");debugSerial.println((char *)AppKey,16);
+  debugSerial.print("LoRa APPKEY: ");
+  for (uint8_t i = 0; i < sizeof(config.applicatif.AppKey); i++) {
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(HIGH_NIBBLE(config.applicatif.AppKey[i])));
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(LOW_NIBBLE(config.applicatif.AppKey[i])));
+  }
+  debugSerial.println();   
+
+
+
 // print...()
   debugSerial.println("=====================");
 }  

@@ -437,11 +437,11 @@ typedef struct
     uint16_t builtinLedDuration;  // BUILTIN_LED_DURATION 100  
 // paramètres Rucher
   uint8_t RucherID;         // ID Rucher           xx  uint8_t
-  char    RucherName [20];    // Localisation Rucher (saisir direct ou liste + "autre") 
+  char    RucherName [21];    // Localisation Rucher (saisir direct ou liste + "autre") 
 // paramètres LoRa
-  uint8_t AppEUI [10];        // AppEUI: {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31, 0x00}
-  uint8_t AppKey [18];        // AppKEY: // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
-// {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53, 0x00} 
+  uint8_t AppEUI [9];        // AppEUI: {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31}
+  uint8_t AppKey [17];        // AppKEY: // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
+// {0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x42, 0x45, 0x45, 0x53} 
   uint8_t SpreadingFactor;    // 7, 9 et 12 echec freudeneck
   uint8_t SendingPeriod;      // WAKEUP_INTERVAL_PAYLOAD 5
   uint8_t OLEDRefreshPeriod;  // INTERVAL_1SEC 1000 

@@ -15,71 +15,133 @@
 
 
 // ---------------------------------------------------------------------------*
-/*
-16:07:59.608 -> Start loop(); =====================================
-16:07:59.608 -> buildLoraPayload, datas:
-16:07:59.608 -> Rucher: 67  [RucherName: LPCZ] temp: 2060, Hum.: 3800
-16:07:59.608 -> Lum:    91 Vbat: 317,  Vsol: 0
-16:07:59.608 -> Masse0: 793300 / Masse1: 2345 / Masse2: 3456 / Masse3: 4567 / 
-16:07:59.608 -> (fin buildLoraPayload) hexPayload: 430C08D80E5B003D010000D41A2909800DD71
-16:07:59.608 -> hexPayload: 430C08D80E5B003D010000D41A2909800DD71 len : 19
-16:07:59.608 -> appel LoRaBee.send
-16:08:00.965 -> 
-16:08:00.965 -> The device is not connected to the network in Send_LoRa_Mess(). The program will reset the RN module...
-16:08:09.065 -> === STATUS LoRa ===
-16:08:09.065 ->  => RN2483#06
-16:08:09.065 -> =====================
-16:08:09.065 -> setupLoRaOTAA(), Network connection failed!
-16:08:10.436 -> Passage en mode EXPLOITATION
-16:08:10.530 -> BlinkRED
-16:08:11.514 -> BlinkRED
-16:08:12.493 -> BlinkRED
-16:08:13.523 -> BlinkRED
-16:08:14.506 -> BlinkRED
-16:08:15.498 -> BlinkRED
-16:08:16.528 -> BlinkRED
-16:08:17.511 -> BlinkRED
-16:08:18.497 -> BlinkRED
-16:08:18.637 -> Passage en mode PROGRAMMATION
-16:08:18.688 -> Lancement Menu principal
 
+/*  WDT
+#include "Sodaq_wdt.h"
 
-16:08:18.688 -> pushMenu()\title: -- MENU PRINCIPAL --
-      16:08:18.688 -> startListInput()\Selection dans liste demarree: -- MENU PRINCIPAL --
-      16:08:18.688 -> Timeout: 0 secondes
-      16:08:18.688 -> OLEDDisplayMessageL8() => Choix d'une valeur
+#define DIAG_STREAM SerialUSB
 
-16:08:19.197 -> pushMenu()\Menu empile: -- MENU PRINCIPAL --                                   currentMenuDepth: 1
-16:08:19.197 -> initStartupList()\Menu principal active
-16:08:19.197 -> initStartupList()\currentMenuDepth apres init: 1
+void setup() 
+{
+  // Startup delay
+  delay(5000);
+  
+  // Supported periods on both platforms
+  // WDT_PERIOD_1DIV64 = 1/64s
+  // WDT_PERIOD_1DIV32 = 1/32s
+  // WDT_PERIOD_1DIV16 = 1/16s
+  // WDT_PERIOD_1DIV8  = 1/8s
+  // WDT_PERIOD_1DIV4  = 1/4s
+  // WDT_PERIOD_1DIV2  = 1/2s
+  // WDT_PERIOD_1X     = 1s
+  // WDT_PERIOD_2X     = 2s
+  // WDT_PERIOD_4X     = 4s
+  // WDT_PERIOD_8X     = 8s
+  // Default parameter is set to WDT_PERIOD_1X = 1s
 
-16:08:19.197 -> Menu/list WDT : 57775 GestionEnCours from handleProgrammingModea: 1
+  // Enable WDT
+  sodaq_wdt_enable(WDT_PERIOD_8X);
 
-Réinitialiser a val defaut
+  // Startup message (also seen after a reset)
+  DIAG_STREAM.begin(57600);
+  DIAG_STREAM.println("Start up");
+}
 
-
-
-16:08:25.961 -> Passage en mode EXPLOITATION                                              1 >> 2 ?????
-16:08:26.521 -> BlinkRED
-16:08:27.505 -> BlinkRED
-16:08:28.492 -> BlinkRED
-16:08:29.522 -> BlinkRED
-16:08:29.567 -> Passage en mode PROGRAMMATION
-16:08:29.614 -> Lancement Menu principal
-
-
-16:08:29.614 -> pushMenu()\title: -- MENU PRINCIPAL --
-
-16:08:29.614 -> pushMenu()\Menu empile: -- MENU PRINCIPAL --                                  currentMenuDepth: 2
-16:08:29.614 -> initStartupList()\Menu principal active
-16:08:29.614 -> initStartupList()\currentMenuDepth apres init: 2
-
-
-16:08:31.217 -> Passage en mode EXPLOITATION
-16:08:31.541 -> BlinkRED
-16:08:32.511 -> BlinkRED
-16:08:33.543 -> BlinkRED
-16:08:34.530 -> BlinkRED
-16:08:35.515 -> BlinkRED
-16:08:36.549 -> BlinkRED
+void loop() 
+{
+  // If the WDT interrupt has been triggered
+  if (sodaq_wdt_flag) {
+    sodaq_wdt_flag = false;
+    sodaq_wdt_reset();
+    
+    DIAG_STREAM.println("WDT interrupt has been triggered");
+  }
+}
 */
+
+
+/* SLEEP
+// C:\Users\h179132\Documents\Arduino\libraries\Sodaq_wdt\src
+#include "Sodaq_wdt.h"
+
+// Gardé source de : ARDUINO_ARCH_SAMD 
+
+#define DIAG_STREAM SerialUSB
+#define SLEEP_LED LED_BUILTIN
+#define WDT_LED 4
+
+// Length of LED flash
+#define LED_FLASH_MS 100
+
+void setup() 
+{
+  // Startup delay
+  delay(5000);
+  
+  // Supported periods on both platforms
+  // WDT_PERIOD_1DIV64 = 1/64s
+  // WDT_PERIOD_1DIV32 = 1/32s
+  // WDT_PERIOD_1DIV16 = 1/16s
+  // WDT_PERIOD_1DIV8  = 1/8s
+  // WDT_PERIOD_1DIV4  = 1/4s
+  // WDT_PERIOD_1DIV2  = 1/2s
+  // WDT_PERIOD_1X     = 1s
+  // WDT_PERIOD_2X     = 2s
+  // WDT_PERIOD_4X     = 4s
+  // WDT_PERIOD_8X     = 8s
+  // Default parameter is set to WDT_PERIOD_1X = 1s
+
+  // Enable WDT
+  sodaq_wdt_enable(WDT_PERIOD_1X);
+
+  // Setup LED's IO pins
+  pinMode(SLEEP_LED, OUTPUT);                          // P13 = LED_BUILTIN
+  pinMode(WDT_LED, OUTPUT);                            // P04
+
+  // Startup message (also seen after a reset)
+  DIAG_STREAM.begin(57600);
+  DIAG_STREAM.println("Start up");
+}
+
+void loop() 
+{
+  // If the WDT interrupt has been triggered
+  if (sodaq_wdt_flag) {
+    sodaq_wdt_flag = false;
+    sodaq_wdt_reset();
+    
+    DIAG_STREAM.println("WDT interrupt has been triggered");
+
+    // Flash LED
+    digitalWrite(WDT_LED, HIGH);
+    sodaq_wdt_safe_delay(LED_FLASH_MS);
+    digitalWrite(WDT_LED, LOW);
+  }
+
+  // Try and enter sleep mode
+  systemSleep();
+}
+
+void systemSleep()
+{
+  // Only go to sleep if there was no watchdog interrupt.
+  if (!sodaq_wdt_flag)
+  {
+    // Power on LED before sleep
+    digitalWrite(SLEEP_LED, HIGH);                //P13
+    
+    // Disable USB
+    USBDevice.detach();
+
+    // Set the sleep mode
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+    
+    // SAMD sleep
+    __WFI();
+    
+    // Power off LED after sleep
+    digitalWrite(SLEEP_LED, LOW);
+    sodaq_wdt_safe_delay(LED_FLASH_MS);
+  }
+}
+ */

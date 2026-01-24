@@ -135,14 +135,13 @@ void DS3231setRTCAlarm2(void)
  //  rtc.alarmFired(2);  // Lit et efface le flag alarme 2
    
     // Reprogrammer A2
-debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
+//debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
   // ALARME 2 : Payload toutes les config.applicatif.SendingPeriod minutes
   if (DEBUG_WAKEUP_PAYLOAD) 
   {
     nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.SendingPeriod, 0);
     rtc.setAlarm2(nextPayload, DS3231_A2_Minute);
-    debugSerialPrintReprogNextAlarm(2);
-    debugSerialPrintNextAlarm(nextPayload,2);
+    debugSerialPrintNextAlarm(nextPayload,2); // ex: Prochaine IRQ2 prévue pour: 15:30:00 (dans 5 min)
 //OLEDDrawScreenNextPayload(7, 0, nextPayload );  // Status message
   }
 //debugSerial.println("=== FIN CONFIGURATION ALARMES + INTERRUPTIONS ===");
