@@ -23,22 +23,40 @@ void SETUPinitDebugSerial(void)
     debugSerial.begin(DEBUG_BAUD);
     while ((!debugSerial) && (millis() < SERIAL_TIMEOUT)) {}
     delay(1000);
-    debugSerial.println("Compiled: " __DATE__ ", " __TIME__ ", " VERSION);
-    debugSerial.println(PROJECT_NAME);
+    LOG_INFO("Compiled: " __DATE__ ", " __TIME__ ", " VERSION);
+    LOG_INFO(PROJECT_NAME);
 }
 
 
 // Port Série LoRa ------------ initialisation -------------------------------*
 // ---------------------------------------------------------------------------*
 // ---------------------------------------------------------------------------*
-void SETUPinitLoRaSerial(void)
+void SETUPSETUPinitLoRaSerial(void)
 {
   loraSerial.begin(LoRaBee.getDefaultBaudRate());
   LoRaBee.setDiag(debugSerial); // to use debug remove //DEBUG inside library
   LoRaBee.init(loraSerial, LORA_RESET);
-  debugSerial.println("Port Série LoRa initialisé");
 }
 
+
+void SETUPswitchToOperationMode(void)
+{
+    
+// supprimer 3 lignes si pas revu.
+debugSerial.println("Passage en mode EXPLOITATION");
+
+    switchToProgrammingMode = true;
+    switchToOperationMode = false;
+// Reactive l'affichage du menu de démarrage pour sortie mode EXPLOITATION
+    startupListActivated = false;
+    OLEDClear(); 
+    OLEDDrawText(1, 7, 0, "MODE EXPLOITATION   ");
+
+// préciser le statut des menus, retour au propre au PRINCIPAL
+//debugSerialPrintMenuStruct(&menuStack[currentMenuDepth]);
+//debugSerialListStruct();
+/**/
+}
 
 // ---------------------------------------------------------------------------*
 // out : 0 (Error ou non référencé) / n (Num de carte)  
@@ -57,19 +75,81 @@ void SETUPsoftReset()
 //  out : 0 (Error ou non référencé) / n (Num de carte)  
 // @brief Find card number
 //                Num_Carte (global) dans fonction
+// @param : uint8_t *HWEUI
+// @return :  0 error or Card number
+// ---------------------------------------------------------------------------*
+uint8_t non_RN2483Init(uint8_t *HWEUI)  
+{ 
+/*
+RN2483AgetHWEUI(Module_ID_HWEUI);     // get the Hardware DevEUI ex: "0004A30B0020300A"               char Module_ID_HWEUI[20] 
+sprintf(serialbuf,"Init_2483()/RN2483AgetHWEUI Module_ID_HWEUI: %s",Module_ID_HWEUI ); 
+debugSerial.println(serialbuf);
+*/
+RN2483AgetHWEUI(config.materiel.DevEUI);     // get the Hardware DevEUI ex: "0004A30B0020300A"   uint8_t HWEUI[8];
+
+
+
+//debugSerial.print("Init_2483()/RN2483AgetHWEUI &config.materiel.DevEUI[0]:"); 
+//printByteArray(config.materiel.DevEUI, 16);
+
+//OLEDDebugDisplay(OLEDbuf);
+//debugSerial.println("------------------------------------------------------------------");
+
+  char Module_ID[17];
+  convertToHexString(config.materiel.DevEUI, Module_ID, 8);
+
+//debugSerial.println(Module_ID);
+ 
+  for (config.materiel.Num_Carte=0;config.materiel.Num_Carte< MAX_HWEUI_List; config.materiel.Num_Carte++)
+  { 
+    if (strncmp(HWEUI_List[config.materiel.Num_Carte],Module_ID,16)==0)   // égalité des 2 
+    {
+// INITIALISER LES IDENTIFIANTS OTAA de LoRa + Contrôle
+  memcpy(config.materiel.DevEUI, SN2483_List[config.materiel.Num_Carte], sizeof(SN2483_List[config.materiel.Num_Carte]));
+
+// Init AppEUI
+      memcpy(config.applicatif.AppEUI, AppEUI_List,9);  //  10 avant le 22/01 KKKKK
+// Init AppKey
+      memcpy(config.applicatif.AppKey, AppKey_List[config.materiel.Num_Carte],17);
+       break;  // sortie du for() quand trouvé egalité.... pas terrible!!!  
+    }
+    LOG_ERROR("HWEUI non trouvé");
+  } 
+
+// config.materiel.Noeud_LoRa = config.materiel.Num_Carte;  // par défaut, fonction Module_ID
+
+      if (config.materiel.Num_Carte)
+      {
+        debugSerial.print(" execution RN2483Init(), done with card : ");
+        debugSerial.println(config.materiel.Num_Carte);
+       }
+      else
+      {
+        LOG_ERROR("NO 2483 present.");
+        OLEDDebugDisplay("2483A   STP   Failed");
+      }
+  return((config.materiel.Num_Carte == MAX_HWEUI_List) ? 0 : config.materiel.Num_Carte); // retourne 0 error or Card number
+}
+
+
+
+// ---------------------------------------------------------------------------*
+//  out : 0 (Error ou non référencé) / n (Num de carte)  
+// @brief Find card number
+//                Num_Carte (global) dans fonction
 // @param void
 // @return :  0 error or Card number
 // ---------------------------------------------------------------------------*
 
-// appel avec  config.materiel.Num_Carte = init2483A(config.materiel.DevEUI);   // return :  0 error or Card number
+// appel avec  config.materiel.Num_Carte = SETUPinit2483A(config.materiel.DevEUI);   // return :  0 error or Card number
 
-uint8_t init2483A(uint8_t *HWEUI)  // Init 2483 ---- Init 2483 ---- Init 2483 ---- Init 2483 
+uint8_t SETUPinit2483A(uint8_t *HWEUI)  // Init 2483 ---- Init 2483 ---- Init 2483 ---- Init 2483 
 { uint8_t tryy = 1 , rc;
 
   uint8_t DevEUI[8];
   uint8_t len = LoRaBee.getHWEUI(DevEUI, sizeof(DevEUI));
    // Print the Hardware EUI
-  debugSerial.print("init2483A()/LoRaBee.getHWEUI => DevEUI: ");
+  LOG_DEBUG("SETUPinit2483A()/LoRaBee.RN2483AgetHWEUI => DevEUI: ");
   for (uint8_t i = 0; i < sizeof(DevEUI); i++) 
   {
       debugSerial.print((char)NIBBLE_TO_HEX_CHAR(HIGH_NIBBLE(DevEUI[i])));
@@ -102,7 +182,7 @@ uint8_t init2483A(uint8_t *HWEUI)  // Init 2483 ---- Init 2483 ---- Init 2483 --
 
 // fin recopié
 */
-debugSerial.print("init2483A()/Module_ID => ");
+debugSerial.print("SETUPinit2483A()/Module_ID => ");
 debugSerial.println(Module_ID);
  
   for (config.materiel.Num_Carte=0;config.materiel.Num_Carte< MAX_HWEUI_List; config.materiel.Num_Carte++)
@@ -125,15 +205,15 @@ debugSerial.println(Module_ID);
 
 // nnnnnnnnnnnnnnnnn 
       if (config.materiel.Num_Carte)
-      {
-        debugSerial.print(" Init 2483 done with card : ");
-        debugSerial.println(config.materiel.Num_Carte);
-        OLEDDebugDisplay("2483A    Initialized");
+      {char msg[80];
+        snprintf(msg,80," Init 2483 done with card : %2d",config.materiel.Num_Carte);
+        LOG_DEBUG(msg);
+        OLEDDebugDisplay("RN2483A STP       OK");
       }
       else
       {
-        debugSerial.println(" NO 2483 present.");
-        OLEDDebugDisplay("2483A   Failed");
+        LOG_DEBUG("NO 2483 present.");
+        OLEDDebugDisplay("RN2483A STP   Failed");
       }
   /*    
       tryy--;
@@ -149,20 +229,27 @@ debugSerial.println(Module_ID);
 */
 // debugSerialPrintLoRaStatus();
 
-debugSerial.println("init2483A() => fin Fonction");
-
+  LOG_DEBUG("SETUPinit2483A() => fin Fonction");
   return(rc);
 }
 
 
+
+// appelé par Send_Lora_Mess() et setup()
+bool SETUPsetupLoRa()
+{ bool result;
+  result=SETUPsetupLoRaOTAA();
+  return(result);
+}
+
+
+
 // ---------------------------------------------------------------------------*
 // ---------------------------------------------------------------------------*
-bool initLoRa(void)
+bool SETUPinitLoRa(void)
 {
 //  Reset_LoRa();  // initialise pas sur reset chaud.
-
-  return(setupLoRa());
-
+  return(SETUPsetupLoRa());
 }
 
 // INIT DHT22 ---- INIT DHT22 ---- INIT DHT22 ---- INIT DHT22 ---- 
@@ -173,7 +260,7 @@ void SETUPDHTInit(void)
 debugSerial.println("--------------------------------- SETUP - INIT DHT22 ---------------------------------");
   dht.begin(); // temperature
   debugSerial.println("done.");
-OLEDDebugDisplay("DHT22   Initialized");
+OLEDDebugDisplay("DHT22 STP         OK");
 }
 
 //==============================================================================
@@ -183,8 +270,37 @@ OLEDDebugDisplay("DHT22   Initialized");
 // Sur ATSAMD21, on peut utiliser le WDT pour forcer un reset si blocage
 
 
-void SETUPinitHX711WithWatchdog(int num)
+
+// ---------------------------------------------------------------------------
+// @brief Initialise le HX711
+// @param num, numéro du HX711 à initialiser
+// @return void
+// ---------------------------------------------------------------------------
+// exemple appel: SETUP_HX711initWithWatchdog(numJauge);
+void SETUP_HX711initWithWatchdog(int num)
 {
+
+  for ( int numGauge=0;numGauge<4;numGauge++)                                 // Z  .. 3
+  {     
+    if (Peson[config.materiel.Num_Carte][numGauge])
+    {   
+       switch (numGauge)
+       {
+         case 0 : scaleA.begin(config.materiel.HX711Dta_0, config.materiel.HX711Clk_0); // DOUT, SCK
+  //                scaleA.power_down(); // mis en basse conso après initialisation
+                  break;
+         case 1 : scaleB.begin(config.materiel.HX711Dta_1, config.materiel.HX711Clk_1); // DOUT, SCK
+    //              scaleB.power_down(); // mis en basse conso après initialisation
+                  break;
+         case 2 : scaleC.begin(config.materiel.HX711Dta_2, config.materiel.HX711Clk_2); // DOUT, SCK
+      //            scaleC.power_down(); // mis en basse conso après initialisation
+                  break;
+         case 3 : scaleD.begin(config.materiel.HX711Dta_3, config.materiel.HX711Clk_3); // DOUT, SCK
+        //          scaleD.power_down(); // mis en basse conso après initialisation
+                  break;
+       }
+     }
+   }   
 // voir porposition Claude : SOLUTION_COMPLETE_HX711_BLOCAGE SODAQ.txt
 }
 
@@ -201,9 +317,10 @@ void SETUPinitHX711WithWatchdog(int num)
 // ---------------------------------------------------------------------------
 // exemple appel: SETUPSetStructDefaultValues();
 void SETUPSetStructDefaultValues()
-{
-  debugSerial.println("////////////////////////////// SETUPSetStructDefaultValues() ////////////////////////////////////");  
-
+{ char msg[80];
+  snprintf(msg,80,"SETUPSetStructDefaultValues() executé: RESET STRUCTURE en EEPROM"); 
+  LOG_INFO(msg);   
+  
 // ---------------------------------------------------------------------------
 // ========================= Configuration Applicatif ========================
 // ---------------------------------------------------------------------------
@@ -219,8 +336,8 @@ void SETUPSetStructDefaultValues()
   config.applicatif.RucherID = 0; 
   strcpy(config.applicatif.RucherName, "Rucher Test       *"); // 19 car max
 
-//debugSerial.println("init2483A()"); 
- config.materiel.Num_Carte = init2483A(config.materiel.DevEUI);   // return :  0 error or Card number
+//debugSerial.println("SETUPinit2483A()"); 
+ config.materiel.Num_Carte = SETUPinit2483A(config.materiel.DevEUI);   // return :  0 error or Card number
    
  memcpy(config.materiel.DevEUI, SN2483_List [config.materiel.Num_Carte], 9);
  memcpy(config.applicatif.AppEUI, AppEUI_List, 8);
@@ -306,8 +423,7 @@ void SETUPSetStructDefaultValues()
 // Calcul et stockage du checksum
   config.checksum = EPR_24C32calcChecksum(&config);
 // 58 elements dans struct
-debugSerial.println(F("Config par defaut initialisee"));
-// EPR_24C32DumpConfigToJSON();
-//debugSerial.println("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ SETUPSetStructDefaultValues() \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");  
-//debugSerial.print("config.materiel.Num_Carte <= "); debugSerial.println(config.materiel.Num_Carte);  // OK
+  LOG_DEBUG(F("Config par defaut initialisee"));
+// E24C32DumpConfigToJSON();
+
 }

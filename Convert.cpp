@@ -84,6 +84,34 @@ char nibbleToHexChar(uint8_t nibble)
 
 // ---------------------------------------------------------------------------*
 // @brief Convertit une chaîne hexadécimale en tableau d'octets
+// @param source Chaîne de caractères contenant les valeurs hexadécimales
+// @param destination Tableau d'octets où stocker le résultat
+// @param len Nombre d'octets à convertir (longueur du tableau destination)
+// @return void
+// ---------------------------------------------------------------------------*
+void CONVERTfconvertByteArray(const char *source, uint8_t *destination, uint8_t len)
+{
+  for (uint8_t i = 0; i < len; i++)
+  {
+    // Extraire deux caractères hexadécimaux de la source
+    char hexByte[3] = {source[i * 2], source[i * 2 + 1], '\0'};
+    
+    // Convertir en valeur numérique et stocker dans destination
+    destination[i] = (uint8_t)strtol(hexByte, NULL, 16);
+  }
+
+   // Print the Hardware EUI
+  debugSerial.print("CONVERTfconvertByteArray()/destination => DevEUI: ");
+  for (uint8_t i = 0; i < len; i++) 
+  {
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(HIGH_NIBBLE(destination[i])));
+      debugSerial.print((char)NIBBLE_TO_HEX_CHAR(LOW_NIBBLE(destination[i])));
+  }
+debugSerial.println(" de CONVERTfconvertByteArray()");
+}
+
+// ---------------------------------------------------------------------------*
+// @brief Convertit une chaîne hexadécimale en tableau d'octets
 // @param hexString Chaîne hexadécimale source (ex: "5048494C...")
 // @param byteArray Tableau destination pour les octets
 // @param maxBytes Taille maximale du tableau destination
@@ -203,13 +231,13 @@ bool byteArrayToHexString(const uint8_t* byteArray, uint8_t numBytes, char* hexS
   
   // Ajouter le terminateur '\0'
   hexString[numBytes * 2] = '\0';
-  
+/*  
   debugSerial.print("Conversion reussie: ");
   debugSerial.print(numBytes);
   debugSerial.print(" octets -> ");
   debugSerial.print(numBytes * 2);
   debugSerial.println(" caracteres hexa");
-  
+  */
   return true;
 }
 

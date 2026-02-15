@@ -21,38 +21,64 @@
 // @return void
 // ---------------------------------------------------------------------------*
 void sleep(void) 
-{     static int sleepCount = 0;
+{ static int sleepCount = 0;
+  sleepCount++;
+//  OLEDDebugDisplay("LowPower.sleep()");
+  OLEDDrawScreenTime(0,0);
+// AJOUTÉ: Debug entrée en veille
+  debugSerial.print("=== ENTRÉE EN VEILLE #");
+  debugSerial.print(sleepCount);
+  debugSerial.println(" ===");
     
+// AJOUTÉ: État pin avant veille
+  debugSerial.print("État pin RTC avant veille: ");
+  debugSerial.println(digitalRead(RTC_INTERRUPT_PIN) ? "HIGH" : "LOW");
     
-    sleepCount++;
-  OLEDDebugDisplay("LowPower.sleep()");
-    // AJOUTÉ: Debug entrée en veille
-    debugSerial.print("=== ENTRÉE EN VEILLE #");
-    debugSerial.print(sleepCount);
-    debugSerial.println(" ===");
-    
-    // AJOUTÉ: État pin avant veille
-    debugSerial.print("État pin RTC avant veille: ");
-    debugSerial.println(digitalRead(RTC_INTERRUPT_PIN) ? "HIGH" : "LOW");
-    
-    // AJOUTÉ: État des alarmes
-    debugSerial.print("Alarmes actives: ");
-    debugSerial.print("A1="); debugSerial.print((DEBUG_INTERVAL_1SEC && !modeExploitation) ? "ON" : "OFF");
-    debugSerial.print(" A2="); debugSerial.println(DEBUG_WAKEUP_PAYLOAD ? "ON" : "OFF");
-    
-    // AJOUTÉ: Forcer envoi série avant veille
-    debugSerial.flush();
-    delay(10);
+// AJOUTÉ: État des alarmes
+  debugSerial.print("Alarmes actives: ");
+  debugSerial.print("A1="); debugSerial.print((DEBUG_INTERVAL_1SEC && !modeExploitation) ? "ON" : "OFF");
+  debugSerial.print(" A2="); debugSerial.println(DEBUG_WAKEUP_PAYLOAD ? "ON" : "OFF");
+  delay(5000);  // le temps de lire l'info
 
-    // Configuration DS3231 AVANT interruption
+// 1. Périphériques externes : mise en basse conso
+// Avant sleep(), éteindre les 4 HX711 (clock partagée)
+  scaleA.power_down();   // éteint les 4 d'un coup
+// L'écran OLED consomme ~20mA en affichage
+// Éteindre l'OLED :
+  display.oled_command(SH110X_DISPLAYOFF);
+// Le module LoRa consomme ~3mA en idle
+  LoRaBee.sleep();   
+
+// 2. USB
+  USB->DEVICE.CTRLA.bit.ENABLE = 0;
+
+// AJOUTÉ: Forcer envoi série avant veille
+  debugSerial.flush();
+  delay(2);
+
+// Configuration DS3231 AVANT interruption
   rtc.writeSqwPinMode(DS3231_OFF);
   rtc.clearAlarm(1);
   rtc.clearAlarm(2);
     
     LowPower.sleep();  // ← VEILLE
+
+// === RÉVEIL ===
+
+
+// RÉVEIL RN2483
+  LoRaBee.wakeUp();
+  delay(100);                         // laisser le temps au RN2483
+  
+// Réactiver USB si nécessaire
+  USB->DEVICE.CTRLA.bit.ENABLE = 1;
     
-    // AJOUTÉ: Debug réveil
-    debugSerial.println("=== RÉVEIL DÉTECTÉ ===");
+// Rallumer l'OLED :
+  display.oled_command(SH110X_DISPLAYON);
+// AJOUTÉ: Debug réveil
+  debugSerial.println("=== RÉVEIL DÉTECTÉ ===");
+
+
     
     // AJOUTÉ: État pin après réveil
     debugSerial.print("État pin RTC après réveil: ");

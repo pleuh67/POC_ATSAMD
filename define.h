@@ -29,6 +29,7 @@
 #define LOG_ERROR(msg)   debugSerial.print("[ERROR] "); debugSerial.println(msg)
 #define LOG_WARNING(msg) debugSerial.print("[WARN]  "); debugSerial.println(msg)
 #define LOG_INFO(msg)    debugSerial.print("[INFO]  "); debugSerial.println(msg)
+#define LOG_DEBUG(msg)   debugSerial.print("[DEBUG] "); debugSerial.println(msg)
 
 
 
@@ -63,7 +64,7 @@
 #define M03_ITEM  5 // menu Calb. Tensions
 #define M033_ITEM 5
 #define M04_ITEM  7 // Menu Calib. Balances
-#define M04x_ITEM 4
+#define M04x_ITEM 5
 
 // ===== EEPROM CONFIGURATION =====
 #define CONFIG_VERSION 111   // Version 1.1.1
@@ -109,7 +110,7 @@
 #define PIN_PE BUTTON
 #define RTC_INTERRUPT_PIN 2
 
-#define TARE_BUTTON         9
+#define TARE_BUTTON   9
 // #define BUZZER     7 // non implanté
 
 
@@ -227,6 +228,9 @@
 #define HX711_DSENSOR_DOUT  10
 #define debugSerialGetStrainGaugeAverage  // decommenter pour les messages debugSerial
 #define TARE  1071         //  56200 // Bloc de 56.2 kg
+#define AVR_1 1     // loop() ttes 10 Secondes
+#define AVR_3 3     // EXPLOITATION au reveil pour TX LoRa
+#define AVR_10 10   // SETUP()
 
 // ---------------------------------------------------------------------------*
 // DHTxx Temperature and Humidity sensors            DTHT22 CONFIGURATION ====*

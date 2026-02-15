@@ -18,10 +18,10 @@
 
 // ===== PROTOTYPES DE FONCTIONS DE SETUP.CPP=====
 void SETUPinitDebugSerial(void);
-void SETUPinitLoRaSerial(void);
+void SETUPSETUPinitLoRaSerial(void);
 void SETUPsoftReset(void);
 void SETUPDHTInit(void);
-void SETUPinitHX711WithWatchdog(int);
+void SETUP_HX711initWithWatchdog(int);
 void SETUPSetStructDefaultValues(void);
 
 
@@ -45,12 +45,12 @@ void DS3231CompleteReset(void);
 // encore dans POC...cpp, déplacer?
 // Gestion Config et EEPROM
 //void setDefaultConfig(void);
-void initConfig(void);
+void E24C32initConfig(void);
 
 // ===== PROTOTYPES DE FONCTIONS EEPROM - 24C32 =====
-void EPR_24C32loadConfig(void);
-void EPR_24C32readConfig(void);
-void EPR_24C32saveConfig(void);
+void E24C32loadConfig(void);
+void E24C32readConfig(void);
+void E24C32saveConfig(void);
 uint16_t EPR_24C32calcChecksum(ConfigGenerale_t* cfg);
 void EPR_24C32writeByte(uint16_t address, uint8_t data);
 uint8_t EPR_24C32readByte(uint16_t address);
@@ -58,8 +58,8 @@ void EPR_24C32writeBlock(uint16_t address, uint8_t* data, uint16_t length);
 void EPR_24C32readBlock(uint16_t address, uint8_t* data, uint16_t length);
 // void initDefaultConfig(void);  remplacé par  : SETUPSetStructDefaultValues()
 // Dump pour contôles
-void EPR_24C32DumpConfigToJSON(void);
-void EPR_24C32printJSON(uint8_t* array, uint8_t length);
+void E24C32DumpConfigToJSON(void);
+void E24C32printJSON(uint8_t* array, uint8_t length);
 
 
 
@@ -160,19 +160,26 @@ void m04_0F_InfoBal(void);          // existe
 void m04_0F_InfoBalDone(void);   
 void m04_1F_PoidsTare(void);        // existe
 void m04_1F_PoidsTareDone(void);    // existe
-void m04_2F_CalibBal_1(void); // appel menu calib#1 des paramètre
-void m04_1F_CalibBal_2(void); // appel menu calib#2 des paramètre
-void m04_2F_CalibBal_3(void); // appel menu calib#3 des paramètre
-void m04_3F_CalibBal_4(void); // appel menu calib#4 des paramètre
+
+void m04_2M_CalibBal(int numJauge);
+//void m04_2F_CalibBal_1(void); // appel menu calib#1 des paramètre
+//void m04_1F_CalibBal_2(void); // appel menu calib#2 des paramètre
+//void m04_2F_CalibBal_3(void); // appel menu calib#3 des paramètre
+//void m04_3F_CalibBal_4(void); // appel menu calib#4 des paramètre
 
 
 //void m04_1F_poidsBal_kgDone(void);
 
 // ---------------------------------------------------------------------------*
 // Appels du menu m04x => appel écrans de calibrations
-void m04x_0F_tareBal_1(void);    // appel écran de calibration
-void m04x_1F_echelleBal_2(void); // appel écran de calibration
-void m04x_2F_tempBal_3(void);    // appel écran de calibration
+void m04x_0F_numBalx(void);
+void m04x_0F_numBalxDone(void);
+void m04x_0F_tareBal_n(void); //int numJauge);    // appel écran de calibration
+void m04x_0F_tareBal_nDone(void); //int numJauge);    // appel écran de calibration
+void m04x_1F_echelleBal_n(void); // appel écran de calibration
+void m04x_1F_echelleBal_nDone(void); // appel écran de calibration
+void m04x_2F_tempBal_n(void);    // appel écran de calibration
+void m04x_2F_tempBal_nDone(void);    // appel écran de calibration
 
 // ---------------------------------------------------------------------------*
 // Fonctions de gestion des calibrations
@@ -361,6 +368,7 @@ void gererLEDsNonBloquant(void);
 
 // ---------------------------------------------------------------------------*
 // Fonctions de conversions
+void CONVERTfconvertByteArray(const char *source, uint8_t *destination, uint8_t len);
 void TestConvert(void);
 // Conversions hexadécimales
 uint8_t hexCharToNibble(char c);
@@ -451,6 +459,18 @@ void debugSerialPrintHEXA(void);  // non appelée ???
 void debugSerialDisplayScaledSensorState(int num);
 
 // ---------------------------------------------------------------------------*
+// Gestion des initialisation => SETUP
+void SETUPswitchToOperationMode(void);
+void SETUPSetStructDefaultValues(void);
+void SETUPinitDebugSerial(void);
+void SETUPSETUPinitLoRaSerial(void);
+void SETUPsoftReset(void);
+uint8_t SETUPinit2483A(uint8_t *HWEUI);
+bool SETUPinitLoRa(void);
+void SETUPDHTInit(void);
+void SETUP_HX711initWithWatchdog(int num);
+
+// ---------------------------------------------------------------------------*
 // Gestion modes et interruptions
 void handleOperationMode(void);
 void executeOperationMode(void);
@@ -459,7 +479,7 @@ void executeProgrammingMode(void);
 // fonctions debug :
 void GestionEnCours(char *from);   // affiche le type de traitement en cours de gestion par le handler
 void restartGestionSaisieOLED(void);  // entrée dans mode Programmation
-void onRTCAlarm(void);
+void ISRonRTCAlarm(void);
 
 // ---------------------------------------------------------------------------*
 // Gestion modes basse consommation
@@ -471,28 +491,26 @@ void configureLowPowerMode(void);
 // RS ?????
 uint8_t RN2483Version(void);    // Lit les infos du modem
 uint8_t RN2483GetCardNumber(void);
-
-uint8_t init2483A(uint8_t *HWEUI); //   => dans setup.cpp
 uint8_t RN2483Init(uint8_t *HWEUI);
-bool    initLoRa(void);
-//void getHWEUI(char *);      // Gets and stores the LoRa module's HWEUI   
+const char* RN2483AloRaSendErrorToString(uint8_t rc);
+//void RN2483AgetHWEUI(char *);      // Gets and stores the LoRa module's HWEUI   
 
 // tests en cours
-void getHWEUI(uint8_t *AppEUI); 
+void RN2483AgetHWEUI(uint8_t *AppEUI); 
 
 
 
 // void Reset_LoRa(void);
-void clearLoRaBuffer(void); // Vide complètement le buffer série du modem
+void RN2483AclearLoRaBuffer(void); // Vide complètement le buffer série du modem
 String readLoRaResponse(int timeoutMs); // Lit la réponse du modem avec timeout
  
-bool setupLoRa(void);   // appelé /*par Send_Lora_Mess() et*/ setup()
-bool setupLoRaOTAA(void);
+bool SETUPsetupLoRa(void);   // appelé /*par Send_Lora_Mess() et*/ setup()
+bool SETUPsetupLoRaOTAA(void);
 
 //void no_Send_DATA_LoRa(void);
 
 void buildLoraPayload(void);
-void sendLoRaPayload(uint8_t *, uint8_t);
+uint8_t RN2483AsendLoRaPayload(uint8_t *, uint8_t);
 
 
 // basse conso.
@@ -507,13 +525,15 @@ char read_DHT(DHT dht);
 
 // ---------------------------------------------------------------------------*
 // Gestion mesures
-void take_All_Measure(void);
-// HX711
-float Set_Scale_Bal(char num, float poids_en_grammes);    // N° de jauges des balances 1 à 4
-float calculePoids(int numJauge);
-float GetStrainGaugeFast(int numJauge);
-float GetStrainGaugeAverage(int numJauge,int sample);    // N° de jauges des balances 0 à 3
+void MESURESgetWeight(void);
+void MESUREStake_All_Measure(void);
 
+
+// HX711
+float Set_Scale_Bal(char num, HX711 scale, float poids_en_grammes);    // N° de jauges des balances 1 à 4
+float calculePoids(int numJauge);
+float MESURESHX711GetStrainGauge(int numJauge, HX711 scale, int sample);    // N° de jauges des balances 0 à 3
+      
 // µC
 float getTemperature(void);
 

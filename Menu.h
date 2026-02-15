@@ -49,7 +49,7 @@ const char* m0_Demarrage[] = {
   "CONFIG. SYSTEME(M)",  // m0_1M_ConfigSystem() Date, Time, N° LoRa
   "CONFIG. LoRa   (M)",  // m0_2M_ConfigLoRa()    DevEUI, AppEUI, SF, Délai
   "CALIB. Tens. (m03)",  // m0_3M_CalibTensions() VBat, Vsol, VLum
-  "CALIB. Bal.  (m04)",  // m0_4M_CalibBal() VBat, Vsol, VLum
+  "CALIB. Bal.  (m04)",  // m0_4M_CalibBal() BAL A/B/C/D
 };
 
 #define M01_ITEM 7 // Maintenir dans Define.h
@@ -57,7 +57,7 @@ const char* m01_ConfigSystem[] = {
   "SAISIE DATE    (S)",  // m01_0F_GetDate()
   "SAISIE HEURE   (S)",  // m01_1F_GetTime()
   "NUM. RUCHER    (S)",  // m01_2F_NumRucher()
-  "NOM. RUCHER    (S)",  // m01_3F_NomRucher()
+  "NOM  RUCHER    (S)",  // m01_3F_NomRucher()
   "Lire EEPROM    (F)",  // m01_4F_readConfig()
   "Ecrire EEPROM  (F)",  // m01_5F_writeConfig()
   "RET  popMenu(m0)"     // popMenu()
@@ -107,31 +107,31 @@ const char* m03_Future_CalibTensions[] = {
 
 #define M033_ITEM 5 // Maintenir dans Define.h
 const char* m033_Reserve[] = {
-  "menu033-0       (F)",      // Mise à Echelle VBat
-  "menu033-1       (F)",      // Mise à Echelle VSol
-  "menu033-2       (F)",      // Mise à Echelle VLum
-  "menu033-3       (F)",      // Libre
-  "RET   popMenu (m03)"       // PopMenu()
+  "menu033-0      (F)",      // Mise à Echelle VBat
+  "menu033-1      (F)",      // Mise à Echelle VSol
+  "menu033-2      (F)",      // Mise à Echelle VLum
+  "menu033-3      (F)",      // Libre
+  "RET  popMenu (m03)"       // PopMenu()
 };
 
 #define M04_ITEM 7 // Maintenir dans Define.h
 const char* m04_CalibBalances[] = {
   "info.  Balances(F)",  // m04_0F_InfoBal() Affichage rafraichi du poids des balances
-  "Poids  Tare    (F)",  // m04_1F_PoidsTare()  (chiffre entre 0 et 100000)
-  "Calib. Bal #1  (F)",  // m04_2F_CalibBal_1()
-  "Calib. Bal #2  (F)",  // m04_nM_CalibBal_bal()
-  "Calib. Bal #3  (F)",  // m04_nM_CalibBal_bal()
-  "Calib. Bal #4  (F)",  // m04_nM_CalibBal_bal()
+  "Poids  Tare    (F)",  // m04_1F_PoidsTare()  (chiffre entre 0 et 99000)
+  "Calib. Bal A  m042",  // m04_2M_CalibBal(int Bal=0)
+  "Calib. Bal B  m043",  // m04_2M_CalibBal(int Bal=1)
+  "Calib. Bal C  m044",  // m04_2M_CalibBal(int Bal=2)
+  "Calib. Bal D m045",  // m04_2M_CalibBal(int Bal=3)
   "RET  popMenu  (m0)"   // PopMenu()
 };
 
 
-#define M04x_ITEM 4 // Maintenir dans Define.h
+#define M04x_ITEM 5 // Maintenir dans Define.h
 const char* m04x_CalibBal[] = {
-//  "Num. Balance    (S)",  // m04x_0F_numBalx()
-  "Tare Balance    (F)",    // m04x_1F_tareBalx(); enregistre la tare et temperature
-  "Echelle Balance (F)",    // m04x_2F_echBalx(); calcule la mise à l'echelle
-  "Saisie Comp. Temp. ",    // m04x_3F_tempBalx(); saisie d'un coefficient de correction
+  "Num. Balance    (S)",    // m04x_0F_numBalx()
+  "Tare Balance    (F)",    // m04x_1F_tareBal(int numJauge); enregistre la tare et temperature
+  "Echelle Balance (F)",    // m04x_2F_echBal(int numJauge); calcule la mise à l'echelle
+  "Saisie Comp. Temp. ",    // m04x_3F_adjustTempBal(int numJauge); saisie d'un coefficient de correction
   "RET   popMenu (m04)"     // PopMenu()
 };
 

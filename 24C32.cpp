@@ -130,10 +130,8 @@ uint16_t EPR_24C32calcChecksum(ConfigGenerale_t* cfg)
   uint16_t length = sizeof(ConfigGenerale_t) - sizeof(uint16_t);
 
 
-// Claud
-  size_t checksumOffset = offsetof(ConfigGenerale_t, checksum);  // = 184
+  size_t checksumOffset = offsetof(ConfigGenerale_t, checksum);  
   for (uint16_t i = 0; i < checksumOffset; i++)  // S'arrête AVANT le checksum
-//  for (uint16_t i = 0; i < 186 /*length*/; i++)  // 188 -2 =186  => 0 .. 185 
   {
     crc ^= data[i];
     for (uint8_t j = 0; j < 8; j++)
@@ -148,18 +146,7 @@ uint16_t EPR_24C32calcChecksum(ConfigGenerale_t* cfg)
       }
     }
   }
-/**/  
-// Affichage du checksum
-debugSerial.print(F("\n********************** EPR_24C32calcChecksum() ==>> calculé: 0x"));
-debugSerial.print(crc, HEX);
-debugSerial.print(F(" taille chksum: "));
-debugSerial.print(length, DEC);
-
-
-debugSerial.print(F(" en structure: 0x"));
-debugSerial.println(config.checksum, HEX);
-/**/
-   return crc;
+  return crc;
 }
 // ---------------------------------------------------------------------------
 // ===== FONCTIONS DE GESTION CONFIGURATION =====
@@ -172,13 +159,11 @@ debugSerial.println(config.checksum, HEX);
 // @param void
 // @return void
 // ---------------------------------------------------------------------------
-// exemple appel: EPR_24C32loadConfig();
-void EPR_24C32loadConfig(void)
+// exemple appel: E24C32loadConfig();
+void E24C32loadConfig(void)
 {
   // Lecture de la configuration
-  EPR_24C32readConfig();                           // lecture et copie des 188 octets de l'eeprom dans structure
-//debugSerial.println(F("FIN : EPR_24C32readConfig()"));
-//EPR_24C32DumpConfigToJSON(); 
+  E24C32readConfig();                           // lecture et copie des 188 octets de l'eeprom dans structure
   // Vérification du nombre magique
   if (config.magicNumber != CONFIG_MAGIC_NUMBER)
   {
@@ -189,15 +174,13 @@ void EPR_24C32loadConfig(void)
     debugSerial.println(F(" => Chargement config par defaut..."));
     SETUPSetStructDefaultValues();
     debugSerial.println(F("FIN : SETUPSetStructDefaultValues() cas erreur CONFIG_MAGIC_NUMBER"));
-    EPR_24C32saveConfig();
-EPR_24C32DumpConfigToJSON();    
+    E24C32saveConfig();
+//E24C32DumpConfigToJSON();    
     return;
   }
 
   // Calcul et vérification du checksum
   uint16_t calculatedChecksum = EPR_24C32calcChecksum(&config);
- debugSerial.print("config lue, magic number OK,checksum calculé :");
-debugSerial.println(calculatedChecksum, HEX);
   if (calculatedChecksum != config.checksum)
   {
     debugSerial.print(F("ERREUR: Checksum invalide! Attendu: 0x"));
@@ -206,25 +189,10 @@ debugSerial.println(calculatedChecksum, HEX);
     debugSerial.print(calculatedChecksum, HEX);
     debugSerial.println(F(" => Chargement config par defaut..."));
     SETUPSetStructDefaultValues();
-debugSerial.println(F("FIN : SETUPSetStructDefaultValues() cas erreur chksum"));
-    EPR_24C32saveConfig();
-EPR_24C32DumpConfigToJSON();    
+    E24C32saveConfig();
     return;
   }
-  
-  debugSerial.print(F("Config chargee avec succes, "));
-/*  debugSerial.print(F("Version materiel: "));
-  debugSerial.println(config.materiel.version);
-  debugSerial.print(F("Version applicatif: "));
-  debugSerial.println(config.applicatif.version);
-*/
-debugSerial.print(F("Checksum: 0x"));
-  debugSerial.println(config.checksum, HEX);
-
-//EPR_24C32DumpConfigToJSON();
-  debugSerial.println("______________________________________________________________________________________________________________________");
-
-  
+  E24C32DumpConfigToJSON();  
 }
 
 // ---------------------------------------------------------------------------
@@ -232,13 +200,13 @@ debugSerial.print(F("Checksum: 0x"));
 // @param void
 // @return void
 // ---------------------------------------------------------------------------
-// exemple appel: EPR_24C32readConfig();
-void EPR_24C32readConfig(void)
+// exemple appel: E24C32readConfig();
+void E24C32readConfig(void)
 {
-  debugSerial.println(F("Lecture EEPROM..."));
+  LOG_INFO(F("Lecture EEPROM..."));
   EPR_24C32readBlock(CONFIG_EEPROM_START, (uint8_t*)&config, sizeof(ConfigGenerale_t));
-  debugSerial.print(F("Octets lus: "));
-  debugSerial.println(sizeof(ConfigGenerale_t));
+//  debugSerial.print(F("Octets lus: "));
+//  debugSerial.println(sizeof(ConfigGenerale_t));
 }
 
 //Sauvegarde marche pas
@@ -250,10 +218,10 @@ void EPR_24C32readConfig(void)
 // @param void
 // @return void
 // ---------------------------------------------------------------------------
-// exemple appel: EPR_24C32saveConfig();
-void EPR_24C32saveConfig(void)
+// exemple appel: E24C32saveConfig();
+void E24C32saveConfig(void)
 {
-  debugSerial.println(F("Sauvegarde config en EEPROM..."));
+  LOG_INFO(F("Sauvegarde config en EEPROM..."));
   
   // S'assurer que le nombre magique est présent
   config.magicNumber = CONFIG_MAGIC_NUMBER;
@@ -261,15 +229,15 @@ void EPR_24C32saveConfig(void)
   // Recalculer le checksum avant sauvegarde
   config.checksum = EPR_24C32calcChecksum(&config);
   
-  debugSerial.print(F("EPR_24C32saveConfig()\Checksum calculé: 0x"));
+  debugSerial.print(F("E24C32saveConfig()\Checksum calculé: 0x"));
   debugSerial.println(config.checksum, HEX);
   
   // Écriture en EEPROM
   EPR_24C32writeBlock(CONFIG_EEPROM_START, (uint8_t*)&config, sizeof(ConfigGenerale_t));
   
-  debugSerial.print(F("Octets ecrits: "));
-  debugSerial.println(sizeof(ConfigGenerale_t));
-  debugSerial.println(F("Config sauvegardee avec succes"));
+//  debugSerial.print(F("Octets ecrits: "));
+//  debugSerial.println(sizeof(ConfigGenerale_t));
+  LOG_INFO(F("Config sauvegardee avec succes"));
 }
 
 // ---------------------------------------------------------------------------
@@ -282,8 +250,8 @@ void EPR_24C32saveConfig(void)
 // @param length Nombre d'octets à afficher
 // @return void
 // ---------------------------------------------------------------------------
-// exemple appel: EPR_24C32printJSON(config.materiel.DevEUI, 8);
-void EPR_24C32printJSON(uint8_t* array, uint8_t length)
+// exemple appel: E24C32printJSON(config.materiel.DevEUI, 8);
+void E24C32printJSON(uint8_t* array, uint8_t length)
 {
   debugSerial.print("\"");
   for (uint8_t i = 0; i < length; i++)
@@ -302,8 +270,8 @@ void EPR_24C32printJSON(uint8_t* array, uint8_t length)
 // @param void
 // @return void
 // ---------------------------------------------------------------------------
-// exemple appel: EPR_24C32DumpConfigToJSON();
-void EPR_24C32DumpConfigToJSON(void)
+// exemple appel: E24C32DumpConfigToJSON();
+void E24C32DumpConfigToJSON(void)
 {
   debugSerial.println(F("{"));
   debugSerial.println(F("  \"configuration\": {"));
@@ -360,10 +328,10 @@ void EPR_24C32DumpConfigToJSON(void)
   // LoRa
   debugSerial.println(F("      \"lora\": {"));
   debugSerial.print(F("        \"appEUI\": "));
-  EPR_24C32printJSON(config.applicatif.AppEUI, 8);
+  E24C32printJSON(config.applicatif.AppEUI, 8);
   debugSerial.println(F(","));
   debugSerial.print(F("        \"appKey\": "));
-  EPR_24C32printJSON(config.applicatif.AppKey, 16);
+  E24C32printJSON(config.applicatif.AppKey, 16);
   debugSerial.println(F(","));
   debugSerial.print(F("        \"spreadingFactor\": "));
   debugSerial.print(config.applicatif.SpreadingFactor);
@@ -403,7 +371,7 @@ void EPR_24C32DumpConfigToJSON(void)
   debugSerial.print(config.materiel.Num_Carte);
   debugSerial.println(F(","));
   debugSerial.print(F("        \"devEUI\": "));
-  EPR_24C32printJSON(config.materiel.DevEUI, 8);
+  E24C32printJSON(config.materiel.DevEUI, 8);
   debugSerial.println();
   debugSerial.println(F("      },"));
   
@@ -548,84 +516,14 @@ void EPR_24C32DumpConfigToJSON(void)
 }
 
 
-// OLD CODE
-
-// ---------------------------------------------------------------------------*
-// @brief Définit la configuration par défaut
-// @param Aucun
-// @return void
-// ---------------------------------------------------------------------------*
-void non_setDefaultConfig(void) 
-{
-  config.materiel.version = CONFIG_VERSION;
-  config.materiel.adresseRTC = DS3231_ADDRESS;    // Adresse RTC Module DS3231
-  config.materiel.adresseOLED = OLED_ADDRESS;     // Adresse écran OLED
-  config.materiel.adresseEEPROM = EEPROM_ADDRESS; // Adresse EEPROM Module DS3231
-  config.materiel.poidsTare = TARE;              // valeur de la tare en grammes
-
-   
-  config.applicatif.redLedDuration = RED_LED_DURATION;
-  config.applicatif.greenLedDuration = GREEN_LED_DURATION;
-  config.applicatif.blueLedDuration = BLUE_LED_DURATION;
-  config.applicatif.builtinLedDuration = BUILTIN_LED_DURATION;
-  config.applicatif.SendingPeriod = WAKEUP_INTERVAL_PAYLOAD;    // mieux: wakeupIntervalPayload
-  config.applicatif.OLEDRefreshPeriod = INTERVAL_1SEC;               //
-    
-  config.checksum = EPR_24C32calcChecksum(&config);
-}
-
-
 // ---------------------------------------------------------------------------*
 // @brief Initialise la configuration par défaut
 // @param Aucun
 // @return void
 // ---------------------------------------------------------------------------*
-void initConfig(void) 
+void E24C32initConfig(void) 
 {
-  debugSerial.println("Début lecture configuration EEPROM");
-  EPR_24C32loadConfig();
-  debugSerial.println("Lecture configuration EEPROM executée");
+  LOG_INFO("Début lecture configuration EEPROM");
+  E24C32loadConfig();
+  LOG_INFO("Lecture configuration EEPROM executée");
 }
-
-/*
- * 
-
-// ---------------------------------------------------------------------------*
-// @brief Charge la configuration depuis l'EEPROM
-// @param Aucun
-// @return void
-// ---------------------------------------------------------------------------*
-void EPR_24C32loadConfig(void) 
-{
-  // Simulation de lecture EEPROM - à implémenter avec bibliothèque I2C EEPROM
-  setDefaultConfig();
-}
-
-// ---------------------------------------------------------------------------*
-// @brief Sauvegarde la configuration dans l'EEPROM
-// @param Aucun
-// @return void
-// ---------------------------------------------------------------------------*
-void EPR_24C32saveConfig(void) 
-{
-  config.checksum = EPR_24C32calcChecksum(&config);
-  // Simulation de sauvegarde EEPROM - à implémenter avec bibliothèque I2C EEPROM
-  debugSerial.println("Configuration sauvegardée");
-}
-
-// ---------------------------------------------------------------------------*
-// @brief Calcule le checksum de la configuration
-// @param cfg Pointeur vers la configuration
-// @return uint16_t Checksum calculé
-// ---------------------------------------------------------------------------*
-uint16_t EPR_24C32calcChecksum(ConfigGenerale_t* cfg) 
-{
-  uint16_t sum = 0;
-  uint8_t* data = (uint8_t*)cfg;
-  for (int i = 0; i < sizeof(ConfigGenerale_t) - sizeof(uint16_t); i++) 
-  {
-      sum += data[i];
-  }
-  return sum;
-}
-*/

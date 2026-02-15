@@ -41,7 +41,6 @@ void initLEDs(void)
   blinkGreenLED();  // Rouge
   delay(500);
   blinkBlueLED();  // bleue
-debugSerial.println("LEDs initialisées");
 }
 
 // ---------------------------------------------------------------------------*

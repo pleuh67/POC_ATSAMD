@@ -524,7 +524,7 @@ void updateListInputCursorBlink(void)
 // -------------------------------------------------------------------------------------
 // ===== FONCTIONS DE SAISIE NUMÉRIQUE =====
 // -------------------------------------------------------------------------------------
-
+// LOG_XXX fait
 // -------------------------------------------------------------------------------------
 // @brief Démarre la saisie numérique non-bloquante avec titre personnalisé
 // @param title Titre à afficher en haut de l'écran (max 20 caractères)
@@ -541,7 +541,7 @@ void startNumInput(const char* title, const char* initialNum, uint8_t maxLen, bo
 {
   if (numInputCtx.state != NUM_INPUT_IDLE)
   {
-  debugSerial.println("Saisie déjà en cours");
+  LOG_DEBUG("Saisie déjà en cours");
     return; // Saisie déjà en cours
   }
   
@@ -596,7 +596,7 @@ void startNumInput(const char* title, const char* initialNum, uint8_t maxLen, bo
   numInputCtx.firstDisplay = true;
   numInputCtx.lastTimeoutValue = 0xFF;
   
-  debugSerial.println("Saisie numerique demarree");
+  LOG_DEBUG("Saisie numerique demarree");
   OLEDDisplayMessageL8("Saisissez nombre    ", false, false);
 }
 
@@ -738,12 +738,6 @@ void refreshNumDisplay(void)
   // Sauvegarder l'état du clignotement
   numInputCtx.lastCursorBlink = numInputCtx.cursorBlink;
 }
-
-
-
-
-
-
 
 // -------------------------------------------------------------------------------------
 // @brief Vérifie si un nombre est valide
@@ -917,7 +911,8 @@ void updateNumDisplayOffset(void)
 // @return numInputState_t État actuel de la saisie (IDLE, ACTIVE, COMPLETED, CANCELLED)
  // ---------------------------------------------------------------------------*
 numInputState_t processNumInput(void)
-{
+{ char msg[80];
+
   if (numInputCtx.state != NUM_INPUT_ACTIVE)
   {
     return numInputCtx.state;
@@ -930,7 +925,7 @@ numInputState_t processNumInput(void)
   if (numInputCtx.timeoutDuration > 0 && (millis() - numInputCtx.lastActivity > numInputCtx.timeoutDuration))
   {
     numInputCtx.state = NUM_INPUT_CANCELLED;
-    debugSerial.println("Saisie numerique annulee par timeout");
+    LOG_DEBUG("Saisie numerique annulee par timeout");
     OLEDDisplayMessageL8("Timeout             ", false, false);
     return numInputCtx.state;
   }
@@ -950,8 +945,8 @@ numInputState_t processNumInput(void)
           numInputCtx.position--;
           updateNumDisplayOffset();
           numInputCtx.displayRefresh = true;
-          debugSerial.print("Position curseur num: ");
-          debugSerial.println(numInputCtx.position);
+          snprintf(msg,80,"Position curseur num: %d",numInputCtx.position);
+          LOG_DEBUG(msg);
         }
         break;
         
@@ -962,8 +957,8 @@ numInputState_t processNumInput(void)
           numInputCtx.position++;
           updateNumDisplayOffset();
           numInputCtx.displayRefresh = true;
-          debugSerial.print("Position curseur num: ");
-          debugSerial.println(numInputCtx.position);
+          snprintf(msg,80,"Position curseur num: %d",numInputCtx.position);
+          LOG_DEBUG(msg);
         }
         break;
         
@@ -1002,12 +997,12 @@ numInputState_t processNumInput(void)
                       numInputCtx.allowDecimal, numInputCtx.minValue, numInputCtx.maxValue))
         {
           numInputCtx.state = NUM_INPUT_COMPLETED;
-          debugSerial.println("Nombre valide");
+          LOG_DEBUG("Nombre valide");
           OLEDDisplayMessageL8("Nombre accepte", false, false);
         }
         else
         {
-          debugSerial.println("Nombre invalide");
+          LOG_DEBUG("Nombre invalide");
           OLEDDisplayMessageL8("Nombre invalide !", false, false);
         }
         break;
@@ -1027,7 +1022,6 @@ numInputState_t processNumInput(void)
     numInputCtx.displayRefresh = false;
     numInputCtx.lastUpdate = millis();
   }
-  
   return numInputCtx.state;
 }
 
@@ -1039,7 +1033,8 @@ numInputState_t processNumInput(void)
 void finalizeNumInput(char* outputNum)
 {
   if (numInputCtx.state == NUM_INPUT_COMPLETED)
-  {
+  { char msg[20];
+  
     strncpy(outputNum, numInputCtx.workingNum, 20);
     outputNum[20] = '\0';
     
@@ -1048,9 +1043,8 @@ void finalizeNumInput(char* outputNum)
     numInputCtx.position = 0;
     numInputCtx.length = 0;
     numInputCtx.displayOffset = 0;
-    
-debugSerial.print("Nombre final: ");
-debugSerial.println(outputNum);
+    snprintf(msg,20,"Nombre final: %d",outputNum);
+    LOG_DEBUG(msg);
   }
 }
 
@@ -1062,7 +1056,7 @@ debugSerial.println(outputNum);
 void cancelNumInput(void)
 {
   numInputCtx.state = NUM_INPUT_CANCELLED;
-  debugSerial.println("Saisie numerique annulee");
+  LOG_DEBUG("Saisie numerique annulee");
   OLEDDisplayMessageL8("Saisie annulee      ", false, false);
   
   // Reset du contexte

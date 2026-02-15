@@ -37,7 +37,7 @@ char read_DHT(DHT dht)
     if (isnan(HiveSensor_Data.DHT_Hum) || isnan(HiveSensor_Data.DHT_Temp))
     {
   #ifdef debugSerialread_DHT
-      debugSerial.println(F("Failed to read from DHT sensor!"));
+      LOG_ERROR("Failed to read from DHT sensor!");
   #endif    
       HiveSensor_Data.DHT_Hum = DHT_H_ERR;
       HiveSensor_Data.DHT_Temp = DHT_T_ERR;

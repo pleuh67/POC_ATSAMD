@@ -80,15 +80,18 @@ debugSerial.println(serialbuf);
     
     // Redémarrer l'affichage du menu précédent
     startListInput(prevMenu->title, prevMenu->menuList, prevMenu->menuSize, prevMenu->selectedIndex, 0);
-    
+/*    
     debugSerial.print("popMenu()\\Retour menu precedent: ");
     debugSerial.print(prevMenu->title);
     debugSerial.print(" Profondeur: ");
     debugSerial.println(currentMenuDepth);
+  */
   }
 // Apres 
+/*
   debugSerial.print("popMenu()\\menu apres popMenu(): ");
   debugSerialPrintMenuStruct(&menuStack[currentMenuDepth - 1]);  
+*/
 }
 
 
@@ -140,7 +143,7 @@ void processMenuSelection(uint8_t selectedIndex)
   }
 
 #ifdef __SerialDebugPoc    
-// debugSerial.print("M");   // MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+//   LOG_DEBUG("M");   // MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 #endif
 
   
@@ -151,8 +154,10 @@ debugSerialPrintMenuStruct(currentMenu);
 // Sauvegarder la sélection dans le menu actuel
   currentMenu->selectedIndex = selectedIndex;
 
-debugSerial.print("processMenuSelection ");
-debugSerial.println(selectedIndex);  
+char msg[80];
+  snprintf(msg,80,"processMenuSelection %d",selectedIndex);  
+  LOG_DEBUG(msg); 
+
 
 // Traitement selon le menu actuel
 // ------------------------------------------------------------m0_Demarrage---*
@@ -162,9 +167,9 @@ debugSerial.println(selectedIndex);
     {
       case 0:                               // "INFOS" => m0_0E_PageInfosSyst()
       {
-debugSerial.print("Appel d'un ecran: ");        
+LOG_DEBUG("Appel d'un ecran: ");        
         m0_0E_PageInfosSyst();   // APPEL D'UN AFFICHAGE D'ECRAN 
-debugSerial.println("CONFIG. SYSTEME - Ecran INFOS demandé");   
+LOG_DEBUG("CONFIG. SYSTEME - Ecran INFOS demandé");   
         break;
       }
       case 1:                     // "CONFIG. SYSTEME" => m0_1M_ConfigSystem()
@@ -210,31 +215,32 @@ debugSerial.println("CONFIG. SYSTEME - Ecran INFOS demandé");
       }
      case 2:  // Numéro de Rucher
       {
-debugSerial.println("m01_2F_GetNumRucher demandé");   
+LOG_DEBUG("m01_2F_GetNumRucher demandé");   
         m01_2F_GetNumRucher();
         break;
       }
       case 3: // Nom de Rucher (Liste avec autre  => saisie TXT)
       {
-debugSerial.println("m01_3F_GetNameRucher demandé");   
+LOG_DEBUG("m01_3F_GetNameRucher demandé");   
         m01_3F_GetNameRucher();
         break;
       }
       case 4: // ReadEEPROM
       {  
-debugSerial.println("m01_5F_readConfig demandé");   
+LOG_DEBUG("m01_5F_readConfig demandé");   
         m01_4F_readConfig();
         break;
       }
       case 5: // WriteEEPROM
       {  
-debugSerial.println(" demandé");   
+LOG_DEBUG("m01_5F_writeConfig() demandé");   
         m01_5F_writeConfig();
         break;
       }
       
       case 6: // Retour m0_Demarrage
       {
+        LOG_DEBUG("popMenu()"); 
         popMenu();    // Retour au menu principal
         break;
       }  
@@ -294,6 +300,7 @@ debugSerial.println("m02_6F_SendPayload() demandé");
       }
       case 7: // Retour m0_Demarrage
       {
+        LOG_DEBUG("popMenu()"); 
         popMenu(); // Retour au menu principal
         break;
       }  
@@ -334,6 +341,7 @@ debugSerial.println("m02_6F_SendPayload() demandé");
       } 
       case 4:  // Retour m0_Demarrage
       {
+        LOG_DEBUG("popMenu()"); 
         popMenu(); // Retour au menu principal
         break;
       }  
@@ -368,10 +376,12 @@ debugSerial.println("m02_6F_SendPayload() demandé");
       } 
       case 4:  // Retour m0_Demarrage
       {
+        LOG_DEBUG("popMenu()"); 
         popMenu(); // Retour au menu principal
         break;
       }  
       default:
+        LOG_DEBUG("currentMenu->menuList == m033_Reserve => default ???"); 
         break;
     }
   }  
@@ -393,23 +403,22 @@ m04_0F_InfoBal();
 bal = 4;    
 sprintf(serialbuf,"m04_1F_PoidsTare() demandé a developper"); 
 debugSerial.println(serialbuf); 
-//m04_1F_poidsBal_kg();
-//  remplacé par   "Poids  Tare    (F)",  // m04_1F_PoidsTare()  (chiffre entre 0 et 100000)
+m04_1F_PoidsTare(); // (chiffre entre 0 et 99000)
         
         break;
       }
       case 2:  
       {
-bal = 1;   
-sprintf(serialbuf,"m04_0 demandé avec balance %d : m04_CalibBal[]", bal); 
+bal = 0;   
+sprintf(serialbuf,"tititi m04_0 demandé avec balance %c : m04_CalibBal[]", bal+65); 
 debugSerial.println(serialbuf); 
-m04_2F_CalibBal_1();      
+m04x_0F_numBalx();
         break;
       }
       case 3: 
       {
 bal = 2;    
-sprintf(serialbuf,"m04_1 demandé avec balance %d : m04_CalibBal[]", bal); 
+sprintf(serialbuf,"m04_1 demandé avec balance %C : m04_CalibBal[]", bal+65); 
 debugSerial.println(serialbuf); 
 m04_nM_CalibBal_bal();
         break;
@@ -417,7 +426,7 @@ m04_nM_CalibBal_bal();
       case 4:
       {
 bal = 3;    
-sprintf(serialbuf,"m04_2 demandé avec balance %d : m04_CalibBal[]", bal); 
+sprintf(serialbuf,"m04_2 demandé avec balance %c : m04_CalibBal[]", bal+65); 
 debugSerial.println(serialbuf); 
 m04_nM_CalibBal_bal();
         break;
@@ -425,13 +434,14 @@ m04_nM_CalibBal_bal();
       case 5: 
       {
 bal = 4;    
-sprintf(serialbuf,"m04_3 demandé avec balance %d : m04_CalibBal[]", bal); 
+sprintf(serialbuf,"m04_3 demandé avec balance %c : m04_CalibBal[]", bal+65); 
 debugSerial.println(serialbuf); 
 m04_nM_CalibBal_bal();
         break;
       }
       case 6:  // Retour m0_Demarrage
       {
+        LOG_DEBUG("popMenu()"); 
         popMenu(); // Retour au menu principal
         break;
       }  
@@ -442,21 +452,33 @@ m04_nM_CalibBal_bal();
     }
   }  
 // -----------------------------------------------------------m04x_CalibBal---*
-  else if (currentMenu->menuList == m04x_CalibBal)
+  else if (currentMenu->menuList == m04x_CalibBal)  // bal 
   {
     switch (selectedIndex)
     {
       case 0: // m04x-0
-        sprintf(serialbuf,"menu04x-0  demandé avec Bal %d pour Tare Balance", bal);
-
+        sprintf(serialbuf,"menu04x-0  demandé avec Bal %c pour affectation jauge", bal+65);
+        LOG_DEBUG(serialbuf); 
+        m04x_0F_numBalx();
         break;
-      case 1: // m04x-1
-        sprintf(serialbuf,"menu04x-1  demandé avec Bal %d pour Echelle Balance", bal);
+      
+      case 1: // m04x-0
+        sprintf(serialbuf,"menu04x-0  demandé avec Bal %c pour Tare Balance", bal+65);
+        LOG_DEBUG(serialbuf); 
+        m04x_0F_tareBal_n();
         break;
-      case 2: // m04x-2
-        sprintf(serialbuf,"menu04x-2  demandé avec Bal %d pour Comp. T° Balance", bal);
+      case 2: // m04x-1
+        sprintf(serialbuf,"menu04x-1  demandé avec Bal %c pour Echelle Balance", bal+65);
+        LOG_DEBUG(serialbuf); 
+        m04x_1F_echelleBal_n();
         break;
-      case 3: // RET   popMenu(M04)
+      case 3: // m04x-2
+        sprintf(serialbuf,"menu04x-2  demandé avec Bal %c pour Comp. T° Balance", bal+65);
+        LOG_DEBUG(serialbuf); 
+        m04x_2F_tempBal_n();
+        break;
+      case 4: // RET   popMenu(M04)
+        LOG_DEBUG("popMenu()"); 
         popMenu(); // Retour au menu: m04_CalibBalances
         break;
       default:

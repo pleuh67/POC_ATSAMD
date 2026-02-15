@@ -39,115 +39,95 @@
 // =====  PROGRAMME =====
 // ===== SETUP =====
 void setup() 
-{ // Initialisation de debugSerial et envoi infos compil.
+{ char msg[80];
+// Initialisation de debugSerial et envoi infos compil.
   SETUPinitDebugSerial(); 
-
-  // Initialisation de LoraSerial
-  SETUPinitLoRaSerial();
-
-  // Initialisation des LEDs
+  LOG_INFO("debugSerial initialisé");
+// Initialisation de LoraSerial
+  SETUPSETUPinitLoRaSerial();
+  LOG_INFO("LoraSerial initialisé");
+// Initialisation des LEDs
   initLEDs();
-    
-  // Initialisation du mode selon PIN_PE
+  LOG_INFO("LED initialisé");    
+// Initialisation du mode selon PIN_PE
   pinMode(PIN_PE, INPUT_PULLUP);
   modeExploitation = digitalRead(PIN_PE);
-  debugSerial.print("Mode détecté: ");
-  debugSerial.println(modeExploitation ? "EXPLOITATION" : "PROGRAMMATION");
-   
+//
+  snprintf(msg,80,modeExploitation ? "Mode détecté: EXPLOITATION" : "Mode détecté: PROGRAMMATION"); 
+  LOG_INFO(msg); 
   // Initialisation I2C
   Wire.begin();
-  debugSerial.println(F("Bus I2C initialise"));
+  LOG_INFO("I2C initialisé");
 // scanI2C???
-
-  // Initialisation OLED
+// Initialisation OLED
   debugOLEDDrawText = false;
   OLEDInit();
-
+  LOG_INFO("OLED initialisé");
 /*
 // Après display.begin() si décallage de 2 lignes
 display.ssd1306_command(0x21);  // Set column address
 display.ssd1306_command(2);      // Column start address (2 au lieu de 0)
 display.ssd1306_command(129);    // Column end address (128 + 2 - 1)
 */
-  
-  OLEDDebugDisplay("OLEDInit OK"); // scrolling lors du setup(); 
-
-debugSerial.println(F("-------------------------------- SETUP - Fin OLED et avant-----------------------"));
-
-  // Initialisation configuration
-  initConfig();     // appel EPR_24C32loadConfig();
-  OLEDDebugDisplay("initConfig OK");
-delay(1000);
-
-debugSerial.println(F("-------------------------------- SETUP - Fin initConfig() -----------------------"));
-
-// initialiser les Structures, lecture EEPROM I2C@0x57,  si echec val par défaut
-// Si echec tester autre adresse I2C si existe
-// initialiser par lecture EEPROM I2C
-
-
-SETUPSetStructDefaultValues();
-
-debugSerial.println(F("-------------------------------- SETUP - Fin SETUPSetStructDefaultValues() -----------"));
-
-  sprintf(OLEDbuf,"ID: %s",config.materiel.DevEUI);
-  OLEDDebugDisplay(OLEDbuf);
-
-
-
-// config balance connue 10 lecture + moyenne
-
-debugSerial.println(F("-------------------------------- SETUP - GetStrainGaugeAverage -------------------------------"));
-
-
-
-
-
-  for ( int z=0;z<4;z++)                                 // Z  .. 3
+// Initialisation configuration
+  E24C32initConfig();     // appel E24C32loadConfig();
+  OLEDDebugDisplay("initConfig        OK");
+//OLEDDebugDisplay("01234567890123456789");
+  LOG_INFO("Config EEPROM lue");
+//  
+  SETUP_HX711initWithWatchdog(1);  // initialise toutes les balances présentes et les mets en basse conso
+  LOG_INFO("HX711 initialisé");      
+  for ( int numGauge=0;numGauge<4;numGauge++) 
   {     
-    if (Peson[config.materiel.Num_Carte][z])
-    {  
-
-SETUPinitHX711WithWatchdog(z);
-
-//#define poidsBal_kg(num)  abs((Contrainte_List[num]-pesonTare(num))/pesonScale(num)/1000) // kg
-      
-      Contrainte_List[z]=GetStrainGaugeAverage(z,10);
-      HiveSensor_Data.HX711Weight[z] = poidsBal_kg(z); //calculePoids(z);
-      snprintf(OLEDbuf, 21,"Bal. %c: %8.2f kg",z+65,poidsBal_kg(z));  //calculePoids(z));
+    if (Peson[config.materiel.Num_Carte][numGauge])
+    { 
+      switch (numGauge)
+      { case 0 : Contrainte_List[numGauge]=MESURESHX711GetStrainGauge(numGauge,scaleA,AVR_10);
+                 break;
+        case 1 : Contrainte_List[numGauge]=MESURESHX711GetStrainGauge(numGauge,scaleB,AVR_10);
+                 break;
+        case 2 : Contrainte_List[numGauge]=MESURESHX711GetStrainGauge(numGauge,scaleC,AVR_10);
+                 break;
+        case 3 : Contrainte_List[numGauge]=MESURESHX711GetStrainGauge(numGauge,scaleD,AVR_10);
+                 break;            
+      } 
+      HiveSensor_Data.HX711Weight[numGauge] = poidsBal_kg(numGauge); //calculePoids(numGauge);
+      snprintf(OLEDbuf, 21,"Bal. %c:  %8.2f kg",numGauge+65,poidsBal_kg(numGauge));  //calculePoids(numGauge));
       OLEDDebugDisplay(OLEDbuf);
+      LOG_INFO(OLEDbuf);
     }
     else 
     {
-      sprintf(OLEDbuf,"Bal. %d: NONE ",z);
-     OLEDDebugDisplay(OLEDbuf);
+      sprintf(OLEDbuf,"Bal. %d:         NONE",numGauge);
+      LOG_INFO(OLEDbuf);
+      OLEDDebugDisplay(OLEDbuf);
     }
   }
- 
 // INIT LoRa ---- INIT LoRa ---- INIT LoRa ---- INIT LoRa ---- INIT LoRa 
-debugSerial.println("--------------------------------- SETUP - INIT LoRa ---------------------------------");
-  if (initLoRa())
+   OLEDDebugDisplay("RN2483A  in progress");
+    LOG_INFO("Init LoRa en cours...");
+  if (SETUPinitLoRa())
   {
-debugSerial.println("Init LoRa done.");
-debugSerial.println("Test sending LoRa testPayload (7) (Restart)..."); 
-    sendLoRaPayload((uint8_t*)testPayload,7);
-    OLEDDebugDisplay("LoRa    Initialized");
+    LOG_INFO("RN2483A initialisé");
+
+char msg[20];
+    byteArrayToHexString(config.materiel.DevEUI, 8, msg, 17);
+    sprintf(OLEDbuf,"ID: %s",msg);
+    OLEDDebugDisplay(OLEDbuf);
+    LOG_INFO(OLEDbuf);
+    OLEDDebugDisplay("LoRa              OK");
+    LOG_INFO("LoRa initialisé");
   }
   else
   {
-    OLEDDebugDisplay("LoRa Failed");  
+    OLEDDebugDisplay("LoRa          Failed");  
+    LOG_INFO("LoRa non initialisé /!\\");
   }
-         OLEDDebugDisplay("2483A    Initialized");
-
-
-// void DS3231CompleteReset() si DS3231 out!
-
-debugSerial.println(F("-------------------------------- SETUP - Fin initLoRa()+ Send Payload -----------"));
-
+  LOG_INFO("Envoi LoRa \"Restart\" Payload...");// ici ajouter testpayload
+  RN2483AsendLoRaPayload((uint8_t*)testPayload,7);
+  LOG_INFO("\"Restart\" Payload envoyé");
   initRTC();
-
-debugSerial.println(F("-------------------------------- SETUP - Fin initRTC() --------------------------"));
-
+  LOG_INFO("RTC initialisé");
 //Affiche heure DS3231
 static DateTime oldSystemTime(1692712245);  //1692712245);  // timestamp Unix
 char localbuf[21] = "00:00:00    00/00/00";  
@@ -156,10 +136,12 @@ char localbuf[21] = "00:00:00    00/00/00";
   snprintf(localbuf, 21, "%02d:%02d:%02d    %02d/%02d/%02d", 
           systemTime.hour(), systemTime.minute(), systemTime.second(),
           systemTime.day(), systemTime.month(), systemTime.year()-2000);
-debugSerial.println(localbuf);
+  LOG_INFO(localbuf);
 // Affiche heure µC
-    OLEDDebugDisplay("Set Time OK");
-  
+//OLEDDebugDisplay("01234567890123456789");
+  OLEDDebugDisplay("Set Time          OK");
+  LOG_INFO("Set Time OK");
+
 // Désactiver TOUTES les interruptions temporairement
     noInterrupts();
   
@@ -167,85 +149,86 @@ debugSerial.println(localbuf);
   rtc.clearAlarm(1);
   rtc.clearAlarm(2);
 
-// Configuration des alarmes RTC 1 et 2
-if (DEBUG_INTERVAL_1SEC)
-{
-  debugSerial.println("Initialisation IRQ1");
-  DS3231setRTCAlarm1();
-}
-if (DEBUG_WAKEUP_PAYLOAD)
-{
-//debugSerial.println("Initialisation IRQ2");
-  DS3231setRTCAlarm2();
-}
-  OLEDDebugDisplay("Set RTC Alarms OK");
+  // Configuration des alarmes RTC 1 et 2
+  if (DEBUG_INTERVAL_1SEC)
+  {
+    LOG_INFO("Initialisation IRQ1");
+    DS3231setRTCAlarm1();
+  }
+  if (DEBUG_WAKEUP_PAYLOAD)
+  {
+    LOG_INFO("Initialisation IRQ2");
+    DS3231setRTCAlarm2();
+  }
+  OLEDDebugDisplay("Set RTC Alarms    OK");
 // Configuration interruption externe
   pinMode(RTC_INTERRUPT_PIN, INPUT_PULLUP);
 // AJOUTÉ: Debug configuration
 debugSerial.print("Configuration interruption sur pin ");
 debugSerial.println(RTC_INTERRUPT_PIN);
   
-  LowPower.attachInterruptWakeup(RTC_INTERRUPT_PIN, onRTCAlarm, FALLING);
-debugSerial.println("Initialisation terminee");
+  LowPower.attachInterruptWakeup(RTC_INTERRUPT_PIN, ISRonRTCAlarm, FALLING);
+LOG_INFO("Initialisation RTC terminee");
 
 //  DS3231forcerSynchronisation();
-debugSerial.println("Mise à l'heure");
+//  debugSerial.println("Mise à l'heure");
 
-debugSerial.println(F("-------------------------------- SETUP - Fin irq DS3231 -------------------------"));
- 
   dht.begin();
   if  (!read_DHT(dht))  // initialise HiveSensor_Data.DHT_Hum et HiveSensor_Data.DHT_Temp
   {
-    OLEDDebugDisplay("DHT Done");
-    debugSerial.println("DHT Done");
+    OLEDDebugDisplay("DHT               OK");
+    LOG_INFO("DHT Done");
   }
   else
   {
-    OLEDDebugDisplay("DHT: Error");
-    debugSerial.println("DHT: Error"); 
+    OLEDDebugDisplay("DHT            Error");
+    LOG_ERROR("DHT: Error"); 
   } 
-
-debugSerial.println(F("-------------------------------- SETUP - Fin DHT --------------------------------"));
-
+// init tensions Moyennes Bat/Sol 
   for ( int z=0;z<10;z++)
   {
     HiveSensor_Data.Bat_Voltage=getVBatMoy();   // calcul moyenne de 10 lectures
     HiveSensor_Data.Solar_Voltage=getVSolMoy();   // calcul moyenne de 10 lectures
   }
-
-debugSerial.println(F("-------------------------------- SETUP - Fin init tensions Moyennes Bat/Sol -----"));
-
-  OLEDDebugDisplayReset();
+  LOG_INFO("Tensions BAT et SOL mesurées");
+  LOG_INFO("Envoi Payload en cours...");
+//  OLEDDebugDisplayReset();
   buildLoraPayload();
-  sendLoRaPayload((uint8_t*)payload,sizeof(payload)); //19);   // hex
-debugSerial.println(F("-------------------------------- SETUP - Send Payload Done ----------------------"));
+  RN2483AsendLoRaPayload((uint8_t*)payload,sizeof(payload)); //19);   // hex
+  LOG_INFO("Payload envoyé.");
+
 
 // Activer les interruptions
   rtc.writeSqwPinMode(DS3231_OFF); 
   
 // Réactiver les interruptions
     interrupts();
-debugSerial.println("Start loop(); =====================================");
+  LOG_INFO("Start loop()");
 }
 
 // ---------------------------------------------------------------------------*
 // ===== LOOP PRINCIPAL =====
 // ---------------------------------------------------------------------------*
 void loop() 
-{  static int index=0; 
-   static int counter1s=0;   
+{ static int index=0; 
+  static int counter1s=0;   
 
-      loopWDT  = millis();
-//debugSerial.println("M");  // MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+  loopWDT  = millis();
   gererLEDsNonBloquant();        // *** APPEL OBLIGATOIRE À CHAQUE CYCLE ***
 
 // Vérification du mode
-  modeExploitation = digitalRead(PIN_PE);  
+  modeExploitation = digitalRead(PIN_PE);
+
+    
   if (modeExploitation)         // OK, validé, GreenLED => couleur Red
   {
     delay(10);  // anti rebond ILS/Switch
     handleOperationMode();    // normalement rien à faire dans ce mode.
 // Envoi du payLoad si ISR2 
+
+// Vérification du mode
+  modeExploitation = digitalRead(PIN_PE);
+
 
 // ---------------------------------------------------------------------------*
 // Gestion Clignotement LED Rouge non bloquant
@@ -253,15 +236,15 @@ void loop()
     if (wakeup1Sec) 
     {  
       wakeup1Sec = false; 
-// attention     if (wakeup1Sec)   retseté plus bas!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      
+  // attention     if (wakeup1Sec)   retseté plus bas!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
       config.applicatif.redLedDuration = 100;  // Clignotement Rouge = 100 ms
       LEDStartRed();                           //Clignotement 100ms
-//debugSerial.println("BlinkRED");   
-// FIN Gestion Clignotement LED non bloquant 
-    
-// Gestion des affichages de pages rafraichies    
-// FIN Gestion des affichages de pages rafraichies        
+  //debugSerial.println("BlinkRED");   
+  // FIN Gestion Clignotement LED non bloquant 
+      
+  // Gestion des affichages de pages rafraichies    
+  // FIN Gestion des affichages de pages rafraichies        
     }  
   } 
   else                          // OK, validé, BlueLED modeProgrammation
@@ -337,7 +320,7 @@ debugSerial.print("3");   // 333333333333333333333333333
 //logPeson = true;
               if (Peson[config.materiel.Num_Carte][0])
               {
-                Contrainte_List[0] = GetStrainGaugeAverage(0,1);
+                Contrainte_List[0] = MESURESHX711GetStrainGauge(0,scaleA,1);
                 HiveSensor_Data.HX711Weight[0] = calculePoids(0);
               }
 // afficher poids bal(1) sur fenêtre OLEDdisplayWeightBal(void)
@@ -348,7 +331,7 @@ logPeson = false;
 //logPeson = true;
               if (Peson[config.materiel.Num_Carte][1])
               {
-                Contrainte_List[1] = GetStrainGaugeAverage(1,1);
+                Contrainte_List[1] = MESURESHX711GetStrainGauge(1,scaleB,1);
                 HiveSensor_Data.HX711Weight[1] = calculePoids(1);
               }               
 logPeson = false;
@@ -358,17 +341,17 @@ logPeson = false;
 //logPeson = true;
               if (Peson[config.materiel.Num_Carte][2])
               {
-                Contrainte_List[2] = GetStrainGaugeAverage(2,1);
+                Contrainte_List[2] = MESURESHX711GetStrainGauge(2,scaleC,1);
                 HiveSensor_Data.HX711Weight[2] = calculePoids(2);
               }               
 logPeson = false;
               break;
      case 6 :
 //debugSerial.println("Case6");
-logPeson = true;
+//logPeson = true;
               if (Peson[config.materiel.Num_Carte][3])
               {
-                Contrainte_List[3] = GetStrainGaugeAverage(3,1);
+                Contrainte_List[3] = MESURESHX711GetStrainGauge(3,scaleD,1);
                 HiveSensor_Data.HX711Weight[3] = calculePoids(3);
               }               
 logPeson = false;
@@ -381,7 +364,7 @@ logPeson = false;
 //debugSerial.println("Case8");
               break;
       case 9 :      // Alive: '.' sur OLED
-              debugSerial.print(".");
+  //            debugSerial.print(".");
               break;
       default : // WTF
                debugSerial.print("WTF");  
@@ -404,28 +387,28 @@ logPeson = false;
 // mode rafraichissement rapide des balances
 // attention le scale.begin  dure > 400 ms
 // les 10 lectures 900 ms
-debugSerial.println("BalRap A");
+//debugSerial.println("BalRap A");
     if (InfoBalScreenRefreshBal_1)
     {
-      Contrainte_List[0] = GetStrainGaugeFast(0);
+      Contrainte_List[0] = MESURESHX711GetStrainGauge(0,scaleA,AVR_3);
       HiveSensor_Data.HX711Weight[0] = calculePoids(0);
     }
-debugSerial.println("BalRap B");   
+//debugSerial.println("BalRap B");   
     if (InfoBalScreenRefreshBal_2)
     {
-      Contrainte_List[1] = GetStrainGaugeFast(1);
+      Contrainte_List[1] = MESURESHX711GetStrainGauge(1,scaleB,AVR_3);
       HiveSensor_Data.HX711Weight[1] = calculePoids(1);
     }   
-debugSerial.println("BalRap C");            
+//debugSerial.println("BalRap C");            
     if (InfoBalScreenRefreshBal_3)
     {
-      Contrainte_List[2] = GetStrainGaugeFast(2);
+      Contrainte_List[2] = MESURESHX711GetStrainGauge(2,scaleC,AVR_3);
       HiveSensor_Data.HX711Weight[2] = calculePoids(2);
     }    
-debugSerial.println("BalRap D");               
+// debugSerial.println("BalRap D");               
     if (InfoBalScreenRefreshBal_4)
     {
-      Contrainte_List[3] = GetStrainGaugeFast(3);
+      Contrainte_List[3] = MESURESHX711GetStrainGauge(3,scaleD,AVR_3);
       HiveSensor_Data.HX711Weight[3] = calculePoids(3);
     }  
  
@@ -436,14 +419,15 @@ debugSerial.println("BalRap D");
     OLEDRefreshDisplay();
   }
 // fin de ISR1
-#ifdef __SerialDebugPoc  
-debugSerial.print("6");   // 666666666666666666666666666666666666666666666
-#endif
 
 // ---------------------------------------------------------------------------*
 // traite : 
 // ---------------------------------------------------------------------------*
     handleProgrammingMode();  // faire gestion Clavier et actions associées
+
+// Vérification du mode
+  modeExploitation = digitalRead(PIN_PE);
+    
   }
 
 #ifdef __SerialDebugPoc  

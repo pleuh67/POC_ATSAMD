@@ -24,8 +24,6 @@
 void processContinuousKeyboard(void)
 { unsigned long currentTime = millis();
 
-// debugSerial.println("C");
-    
 // Vérifier l'intervalle minimum entre lectures
   if (currentTime - clavierContext.derniereLecture < DEBOUNCE_DELAY_MS)
     return; // Trop tôt pour une nouvelle lecture
@@ -50,18 +48,6 @@ void processContinuousKeyboard(void)
         if (toucheActuelle != KEY_NONE)
         {
           clavierContext.toucheDisponible = true;
-/*                    
-                    // Debug optionnel
-                    static int toucheCount = 0;
-                    toucheCount++;
-                    if (toucheCount % 5 == 0)
-                    {
-                        debugSerial.print("Touche détectée #");
-                        debugSerial.print(toucheCount);
-                        debugSerial.print(": ");
-                        debugSerial.println(keyToString(toucheActuelle));
-                    }
-*/                    
         }
       }
     }
@@ -101,35 +87,7 @@ debugSerial.println(localserialbuf);
   return KEY_INVALID;                                     // Val non identifiable
 }
 
-// ---------------------------------------------------------------------------*
-// @brief Lecture avec anti-rebond du clavier analogique
-// @param Aucun
-// @return key_code_t Code de touche stable après confirmation
-// ---------------------------------------------------------------------------*
-/* 
-key_code_t readKey(void) 
-{ key_code_t key, key2;
-  int stable_count = 0;
-    
-  key = readKeyOnce();
-  do 
-  {
-    delay(DEBOUNCE_DELAY_MS);
-    key2 = readKeyOnce();
-   
-    if (key == key2) 
-    {
-      stable_count++;
-    } 
-    else 
-    {
-      stable_count = 0;
-      key = key2;
-    }
-  } while (stable_count < DEBOUNCE_COUNT);
-  return key;
-}
-*/
+
 
 // ---------------------------------------------------------------------------*
 // @brief Convertit un code de touche en chaîne de caractères
@@ -166,3 +124,35 @@ key_code_t readKeyNonBlocking(void)
   }
   return KEY_NONE; // Pas de touche disponible
 }
+
+
+
+/* 
+// ---------------------------------------------------------------------------*
+// @brief Lecture avec anti-rebond du clavier analogique
+// @param Aucun
+// @return key_code_t Code de touche stable après confirmation
+// ---------------------------------------------------------------------------*
+key_code_t readKey(void) 
+{ key_code_t key, key2;
+  int stable_count = 0;
+    
+  key = readKeyOnce();
+  do 
+  {
+    delay(DEBOUNCE_DELAY_MS);
+    key2 = readKeyOnce();
+   
+    if (key == key2) 
+    {
+      stable_count++;
+    } 
+    else 
+    {
+      stable_count = 0;
+      key = key2;
+    }
+  } while (stable_count < DEBOUNCE_COUNT);
+  return key;
+}
+*/

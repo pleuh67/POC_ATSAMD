@@ -12,7 +12,7 @@ isInfoScreenActive :
 	teste state : sortie?			
 														
 
-sisaisie   _COMPLETED: execute  HandleSaisieActive();  // pas infoscreen
+si saisie   _COMPLETED: execute  HandleSaisieActive();  // pas infoscreen
 
 
 

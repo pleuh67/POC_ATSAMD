@@ -28,14 +28,14 @@ void initRTC(void)
   if (!rtc.begin()) 
   {
 #ifdef debugSerialinitRTC
-  debugSerial.println("Erreur: RTC introuvable");
+  LOG_ERROR("Erreur: RTC introuvable");
 OLEDDebugDisplay("RTC introuvable");  
 #endif  
     DS3231hardReset();
     if (!rtc.begin()) 
     {
 #ifdef debugSerialinitRTC
-  debugSerial.println("Erreur: RESET RTC pas OK => FIN");
+  LOG_ERROR("Erreur: RESET RTC pas OK => FIN");
 #endif  
       while (1) 
       {
@@ -75,10 +75,7 @@ char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursd
       rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));  
       
     }
-#ifdef debugSerialinitRTC
-    debugSerial.println("RTC initialisé");
-#endif  
-    OLEDDebugDisplay("initRTC OK");
+    OLEDDebugDisplay("initRTC DS3231    OK");
   }
 }
 
@@ -122,18 +119,7 @@ void DS3231setRTCAlarm2(void)
 // Désactiver TOUTES les interruptions temporairement
     noInterrupts();
     
-    // Effacer les flags
-// Configuration DS3231 AVANT interruption
-//      rtc.writeSqwPinMode(DS3231_OFF);
-//      rtc.clearAlarm(1);
-// déjà fait dans fonction appelante:      rtc.clearAlarm(2);
-
-   // AJOUTEZ ceci pour être sûr :
-   // DS3231clearRTCAlarms();       // Efface les 2 alarmes du RTC
-   
-    // Reprogrammer A2
-//debugSerial.println("=== CONFIGURATION ALARMES RTC + INTERRUPTIONS ===");
-  // ALARME 2 : Payload toutes les config.applicatif.SendingPeriod minutes
+// ALARME 2 : Payload toutes les config.applicatif.SendingPeriod minutes
   if (DEBUG_WAKEUP_PAYLOAD) 
   {
     nextPayload = rtc.now() + TimeSpan(0, 0, config.applicatif.SendingPeriod, 0);

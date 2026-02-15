@@ -1,0 +1,330 @@
+//==============================================================================
+// DOCUMENTATION - STRUCTURE MENU CALIBRATION BALANCES
+//==============================================================================
+// Fichiers concernés : Menu.h, MenusFonc.cpp, prototypes.h
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// ÉTAPE 1 : Menu.h - Définir les menus et sous-menus
+//------------------------------------------------------------------------------
+
+// Menu principal m04_CalibBalances (déjà existant)
+#define M04_ITEM 7
+const char* m04_CalibBalances[] = {
+  "info.  Balances(F)",  // m04_0F_InfoBal()
+  "Poids  Balances(F)",  // m04_1F_PoidsBal()
+  "Calib. Bal #1  (M)",  // m04_2M_CalibBal_1()  ← (M) = ouvre sous-menu
+  "Calib. Bal #2  (M)",  // m04_3M_CalibBal_2()
+  "Calib. Bal #3  (M)",  // m04_4M_CalibBal_3()
+  "Calib. Bal #4  (M)",  // m04_5M_CalibBal_4()
+  "RET  popMenu  (m0)"   // PopMenu()
+};
+
+// Sous-menus pour chaque balance (NOUVEAU - à ajouter dans Menu.h)
+#define M042_ITEM 4
+const char* m042_CalibBal[] = {        // Balance #1
+  "Tare Balance    (F)",    // m042_0F_tareBal_1()
+  "Echelle Balance (F)",    // m042_1F_echBal_1()
+  "Comp. Temp.     (F)",    // m042_2F_tempBal_1()
+  "RET   popMenu (m04)"     // popMenu()
+};
+
+#define M043_ITEM 4
+const char* m043_CalibBal[] = {        // Balance #2
+  "Tare Balance    (F)",    // m043_0F_tareBal_2()
+  "Echelle Balance (F)",    // m043_1F_echBal_2()
+  "Comp. Temp.     (F)",    // m043_2F_tempBal_2()
+  "RET   popMenu (m04)"     // popMenu()
+};
+
+#define M044_ITEM 4
+const char* m044_CalibBal[] = {        // Balance #3
+  "Tare Balance    (F)",    // m044_0F_tareBal_3()
+  "Echelle Balance (F)",    // m044_1F_echBal_3()
+  "Comp. Temp.     (F)",    // m044_2F_tempBal_3()
+  "RET   popMenu (m04)"     // popMenu()
+};
+
+#define M045_ITEM 4
+const char* m045_CalibBal[] = {        // Balance #4
+  "Tare Balance    (F)",    // m045_0F_tareBal_4()
+  "Echelle Balance (F)",    // m045_1F_echBal_4()
+  "Comp. Temp.     (F)",    // m045_2F_tempBal_4()
+  "RET   popMenu (m04)"     // popMenu()
+};
+
+
+// Section #else - Déclarations extern (AJOUTER)
+#else
+
+extern const char* m042_CalibBal[];
+extern const char* m043_CalibBal[];
+extern const char* m044_CalibBal[];
+extern const char* m045_CalibBal[];
+
+#endif
+
+
+//------------------------------------------------------------------------------
+// ÉTAPE 2 : prototypes.h - Déclarer les fonctions
+//------------------------------------------------------------------------------
+
+// Fonctions menu (M) - ouvrent un sous-menu
+void m04_2M_CalibBal_1(void);
+void m04_3M_CalibBal_2(void);
+void m04_4M_CalibBal_3(void);
+void m04_5M_CalibBal_4(void);
+
+// Fonctions terminales (F) - Balance #1
+void m042_0F_tareBal_1(void);
+void m042_1F_echBal_1(void);
+void m042_2F_tempBal_1(void);
+
+// Fonctions terminales (F) - Balance #2
+void m043_0F_tareBal_2(void);
+void m043_1F_echBal_2(void);
+void m043_2F_tempBal_2(void);
+
+// Fonctions terminales (F) - Balance #3
+void m044_0F_tareBal_3(void);
+void m044_1F_echBal_3(void);
+void m044_2F_tempBal_3(void);
+
+// Fonctions terminales (F) - Balance #4
+void m045_0F_tareBal_4(void);
+void m045_1F_echBal_4(void);
+void m045_2F_tempBal_4(void);
+
+
+//------------------------------------------------------------------------------
+// ÉTAPE 3 : MenusFonc.cpp - Implémenter les fonctions
+//------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Fonctions menu (M) - Poussent le sous-menu correspondant
+// ---------------------------------------------------------------------------
+
+void m04_2M_CalibBal_1(void)
+{
+  bal = 1;  // Sélectionner balance #1
+  debugSerial.println("Appel du Menu: Calibration Balance #1");
+  pushMenu("-- CALIB BAL #1 --", m042_CalibBal, M042_ITEM, 0);
+}
+
+void m04_3M_CalibBal_2(void)
+{
+  bal = 2;  // Sélectionner balance #2
+  debugSerial.println("Appel du Menu: Calibration Balance #2");
+  pushMenu("-- CALIB BAL #2 --", m043_CalibBal, M043_ITEM, 0);
+}
+
+void m04_4M_CalibBal_3(void)
+{
+  bal = 3;  // Sélectionner balance #3
+  debugSerial.println("Appel du Menu: Calibration Balance #3");
+  pushMenu("-- CALIB BAL #3 --", m044_CalibBal, M044_ITEM, 0);
+}
+
+void m04_5M_CalibBal_4(void)
+{
+  bal = 4;  // Sélectionner balance #4
+  debugSerial.println("Appel du Menu: Calibration Balance #4");
+  pushMenu("-- CALIB BAL #4 --", m045_CalibBal, M045_ITEM, 0);
+}
+
+
+// ---------------------------------------------------------------------------
+// Fonctions terminales (F) - Balance #1
+// ---------------------------------------------------------------------------
+
+void m042_0F_tareBal_1(void)
+{
+  debugSerial.println("Appel: Tare Balance #1");
+  
+  // Vérifier que la balance est présente
+  if (!HX711_present[0])
+  {
+    OLEDClear();
+    OLEDDrawText(1, 2, 0, "ERREUR:");
+    OLEDDrawText(1, 3, 0, "Balance #1 absente");
+    delay(2000);
+    backMenu();
+    return;
+  }
+  
+  // Afficher instructions
+  OLEDClear();
+  OLEDDrawText(1, 0, 0, "== TARE BAL #1 ==");
+  OLEDDrawText(1, 2, 0, "Retirer charge");
+  OLEDDrawText(1, 3, 0, "Appuyer VALIDE");
+  
+  // Attendre validation
+  // TODO: implémenter avec startNumInput ou logique de validation
+  
+  // Lire la tare
+  scale.power_up();
+  delay(400);
+  scale.begin(balance[0][0], balance[0][1]);
+  long tare = scale.read_average(20);
+  scale.power_down();
+  
+  // Sauvegarder
+  Jauge[Peson[config.materiel.Num_Carte][0]][0] = tare;
+  
+  // Afficher résultat
+  char buf[21];
+  snprintf(buf, 21, "Tare: %ld", tare);
+  OLEDDrawText(1, 5, 0, buf);
+  OLEDDrawText(1, 7, 0, "VALIDE pour retour");
+  
+  infoScreenState = INFO_SCREEN_ACTIVE;
+}
+
+void m042_1F_echBal_1(void)
+{
+  debugSerial.println("Appel: Echelle Balance #1");
+  
+  // Vérifier que la balance est présente
+  if (!HX711_present[0])
+  {
+    OLEDClear();
+    OLEDDrawText(1, 2, 0, "ERREUR:");
+    OLEDDrawText(1, 3, 0, "Balance #1 absente");
+    delay(2000);
+    backMenu();
+    return;
+  }
+  
+  // Saisie du poids de référence (ex: 10000 grammes = 10 kg)
+  static char poidsRef[11] = "10000";
+  startNumInput("Poids ref (g):", poidsRef, 10, false, false, 100, 100000);
+  
+  // TODO: dans la fonction Done() correspondante :
+  // - Lire la valeur chargée : valCharge = scale.read_average(20)
+  // - Calculer échelle : (valCharge - tare) / poids_grammes
+  // - Sauvegarder dans Jauge[...][1]
+}
+
+void m042_2F_tempBal_1(void)
+{
+  debugSerial.println("Appel: Compensation Température Balance #1");
+  
+  // Saisie du coefficient de compensation
+  static char compTemp[11] = "0";
+  startNumInput("Comp Temp:", compTemp, 10, true, true, -100, 100);
+  
+  // TODO: dans la fonction Done() correspondante :
+  // - Sauvegarder dans Jauge[Peson[...][0]][3]
+}
+
+
+// ---------------------------------------------------------------------------
+// Fonctions terminales (F) - Balance #2
+// ---------------------------------------------------------------------------
+
+void m043_0F_tareBal_2(void)
+{
+  // Même logique que m042_0F_tareBal_1() avec bal=2, index=1
+  debugSerial.println("Appel: Tare Balance #2");
+  // ... code identique en changeant les indices ...
+}
+
+void m043_1F_echBal_2(void)
+{
+  debugSerial.println("Appel: Echelle Balance #2");
+  // ... code identique en changeant les indices ...
+}
+
+void m043_2F_tempBal_2(void)
+{
+  debugSerial.println("Appel: Compensation Température Balance #2");
+  // ... code identique en changeant les indices ...
+}
+
+
+// ---------------------------------------------------------------------------
+// Fonctions terminales (F) - Balance #3 et #4
+// ---------------------------------------------------------------------------
+// ... même pattern pour les balances #3 et #4 ...
+
+
+//------------------------------------------------------------------------------
+// ÉTAPE 4 : Menus.cpp - Mapper les fonctions aux menus
+//------------------------------------------------------------------------------
+
+// Dans Menus.cpp, ajouter les mappings pour m04_CalibBalances :
+
+const menuFunction m04_CalibBalancesFonc[M04_ITEM] = {
+  m04_0F_InfoBal,      // "info.  Balances(F)"
+  m04_1F_PoidsBal,     // "Poids  Balances(F)"
+  m04_2M_CalibBal_1,   // "Calib. Bal #1  (M)"  ← MODIFIÉ
+  m04_3M_CalibBal_2,   // "Calib. Bal #2  (M)"  ← MODIFIÉ
+  m04_4M_CalibBal_3,   // "Calib. Bal #3  (M)"  ← MODIFIÉ
+  m04_5M_CalibBal_4,   // "Calib. Bal #4  (M)"  ← MODIFIÉ
+  popMenu              // "RET  popMenu  (m0)"
+};
+
+// Ajouter les nouveaux sous-menus :
+
+const menuFunction m042_CalibBalFonc[M042_ITEM] = {
+  m042_0F_tareBal_1,   // "Tare Balance    (F)"
+  m042_1F_echBal_1,    // "Echelle Balance (F)"
+  m042_2F_tempBal_1,   // "Comp. Temp.     (F)"
+  popMenu              // "RET   popMenu (m04)"
+};
+
+const menuFunction m043_CalibBalFonc[M043_ITEM] = {
+  m043_0F_tareBal_2,
+  m043_1F_echBal_2,
+  m043_2F_tempBal_2,
+  popMenu
+};
+
+const menuFunction m044_CalibBalFonc[M044_ITEM] = {
+  m044_0F_tareBal_3,
+  m044_1F_echBal_3,
+  m044_2F_tempBal_3,
+  popMenu
+};
+
+const menuFunction m045_CalibBalFonc[M045_ITEM] = {
+  m045_0F_tareBal_4,
+  m045_1F_echBal_4,
+  m045_2F_tempBal_4,
+  popMenu
+};
+
+
+//==============================================================================
+// RÉSUMÉ MODIFICATIONS
+//==============================================================================
+//
+// 1. Menu.h :
+//    - Ajouter m042_CalibBal[], m043_CalibBal[], m044_CalibBal[], m045_CalibBal[]
+//    - Ajouter les #define M042_ITEM, M043_ITEM, M044_ITEM, M045_ITEM
+//    - Changer (F) en (M) pour "Calib. Bal #1/2/3/4" dans m04_CalibBalances[]
+//    - Ajouter extern dans la section #else
+//
+// 2. prototypes.h :
+//    - Ajouter les prototypes des 4 fonctions menu (M) : m04_2M à m04_5M
+//    - Ajouter les prototypes des 12 fonctions terminales (F) : m042_0F à m045_2F
+//
+// 3. MenusFonc.cpp :
+//    - Implémenter les 4 fonctions menu (M) qui appellent pushMenu()
+//    - Implémenter les 12 fonctions terminales (F) pour tare/échelle/temp
+//
+// 4. Menus.cpp :
+//    - Modifier m04_CalibBalancesFonc[] pour appeler m04_2M à m04_5M
+//    - Ajouter m042_CalibBalFonc[], m043_CalibBalFonc[], etc.
+//
+//==============================================================================
+// VARIABLE GLOBALE
+//==============================================================================
+//
+// La variable globale 'bal' (1 à 4) est positionnée dans les fonctions menu (M)
+// pour indiquer quelle balance est sélectionnée.
+//
+// Les fonctions terminales (F) utilisent cette variable pour savoir
+// sur quelle balance elles doivent opérer.
+//
+//==============================================================================

@@ -20,25 +20,20 @@
 // @param Aucun
 // @return void
 // ---------------------------------------------------------------------------*
-void onRTCAlarm(void) // $ ou £
+void ISRonRTCAlarm(void) // $ ou £
 {
-debugSerial.print("\n€ISR€ ");  // €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
-
-
+  LOG_DEBUG("€ISR€ ");  // €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 // ISR1 doit être activé, sinon vu toutes les n minutes de ISR2
   if (millis() - loopWDT >  100000) // 100s sans passage par loop() => RESET
   {
 
-debugSerial.println(loopWDT);
+LOG_DEBUG(loopWDT);
    loopWDT  = millis();
-debugSerial.println(loopWDT);
+LOG_DEBUG(loopWDT);
     
-//    SETUPsoftReset();
-// Reset immédiat du microcontrôleur, le code ne continue jamais après cette ligne
-//trouver autre chose que MORT
   }
   else
-    debugSerial.println(loopWDT);
+    LOG_DEBUG(loopWDT);
   
   
 // ALARME 1 : Toutes les secondes (mode programmation)
@@ -48,7 +43,7 @@ debugSerial.println(loopWDT);
     if (!alarm1_enabled) 
       return;     // interruption execution code de IRQ1 pendant IRQ2
     wakeup1Sec = alarm1_enabled;  // True si autorisé par IRQ2
-debugSerial.print("\n$1$\n");   // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+LOG_DEBUG("\n$1$\n");   // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
   }
   
 // ALARME 2 : Payload périodique    
@@ -59,19 +54,15 @@ debugSerial.print("\n$1$\n");   // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
     if (!alarm2_enabled) 
     {
-      debugSerial.println("onRTCAlarm():alarm2_enabled = False");
       return;     // interruption execution code de IRQ1 pendant IRQ2
     }
     wakeup1Sec = false;    // annule si activée
-displayNextPayload = false; //true;
+    displayNextPayload = false; //true;
     wakeupPayload = true;
-//debugSerial.println("OnRTCAlarm/wakeupPayload set to true");
     
-
     if (config.applicatif.SendingPeriod)     // si 0 pas d'envois par IT
     {
       DS3231setRTCAlarm2(); // Reprogrammer prochaine alarme
     }
-//debugSerial.println("\n£2£\n");  // £££££££££££££££££££££££££££££££££££££££££££££££££££££££££
   }
 }

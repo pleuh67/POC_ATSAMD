@@ -377,7 +377,7 @@ typedef struct __attribute__((packed))
   uint8_t adresseRTC;     // DS3231_ADDRESS 0x68
   uint8_t adresseOLED;    //
   uint8_t adresseEEPROM;  // EEPROM_ADDRESS 0x57
-  uint16_t poidsTare;        // valeur de la tare en grammes
+  uint16_t poidsTare;        // valeur de la tare en grammes, max 65535g
 
   uint8_t Num_Carte;  // Numéro de carte fct° de SN RN2482
   uint8_t DevEUI[9];         // ID RN2483: 0x0004A30B00EEEE01

@@ -1,0 +1,238 @@
+14:56:41.744 -> ========================================
+14:56:41.744 -> Test conversion Hexa String -> Byte Array
+14:56:41.744 -> ========================================
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 1 : Conversion standard ---
+14:56:41.744 -> Chaine hexa source: 5048494C495050454C4F56454C4F56454C414F4F
+14:56:41.744 -> Longueur: 40 caracteres
+14:56:41.744 -> 
+14:56:41.744 -> Erreur: tableau trop petit (besoin de 21 octets, disponible: 17)
+14:56:41.744 -> Echec de la conversion !
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 2 : Cle AES-128 ---
+14:56:41.744 -> Chaine hexa source: 0123456789ABCDEF0123456789ABCDEF
+14:56:41.744 -> Conversion reussie: 32 caracteres hexa -> 16 octets
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> uint8_t array[16] = { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 3 : DevEUI LoRaWAN ---
+14:56:41.744 -> Chaine hexa source: 0004A30B001A2B3C
+14:56:41.744 -> Conversion reussie: 16 caracteres hexa -> 8 octets
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> uint8_t array[8] = { 0x00, 0x04, 0xA3, 0x0B, 0x00, 0x1A, 0x2B, 0x3C };
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 4 : Adresse MAC ---
+14:56:41.744 -> Chaine hexa source: AABBCCDDEEFF
+14:56:41.744 -> Conversion reussie: 12 caracteres hexa -> 6 octets
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> uint8_t array[6] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 5 : Valeur courte ---
+14:56:41.744 -> Chaine hexa source: BEEF
+14:56:41.744 -> Conversion reussie: 4 caracteres hexa -> 2 octets
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> uint8_t array[2] = { 0xBE, 0xEF };
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 6 : Erreur longueur impaire ---
+14:56:41.744 -> Chaine hexa source: ABC
+14:56:41.744 -> Erreur: longueur impaire (3 caracteres)
+14:56:41.744 -> Erreur detectee comme prevu !
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 7 : Erreur caractere invalide ---
+14:56:41.744 -> Chaine hexa source: 12G4
+14:56:41.744 -> Erreur: caractere hexa invalide a la position 2
+14:56:41.744 -> Erreur detectee comme prevu !
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 8 : Integration avec saisie hexa ---
+14:56:41.744 -> Simulation d'une saisie utilisateur:
+14:56:41.744 -> Utilisateur a saisi: 0123456789ABCDEF0123456789ABCDEF
+14:56:41.744 -> Conversion reussie: 32 caracteres hexa -> 16 octets
+14:56:41.744 -> Cle prete a etre utilisee:
+14:56:41.744 -> uint8_t array[16] = { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
+14:56:41.744 -> 
+14:56:41.744 -> Utilisation dans le code:
+14:56:41.744 -> lorawan.setAppKey(userKey); // 16 octets sans le 0x00
+14:56:41.744 -> 
+14:56:41.744 -> ========================================
+14:56:41.744 -> Tests termines !
+14:56:41.744 -> ========================================
+14:56:41.744 -> 
+14:56:41.744 -> 
+14:56:41.744 -> ========================================
+14:56:41.744 -> CONVERSION INVERSE: Byte Array -> Hex String
+14:56:41.744 -> ========================================
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 9 : Conversion inverse AppKey ---
+14:56:41.744 -> Tableau source:
+14:56:41.744 -> uint8_t array[16] = { 0x50, 0x48, 0x49, 0x4C, 0x49, 0x50, 0x50, 0x45, 0x4C, 0x4F, 0x56, 0x45, 0x4C, 0x41, 0x4F, 0x4F };
+14:56:41.744 -> 
+14:56:41.744 -> Conversion reussie: 16 octets -> 32 caracteres hexa
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> char hexString[33] = "5048494C495050454C4F56454C414F4F";
+14:56:41.744 -> Chaine obtenue: 5048494C495050454C4F56454C414F4F
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 10 : Conversion inverse cle AES-128 ---
+14:56:41.744 -> Tableau source:
+14:56:41.744 -> uint8_t array[16] = { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
+14:56:41.744 -> 
+14:56:41.744 -> Conversion reussie: 16 octets -> 32 caracteres hexa
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> char hexString[33] = "0123456789ABCDEF0123456789ABCDEF";
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 11 : Conversion inverse DevEUI ---
+14:56:41.744 -> Tableau source:
+14:56:41.744 -> uint8_t array[8] = { 0x00, 0x04, 0xA3, 0x0B, 0x00, 0x1A, 0x2B, 0x3C };
+14:56:41.744 -> 
+14:56:41.744 -> Conversion reussie: 8 octets -> 16 caracteres hexa
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> char hexString[17] = "0004A30B001A2B3C";
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 12 : Conversion inverse MAC address ---
+14:56:41.744 -> Tableau source:
+14:56:41.744 -> uint8_t array[6] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+14:56:41.744 -> 
+14:56:41.744 -> Conversion reussie: 6 octets -> 12 caracteres hexa
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> char hexString[13] = "AABBCCDDEEFF";
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 13 : Conversion inverse valeur courte ---
+14:56:41.744 -> Tableau source:
+14:56:41.744 -> uint8_t array[2] = { 0xBE, 0xEF };
+14:56:41.744 -> 
+14:56:41.744 -> Conversion reussie: 2 octets -> 4 caracteres hexa
+14:56:41.744 -> Resultat de la conversion:
+14:56:41.744 -> char hexString[5] = "BEEF";
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 14 : Erreur buffer trop petit ---
+14:56:41.744 -> Tentative de conversion de 16 octets dans un buffer de 10 caracteres:
+14:56:41.744 -> Erreur: chaine trop petite (besoin de 33 caracteres, disponible: 10)
+14:56:41.744 -> Erreur detectee comme prevu !
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 15 : Conversion aller-retour ---
+14:56:41.744 -> Test de coherence: Hexa -> Bytes -> Hexa
+14:56:41.744 -> Chaine hexa originale: DEADBEEFCAFEBABE
+14:56:41.744 -> Conversion reussie: 16 caracteres hexa -> 8 octets
+14:56:41.744 -> 
+14:56:41.744 -> Apres conversion vers bytes:
+14:56:41.744 -> uint8_t array[8] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xBA, 0xBE };
+14:56:41.744 -> Conversion reussie: 8 octets -> 16 caracteres hexa
+14:56:41.744 -> 
+14:56:41.744 -> Apres conversion retour vers hexa:
+14:56:41.744 -> char hexString[17] = "DEADBEEFCAFEBABE";
+14:56:41.744 -> 
+14:56:41.744 -> *** TEST REUSSI: Les chaines sont identiques ! ***
+14:56:41.744 -> 
+14:56:41.744 -> ========================================
+14:56:41.744 -> Tous les tests termines !
+14:56:41.744 -> ========================================
+14:56:41.744 -> 
+14:56:41.744 -> 
+14:56:41.744 -> ========================================
+14:56:41.744 -> CONVERSIONS DECIMALES: uint8_t <-> char buffer
+14:56:41.744 -> ========================================
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 16 : uint8_t -> string (cas typiques) ---
+14:56:41.744 -> Conversion uint8 -> string: 7 -> "7"
+14:56:41.744 -> Resultat: SF7 = "7"
+14:56:41.744 -> Conversion uint8 -> string: 12 -> "12"
+14:56:41.744 -> Resultat: SF12 = "12"
+14:56:41.744 -> Conversion uint8 -> string: 255 -> "255"
+14:56:41.744 -> Resultat: 255 = "255"
+14:56:41.744 -> Conversion uint8 -> string: 0 -> "0"
+14:56:41.744 -> Resultat: 0 = "0"
+14:56:41.744 -> 
+14:56:41.744 -> --- TEST 17 : string -> uint8_t (cas valides) ---
+14:56:41.744 -> Conversion string -> uint8: "7" -> 7
+14:56:41.744 -> Spreading Factor = 7
+14:56:41.744 -> Conversion string -> uint8: "12" -> 12
+14:56:41.744 -> Spreading Factor = 12
+14:56:41.744 -> Conversion string -> uint8: "255" -> 255
+14:56:41.744 -> Valeur maximale = 255
+14:56:41.803 -> Conversion string -> uint8: "0" -> 0
+14:56:41.803 -> Valeur minimale = 0
+14:56:41.803 -> Conversion string -> uint8: "42 " -> 42
+14:56:41.803 -> Avec espaces = 42
+14:56:41.803 -> 
+14:56:41.803 -> --- TEST 18 : Erreurs de conversion ---
+14:56:41.803 -> Test: "256" (hors plage)
+14:56:41.803 -> Erreur: valeur hors plage (256), plage valide: 0-255
+14:56:41.803 -> Erreur detectee comme prevu !
+14:56:41.803 -> 
+14:56:41.803 -> Test: "-5" (negatif)
+14:56:41.803 -> Erreur: caractere invalide '-' (chiffres 0-9 uniquement)
+14:56:41.803 -> Erreur detectee comme prevu !
+14:56:41.803 -> 
+14:56:41.803 -> Test: "12A" (caractere invalide)
+14:56:41.803 -> Erreur: caractere invalide 'A' (chiffres 0-9 uniquement)
+14:56:41.803 -> Erreur detectee comme prevu !
+14:56:41.803 -> 
+14:56:41.803 -> Test: "" (chaine vide)
+14:56:41.803 -> Erreur: chaine vide
+14:56:41.803 -> Erreur detectee comme prevu !
+14:56:41.803 -> 
+14:56:41.803 -> --- TEST 19 : Conversion aller-retour decimale ---
+14:56:41.803 -> Test de coherence: uint8 -> string -> uint8
+14:56:41.803 -> Valeur originale: 12
+14:56:41.803 -> Conversion uint8 -> string: 12 -> "12"
+14:56:41.803 -> Apres conversion en string: "12"
+14:56:41.803 -> Conversion string -> uint8: "12" -> 12
+14:56:41.803 -> Apres conversion retour: 12
+14:56:41.803 -> 
+14:56:41.803 -> *** TEST REUSSI: Les valeurs sont identiques ! ***
+14:56:41.803 -> 
+14:56:41.803 -> --- TEST 20 : Usage pratique LoRaWAN SF ---
+14:56:41.803 -> Configuration Spreading Factor:
+14:56:41.803 -> 
+14:56:41.803 -> Test SF: "7"
+14:56:41.803 -> Conversion string -> uint8: "7" -> 7
+14:56:41.803 -> SF LoRaWAN valide: SF7
+14:56:41.803 ->   => lorawan.setSpreadingFactor(spreadingFactor);
+14:56:41.803 -> 
+14:56:41.803 -> Test SF: "9"
+14:56:41.803 -> Conversion string -> uint8: "9" -> 9
+14:56:41.803 -> SF LoRaWAN valide: SF9
+14:56:41.803 ->   => lorawan.setSpreadingFactor(spreadingFactor);
+14:56:41.803 -> 
+14:56:41.803 -> Test SF: "12"
+14:56:41.803 -> Conversion string -> uint8: "12" -> 12
+14:56:41.803 -> SF LoRaWAN valide: SF12
+14:56:41.803 ->   => lorawan.setSpreadingFactor(spreadingFactor);
+14:56:41.803 -> 
+14:56:41.803 -> Tests de valeurs invalides:
+14:56:41.803 -> Test SF: "6"
+14:56:41.803 -> Conversion string -> uint8: "6" -> 6
+14:56:41.803 -> Erreur: SF6 invalide. Valeurs autorisees: 7, 9, 12
+14:56:41.803 ->   => Rejete comme prevu
+14:56:41.803 -> 
+14:56:41.803 -> Test SF: "8"
+14:56:41.803 -> Conversion string -> uint8: "8" -> 8
+14:56:41.803 -> Erreur: SF8 invalide. Valeurs autorisees: 7, 9, 12
+14:56:41.803 ->   => Rejete comme prevu
+14:56:41.803 -> 
+14:56:41.803 -> Test SF: "10"
+14:56:41.803 -> Conversion string -> uint8: "10" -> 10
+14:56:41.803 -> Erreur: SF10 invalide. Valeurs autorisees: 7, 9, 12
+14:56:41.803 ->   => Rejete comme prevu
+14:56:41.803 -> 
+14:56:41.803 -> Test SF: "11"
+14:56:41.803 -> Conversion string -> uint8: "11" -> 11
+14:56:41.803 -> Erreur: SF11 invalide. Valeurs autorisees: 7, 9, 12
+14:56:41.803 ->   => Rejete comme prevu
+14:56:41.803 -> 
+14:56:41.803 -> Test SF: "13"
+14:56:41.803 -> Conversion string -> uint8: "13" -> 13
+14:56:41.803 -> Erreur: SF13 invalide. Valeurs autorisees: 7, 9, 12
+14:56:41.803 ->   => Rejete comme prevu
+14:56:41.803 -> 
+14:56:41.803 -> 
+14:56:41.803 -> --- TEST 21 : Autres parametres LoRaWAN ---
+14:56:41.803 -> Conversion uint8 -> string: 125 -> "125"
+14:56:41.803 -> Bandwidth: 125 kHz
+14:56:41.803 -> Conversion uint8 -> string: 5 -> "5"
+14:56:41.803 -> Coding Rate: 4/5
+14:56:41.803 -> Conversion uint8 -> string: 14 -> "14"
+14:56:41.803 -> TX Power: 14 dBm
+14:56:41.803 -> 
+14:56:41.803 -> ========================================
+14:56:41.803 -> Tous les tests de conversion termines !
+14:56:41.803 -> ========================================

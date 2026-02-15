@@ -257,14 +257,18 @@ void m01_2F_GetNumRucher()
 void m01_2F_GetNumRucherDone()   // appel dans Handle.cpp en fonction de saisieActive
 { static char number[9] = ""; // Buffer pour le numérique
 
-  debugSerial.print("Appel d'une Fonction: ");
-  debugSerial.println("m01_2F_GetNumRucherDone()");
   finalizeNumInput(number); // Récupérer saisie finale
-  debugSerial.print("Nouveau nombre: ");
-  debugSerial.println(number);
   config.applicatif.RucherID = atoi(number);
-  debugSerial.print("Nombre memorisé: ");
-  debugSerial.println(config.applicatif.RucherID);
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+char msg[80];
+  snprintf(msg,80,"Num. de rucher mémorisé: %d",config.applicatif.RucherID);  
+  LOG_INFO(msg);
+//  LOG_WARNING(msg)
+//  LOG_ERROR(msg)
+//  LOG_DEBUG(msg); 
+//  OLEDDrawText(1,2, 0, msg );
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  E24C32saveConfig();
   backMenu();
 }
 
@@ -283,13 +287,22 @@ void m01_3F_GetNameRucher()  // Saisir dans la liste List_Ruchers[], 12 elements
 // Sauvegarde de config.applicatif.RucherName
 void m01_3F_GetNameRucherDone()   // appel dans Handle.cpp en fonction de saisieActive
 { static char currentString[21];
-debugSerial.println("Appel d'une Fonction: m01_4F_GetNameRucherDone()");
 
   finalizeStringInput(currentString); // Récupérer saisie finale
-  debugSerial.print("Nouveau nom: ");
-  debugSerial.println(currentString);
+//  debugSerial.print("Nouveau nom: ");
+//  debugSerial.println(currentString);
   sprintf(config.applicatif.RucherName, "%s", currentString);
-  debugSerial.println(config.applicatif.RucherName);
+// debugSerial.println(config.applicatif.RucherName);
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+char msg[80];
+  snprintf(msg,80,"Nom de rucher mémorisé: %s",config.applicatif.RucherName);  
+  LOG_INFO(msg);
+//  LOG_WARNING(msg)
+//  LOG_ERROR(msg)
+//  LOG_DEBUG(msg); 
+//  OLEDDrawText(1,2, 0, msg );
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  E24C32saveConfig();
   backMenu();
 }
 
@@ -299,8 +312,8 @@ void m01_4F_readConfig()
   debugSerial.println("m01_5F_readConfig()");
 
   //
-EPR_24C32readConfig();
-EPR_24C32DumpConfigToJSON();
+E24C32readConfig();
+E24C32DumpConfigToJSON();
  
   // Si pas fonction_Done();
   // Activer la liste de démarrage quand fin saisie
@@ -317,8 +330,8 @@ void m01_5F_writeConfig()
 {
   debugSerial.println("Appel d'une Fonction: m01_5F_writeConfig()");
 
-EPR_24C32saveConfig();
-EPR_24C32DumpConfigToJSON();
+E24C32saveConfig();
+E24C32DumpConfigToJSON();
 
   // Si pas fonction_Done();
   // Activer la liste de démarrage quand fin saisie
@@ -409,7 +422,22 @@ void m02_2F_AppEUIDone()    // appel dans Handle.cpp en fonction de saisieActive
   finalizeHexInput(hexBuffer); // Récupérer chaine HEXA
   debugSerial.print("Nouvelle chaine AppEUI: ");
   debugSerial.println(hexBuffer);        // Ici vous pouvez traiter AppEUI et revenir au menu
-  hexStringToByteArray(hexBuffer, &AppEUI_List[0], strlen(hexBuffer));                                      // &[0]  ???
+  hexStringToByteArray(hexBuffer, &AppEUI_List[0], strlen(hexBuffer));         // &[0]  ???
+// paramètres LoRa
+//  uint8_t AppEUI [9];        // AppEUI: {0x41, 0x42, 0x45, 0x49, 0x4C, 0x4C, 0x45, 0x31}
+//  uint8_t AppKey [17];        // AppKEY: // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
+
+hexStringToByteArray(hexBuffer, config.applicatif.AppEUI, 9);
+  
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+char msg[80];
+  snprintf(msg,80,"AppEUI mémorisé: %s",hexBuffer);
+  LOG_INFO(msg);
+//  LOG_WARNING(msg);
+//  LOG_ERROR(msg);
+//  OLEDDrawText(1,2, 0, msg );
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  E24C32saveConfig();
   backMenu();
 }
 
@@ -447,9 +475,15 @@ void m02_3L_GetSFDone()    // appel dans Handle.cpp en fonction de saisieActive
     config.applicatif.SpreadingFactor = 9;
   else if (strcmp(selectedSF, "SF12") == 0)
     config.applicatif.SpreadingFactor = 12;
-
-  sprintf(localBuffer, "Nouvelle chaine RC: %d / item: %s / SF: %d", index, selectedSF, config.applicatif.SpreadingFactor );
-  debugSerial.println(localBuffer);        // Ici vous pouvez traiter SF et revenir au menu
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+char msg[80];
+  snprintf(msg,80,"SpreadingFactor mémorisé: %d",config.applicatif.SpreadingFactor);
+  LOG_INFO(msg);
+//  LOG_WARNING(msg)
+//  LOG_ERROR(msg)
+//  OLEDDrawText(1,2, 0, msg );
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  E24C32saveConfig();
   backMenuFromList(); // Fin de gestion hors Timeout
 }
 
@@ -483,8 +517,16 @@ void m02_4F_GetPayloadDelayDone()                          // appel de Handle.cp
   debugSerial.print("PayloadDelay selectionne: ");
   debugSerial.println(strNumber);
   config.applicatif.SendingPeriod = atoi(strNumber);
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+char msg[80];
+  snprintf(msg,80,"PayloadDelay mémorisé: %d",config.applicatif.SendingPeriod);  
+  LOG_INFO(msg);
+//  LOG_WARNING(msg)
+//  LOG_ERROR(msg)
+//  OLEDDrawText(1,2, 0, msg );
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  debugSerial.print("PayloadDelay mémorisé: "); debugSerial.println(config.applicatif.SendingPeriod);
+  E24C32saveConfig();
   DS3231setRTCAlarm2();
   backMenu();
 }
@@ -495,15 +537,15 @@ void m02_5F_Join() // Connexion LoRa
   debugSerial.println("Appel m02_5F_Join - a tester");
   GestionEnCours("m02_5Fa");
 
-  init2483A(config.materiel.DevEUI);  // Réinitialise DevEUI, AppEUI et AppKey
+  SETUPinit2483A(config.materiel.DevEUI);  // Réinitialise DevEUI, AppEUI et AppKey
   
-  debugSerial.println("Fin init2483A");
+  debugSerial.println("Fin SETUPinit2483A");
   GestionEnCours("m02_5Fb");
-  if (initLoRa())   // Reconnecte et envoie Payload + affiche résultat
+  if (SETUPinitLoRa())   // Reconnecte et envoie Payload + affiche résultat
   {
 debugSerial.println("Init LoRa done.");
 debugSerial.println("Test sending LoRa testPayload (7) (Restart)..."); 
-    sendLoRaPayload((uint8_t*)testPayload,7);
+    RN2483AsendLoRaPayload((uint8_t*)testPayload,7);
     OLEDDebugDisplay("LoRa    Initialized");
   }
   else
@@ -532,9 +574,10 @@ void m02_6F_SendPayLoad() // Envoyer Payload
   alarm2_enabled = false;  // Bloquer alarme 2
   debugSerial.println("Appel m02_6F_SendPayLoad - a tester");
   turnOnRedLED();     // PCB donne GREEN?
+  MESUREStake_All_Measure();
   buildLoraPayload();
 #ifdef __SendLoRaInProgrammationMode
-  sendLoRaPayload((uint8_t*)payload, 19);  // hex
+  RN2483AsendLoRaPayload((uint8_t*)payload, 19);  // hex
 #endif
   turnOffRedLED();
   debugSerial.println("Fin Payload, Reactive IRQ1");
@@ -789,7 +832,7 @@ void m04_1F_PoidsTare()
   sprintf(number, "%d", config.materiel.poidsTare);
   debugSerial.println(config.materiel.poidsTare);
   debugSerial.println(number);
-  startNumInput("- MASSE DE LA TARE -", number, 6, false, false, 0, 99000);
+  startNumInput("- MASSE DE LA TARE -", number, 6, false, false, 0, 65535);
 }
 
 void m04_1F_PoidsTareDone()
@@ -803,13 +846,21 @@ void m04_1F_PoidsTareDone()
   config.materiel.poidsTare = atoi(number);
   debugSerial.print("Nombre memorisé: ");
   debugSerial.println(config.materiel.poidsTare);
+// sauvegarde en EEPROM
+char msg[80];
+  snprintf(msg, 21, "poidsTare:%d",config.materiel.poidsTare);
+  LOG_INFO(msg);
+  OLEDDrawText(1,2, 0, msg );
+  E24C32saveConfig();
   backMenu();  
 }
 
 
 void m04_nM_CalibBal_bal()    // utiliser la var gloale bal
 {
-  debugSerial.println("Appel m04_nM_CalibBal_bal - a implementer");
+
+ //   saisieActive = 4n; // pour identifier variable saisie lors de l'affectation
+  LOG_DEBUG("Appel m04_nM_CalibBal_bal - a implementer");
   //  OLEDDrawText(1, 7, 0, "VALIDE pour retour");
   OLEDDrawText(1, 7, 0, "m04_nM_CalibBal_bal");
   /*
@@ -819,23 +870,73 @@ void m04_nM_CalibBal_bal()    // utiliser la var gloale bal
     OLEDdisplayInfoBal();     // part dans KKKKKKKKK
   */
   // fonction implementer
+
+
+
+  
   OLEDdisplayCalibBal();
   InfoScreenRefreshTime = false;
   //  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
+void m04_2M_CalibBal(int numJauge)
+{
+/*
+menu qui appelle :
+  "Tare Balance    (F)",    // m04x_1F_tareBal(int numJauge); enregistre la tare et temperature
+  "Echelle Balance (F)",    // m04x_2F_echBal(int numJauge); calcule la mise à l'echelle
+  "Saisie Comp. Temp. ",    // m04x_3F_adjustTempBal(int numJauge); saisie d'un coefficient de correction
+
+m04_2F_CalibBal_1();   devient tare/echelle?  
+
+  */
+}
+
+
 
 
 void m04_2F_CalibBal_1()  //
 {
-  debugSerial.println("Appel m04_nM_CalibBal_1 - a implementer");
+  LOG_DEBUG("Appel m04_nM_CalibBal_1 - a implementer");
+  saisieActive = 42; // pour identifier variable saisie lors de l'affectation
 
   InfoScreenRefreshTime = true;
   OLEDdisplayInfoBal();     // part dans KKKKKKKKK
 
   // fonction implementer
 
-  InfoScreenRefreshTime = false;
+    if (Peson[config.materiel.Num_Carte][0])//  Poids_Peson(3) = GetPoids(4, 1);
+    {
+      Contrainte_List[0]= MESURESHX711GetStrainGauge(0,scaleA,AVR_10);  // renvoi la moyenne des 10 dernières mesures 
+      HiveSensor_Data.HX711Weight[0] =  calculePoids(0); // kg     
+    }
+
+config.materiel.HX711NoloadValue_0 = Contrainte_List[0];
+
+  
+/*
+  uint8_t Peson_0;              //  N° Peson
+  uint8_t HX711Clk_0;           
+  uint8_t HX711Dta_0;
+  float   HX711NoloadValue_0;   // valeur sans charge (relevée par opérateur )
+  float   HX711Tare_Temp_0;     // Température lors de la tare (mesurée lors de la tare)  
+  float   HX711Scaling_0;       // Facteur de mise à l'echelle
+  float   HX711Cor_Temp_0;      // Facteur de compensation en température
+*/
+    
+char msg[80];
+  snprintf(msg, 21, "tareJaugeA:%8f",Contrainte_List[0]);
+  
+  LOG_INFO(msg);
+//  LOG_WARNING(msg)
+//  LOG_ERROR(msg)
+  OLEDDrawText(1,2, 0, msg );
+
+char rc = read_DHT(dht); 
+config.materiel.HX711Tare_Temp_0 = rc ? 99 : HiveSensor_Data.DHT_Temp;
+E24C32saveConfig();
+
+    InfoScreenRefreshTime = false;
   //  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
@@ -845,7 +946,8 @@ void m04_1F_CalibBal_2()  //
 {
   debugSerial.print("Appel d'une Fonction: ");
   debugSerial.println("m04_1F_CalibBal_2 - a implementer");
-
+  
+  
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
 
   backMenu(); // Relance la navigation menu après saisie  ou timeout
@@ -897,25 +999,137 @@ void m04_6M_PopMenu()  // retour menu000Demarrage
 //  float   Ruche.HX711Scaling_0;
 //  float   Ruche.HX711Cor_Temp_0;
 
-void m04x_0F_tareBal_1(void)    // appel écran de calibration
+// HX711#0 parameters    
+  uint8_t Peson_0;              //  N° Peson
+  uint8_t HX711Clk_0;           
+  uint8_t HX711Dta_0;
+  float   HX711NoloadValue_0;   // valeur sans charge (relevée par opérateur )
+  float   HX711Tare_Temp_0;     // Température lors de la tare (mesurée lors de la tare)  
+  float   HX711Scaling_0;       // Facteur de mise à l'echelle
+  float   HX711Cor_Temp_0;      // Facteur de compensation en température
+
+
+// ---------------------------------------------------------------------------*
+// @brief 
+// @param Aucun
+// @return void
+// @description 
+// ---------------------------------------------------------------------------*
+void m04x_0F_numBalx(void)
+{ static char number[3]; // Buffer pour le numérique 0..99
+ 
+  saisieActive = 490; // pour identifier variable saisie lors de l'affectation
+  debugSerial.print("Appel d'une Fonction: m04x_0F_numBalx()");
+  sprintf(number, "%d", config.materiel.Peson_0);
+  debugSerial.println(config.materiel.Peson_0);
+  debugSerial.println(number);
+  startNumInput("- PESON DE BALANCE -", number, 2, false, false, 0, 99);
+//  backMenu(); // Relance la navigation menu après saisie  ou timeout  
+}
+
+void m04x_0F_numBalxDone(void)
+{ static char number[3] = ""; // Buffer pour le numérique 0..99
+
+  LOG_INFO("Appel d'une Fonction: m04x_0F_numBalxDone()");
+  finalizeNumInput(number); // Récupérer saisie finale
+char msg[80];
+  snprintf(msg,80,"Nouveau nombre: %d",number);
+  LOG_INFO(msg);
+  config.materiel.Peson_0 = atoi(number);
+//  modifier struct pour tableau [num] vs switch (num)/case 1..3
+  snprintf(msg,80,"Nombre memorisé: %d",config.materiel.Peson_0);
+  LOG_INFO(msg);
+
+// sauvegarde en EEPROM
+  snprintf(msg, 21, "Bal %c => Jauge %d",bal+65,config.materiel.Peson_0);
+  LOG_INFO(msg);
+  OLEDDrawText(1,2, 0, msg );
+  E24C32saveConfig();
+E24C32DumpConfigToJSON();    
+  backMenu();                                            // erreur retour menu
+/*  
+09:49:53.653 -> Nombre valide
+09:49:53.653 -> OLEDDisplayMessageL8() => Nombre accepte
+09:49:54.127 -> [DEBUG] Default dans isListInputActive()/saisieActive/default, pourquoi ???????????????????
+09:49:54.127 -> [DEBUG] !!!else!!! : 146106 GestionEnCours 
+09:49:54.127 -> [DEBUG] from handleProgrammingModea: 0
+09:49:54.127 -> [ERROR] Perte de la Gestion courante dans Handle.cpp (Saisies_NB)
+09:49:54.175 -> Lancement Menu principal
+09:49:54.175 -> pushMenu()\title: -- MENU PRINCIPAL --
+*/
+  LOG_ERROR("m04x_0F_numBalxDone: erreur retour menu");
+}
+
+void m04x_0F_tareBal_n(void)    // appel écran de calibration
 {
-  debugSerial.print("Appel d'une Fonction: ");
-  debugSerial.println("m04x_0F_tareBal_1()");
-  backMenu(); // Relance la navigation menu après saisie  ou timeout
+  debugSerial.println("Appel m04x_0F_tareBal_n - a implementer");
+  saisieActive = 491; // pour identifier variable saisie lors de l'affectation
+// selectionner numBal et affectation DEFAULT_VAL + Write EEPROM
+// ou timeout
+  InfoScreenRefreshTime = true;
+  OLEDdisplayInfoBal();     // part dans KKKKKKKKK
+
+  // fonction implementer
+
+    if (Peson[config.materiel.Num_Carte][0])//  Poids_Peson(3) = GetPoids(4, 1);
+    {
+      Contrainte_List[0]= MESURESHX711GetStrainGauge(0,scaleA,AVR_10);  // renvoi la moyenne des 10 dernières mesures 
+      HiveSensor_Data.HX711Weight[0] =  calculePoids(0); // kg     
+    }
+
+config.materiel.HX711NoloadValue_0 = Contrainte_List[0];
+
+  
+/*
+  uint8_t Peson_0;              //  N° Peson
+  uint8_t HX711Clk_0;           
+  uint8_t HX711Dta_0;
+  float   HX711NoloadValue_0;   // valeur sans charge (relevée par opérateur )
+  float   HX711Tare_Temp_0;     // Température lors de la tare (mesurée lors de la tare)  
+  float   HX711Scaling_0;       // Facteur de mise à l'echelle
+  float   HX711Cor_Temp_0;      // Facteur de compensation en température
+*/
+    
+char msg[80];
+  snprintf(msg, 21, "tareJaugeA:%8f",Contrainte_List[0]);
+  
+  LOG_INFO(msg);
+//  LOG_WARNING(msg)
+//  LOG_ERROR(msg)
+  OLEDDrawText(1,2, 0, msg );
+
+char rc = read_DHT(dht); 
+config.materiel.HX711Tare_Temp_0 = rc ? 99 : HiveSensor_Data.DHT_Temp;
+E24C32saveConfig();
+
+//delay(10000);
+
+  InfoScreenRefreshTime = false;
+  //  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
 
-void m04x_1F_echelleBal_2(void) // appel écran de calibration
+
+
+void m04x_1F_echelleBal_n(void) // appel écran de calibration
 {
   debugSerial.print("Appel d'une Fonction: ");
-  debugSerial.println("m04x_1F_echelleBal_2()");
+  debugSerial.println("m04x_1F_echelleBal_n()");
+
+  saisieActive = 492; // pour identifier variable saisie lors de l'affectation
+// selectionner numBal et affectation DEFAULT_VAL + Write EEPROM
+// ou timeout
+  
   backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
-void m04x_2F_tempBal_3(void)    // appel écran de calibration
+void m04x_2F_tempBal_n(void)    // appel écran de calibration
 {
   debugSerial.print("Appel d'une Fonction: ");
-  debugSerial.println("m04x_2F_tempBal_3()");
+  debugSerial.println("m04x_2F_tempBal_n()");
+  saisieActive = 493; // pour identifier variable saisie lors de l'affectation
+// selectionner numBal et affectation DEFAULT_VAL + Write EEPROM
+// ou timeout
   backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 

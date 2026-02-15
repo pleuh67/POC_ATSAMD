@@ -54,10 +54,8 @@ void OLEDInit(void)
 #ifdef OLED242      // SSD1309
     //OLEDInit242();
 #endif
-  debugSerial.print("OLEDInit OK => Display LOGO");
   delay(500);
   display.clearDisplay();
-  debugSerial.println(" done");
 }
 
 // ---------------------------------------------------------------------------*
@@ -67,7 +65,7 @@ void OLEDInit(void)
 // ---------------------------------------------------------------------------*
 void OLEDInit096(void) 
 {
-  debugSerial.println("INIT OLED096");
+  LOG_INFO("INIT OLED096");
 #define SSD1306_SWITCHCAPVCC 0x02
   display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS);
   display.setTextSize(1);
@@ -82,7 +80,7 @@ void OLEDInit096(void)
 // ---------------------------------------------------------------------------*
 void OLEDInit130(void) 
 {
-  debugSerial.println("INIT OLED130");
+  LOG_INFO("INIT OLED130");
   display.begin(OLED_ADDRESS, true);
   display.setTextSize(1);
   display.setTextColor(WHITE);
@@ -96,7 +94,7 @@ void OLEDInit130(void)
 // ---------------------------------------------------------------------------*
 void OLEDInit154(void) 
 {
-  debugSerial.println("INIT OLED154");
+  LOG_INFO("INIT OLED154");
   display.begin(OLED_ADDRESS, true);
   display.setTextSize(1);
   display.setTextColor(WHITE);

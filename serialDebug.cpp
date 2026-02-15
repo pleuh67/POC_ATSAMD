@@ -295,15 +295,14 @@ void debugSerialPrint2digits(int number)
 // ---------------------------------------------------------------------------*
 void debugSerialPrintLoraPayload(uint8_t *payload, uint8_t len)
 { int i;
- char localSerialbuf[40];
+ char localSerialbuf[80];
 
-return;
- 
   for (i = 0; i < len; i++)
     sprintf(&hexPayload[i * 2], "%02X", payload[i]);  
-sprintf(localSerialbuf, "hexPayload: %38s len : %d", hexPayload, len);  
-debugSerial.println(localSerialbuf);
+  sprintf(localSerialbuf, "Sending hexPayload: %s len : %d", hexPayload, len);  
+  LOG_INFO(localSerialbuf);
 }
+
 
 // ---------------------------------------------------------------------------*
 // @brief Affiche des données au format hexadécimal sur le port série
@@ -340,7 +339,7 @@ void debugSerialPrintNextAlarm(DateTime nextPayload, int IRQ)
 {   
   sprintf(serialbuf,"Prochaine IRQ%d: %02d:%02d:%02d",            // (dans %d min) ",
           IRQ, nextPayload.hour(),nextPayload.minute(),nextPayload.second()); //, config.applicatif.SendingPeriod);
-  debugSerial.println(serialbuf); 
+  LOG_INFO(serialbuf); 
 }
 
 
@@ -454,7 +453,7 @@ void debugSerialPrintSystemInfo(void)
 
 
 // debugSerial.println("xxx()\debugSerialDisplayScaledSensorState():");  // tracage d'appel
-void debugSerialDisplayScaledSensorState(int num)     // num 0 .. 3
+void nondebugSerialDisplayScaledSensorState(int num)     // num 0 .. 3
 { 
   return;
 
@@ -464,7 +463,7 @@ void debugSerialDisplayScaledSensorState(int num)     // num 0 .. 3
 // temp : utiliser DHT22 si existe sinon temperature interne µC
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-float toto = (abs(scale.read_average(20)));
+float toto = (abs(scaleA.read_average(20)));
 float pesonValue = toto - pesonTare(num) ;           // valeur à convertir
 float pesonPoids = pesonValue /  pesonScale(num);              // poids correspondant
 // /* 

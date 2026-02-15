@@ -14,7 +14,7 @@
 #include ".\Menu.h"
 #ifdef __MAIN__
 
-// pas de const dans les globales => erreur ce compile !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// pas de const dans les globales => erreur de compile !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Cas typiques nécessitant volatile
 
 // Variables modifiées par interruptions : controler rtc,nextPayload passé volatile pour test compile pas
@@ -29,8 +29,8 @@ bool DEBUG_INTERVAL_1SEC = false;     // désactiver IRQ1 réveil 1 seconde
 bool DEBUG_WAKEUP_PAYLOAD = true;      // Activer IRQ2 réveil payload
 //bool DEBUG_WAKEUP_PAYLOAD = false;    // désactiver IRQ2 réveil payload
 
-//bool DEBUG_LOW_POWER = true;         // Activer/désactiver basse consommation
-bool DEBUG_LOW_POWER = false;        // Activer/désactiver basse consommation
+bool DEBUG_LOW_POWER = true;         // Activer/désactiver basse consommation
+//bool DEBUG_LOW_POWER = false;        // Activer/désactiver basse consommation
 
 unsigned long loopWDT = 0;      // detailler
 
@@ -234,7 +234,7 @@ float Jauge[22][4] = {                // Tare , Echelle (positif) , TareTemp , C
 {-21000,-23208.92,20,0},     // J03 évolution valeurs en négatif. tester sur bornier
       {31000,32000,20,0},     // J04
       {41000,42000,20,0},     // J05
-      {8000,0.19,19.7,0},     // J06  BAL_A  200kg  le 19/03/2021                     // new
+{-142358,20048,19.7,0},     // J06  BAL_A  200kg  le 19/03/2021                     // new
       {61000,62000,20,0},     // J07MS 200kg
  {-35751,-22785.07079,20,0},     // J08SL proto1 SLB 200kg (OK à 5 et 50kg)
  {-28026,-22990.56199,20,0},    // J09MS proto1 SL 200kg (OK à 5 et 50kg)
@@ -256,79 +256,18 @@ float Jauge[22][4] = {                // Tare , Echelle (positif) , TareTemp , C
 
 // N° des jauge montée sur le dispositif de pesée A,B,C,D
 int Peson [10][4] = {
-      {0,0,0,0},    // Module LoRa pas Lu; pas de Peson
+      {0,0,0,0},     // Module LoRa pas Lu; pas de Peson
       {0,0,0,17},    // 0004A30B0020300A carte 1 HS; sur Carte PROTO2 en service le 05/03/2021
       {13,8,9,0},    // 0004A30B0024BF45 carte 2; en service le 10/05/2020
-      {6,3,8,9},   // 0004A30B00EEEE01 Carte PROTO1 mis en service Loess le 08/03/2021 et 02/2026
+      {6,9,3,8},     // 0004A30B00EEEE01 Carte PROTO1 mis en service Loess le 08/03/2021 et 02/2026
       {0,18,0,0},    // 0004A30B00EEA5D5
-      {19,21,14,8}, //17},  // 0004A30B00F547C //
+      {19,21,14,17}, // 0004A30B00F547C //
       {6,0,0,0},
-      {7,0,0,0},
+      {7,0,0,0},   
       {8,0,0,0},
       {9,0,0,0}  
     };
 
-
-// Structures de données des configurations
-
-
-
-// maintenir table de valeurs de correction pesons
-/*
-typedef struct 
-{
-  uint16_t version;       // version matérielle : 3 = PCB2
-  uint8_t adresseRTC;     // DS3231_ADDRESS 0x68
-  uint8_t adresseOLED;    //
-  uint8_t adresseEEPROM;  // EEPROM_ADDRESS 0x57
-
-  uint8_t Num_Carte;  // Numéro de carte 
-  uint8_t Noeud_LoRa;
-  uint8_t Rtc;        // True or False, autodetect?
-  uint8_t KBD_Ana;    // True or False
-  uint8_t Oled;       // True or False OLED096 ou OLED130
-  uint8_t SDHC;       // True or False
-  uint8_t LiPo;       // True or False
-  uint8_t Solaire;    // True or False Aabandonné?
-
-// HX711#0 parameters    
-  uint8_t Peson_0; //  N° Peson
-  uint8_t HX711Clk_0;           
-  uint8_t HX711Dta_0;
-  float   HX711ZeroValue_00;
-  float   HX711Scaling_0;
-  float   HX711Cor_Temp_0;
-// HX711#1 parameters  
-  uint8_t Peson_1; //  N° Peson
-  uint8_t HX711Clk_1;           
-  uint8_t HX711Dta_1;
-  float   HX711ZeroValue_1;
-  float   HX711Scaling_1;
-  float   HX711Cor_Temp_1;
-// HX711#2 parameters
-  uint8_t Peson_2; //  N° Peson
-  uint8_t HX711Clk_2;           
-  uint8_t HX711Dta_2;
-  float   HX711ZeroValue_2;
-  float   HX711Scaling_2;
-  float   HX711Cor_Temp_2;
-// HX711#3 parameters
-  uint8_t Peson_3; //  N° Peson
-  uint8_t HX711Clk_3;           
-  uint8_t HX711Dta_3;
-  float   HX711ZeroValue_3;
-  float   HX711Scaling_3;
-  float   HX711Cor_Temp_3;
-// Analog scaling  
-  float   LDRBrightnessScale;   // 
-  float   VSolScale;            //  
-  float   VBatScale;
-} config.materiel_t;
-*/
-
-// n'est ce pas en doublon avec Data_LoRa.HX711Weight[num]
-// non car Data_LoRa.HX711Weight = poids en g
-// et Contrainte_List[4] = valeur jauge
 float Contrainte_List[4] = {
          -999,  // pas de balance, Affiche "N/A"
          -999,  // pas de balance, Affiche "N/A"
@@ -373,7 +312,7 @@ String readingT;
 // pesée HX711
 // 100 ms par lecture
 // setup 400 ms
-HX711 scale;    // parameter "gain" is ommited; the default value 128 is used 
+//HX711 scale;    // parameter "gain" is ommited; the default value 128 is used 
 HX711 scaleA;    // parameter "gain" is ommited; the default value 128 is used 
 HX711 scaleB;    // parameter "gain" is ommited; the default value 128 is used 
 HX711 scaleC;    // parameter "gain" is ommited; the default value 128 is used 
@@ -431,7 +370,6 @@ extern char lignesDebug[][21];
 // Variables pour saisies
 extern unsigned long lastBlink;
 extern bool blinkState;
-
 
 extern bool debugOLEDDrawText;
 
@@ -526,12 +464,6 @@ extern uint8_t AppKey_List [][17];
 extern ConfigGenerale_t config;
 extern HiveSensor_Data_t HiveSensor_Data;
 
-
-
-
-
-
-
 // Variables debug
 extern bool COM_DebugSerial;
 extern bool logPeson;
@@ -563,7 +495,11 @@ extern float VLumScale_List [];
 extern String readingT;
 
 // Lecture du poids 
-extern HX711 scale;
+//extern HX711 scale;
+extern HX711 scaleA;    // parameter "gain" is ommited; the default value 128 is used 
+extern HX711 scaleB;    // parameter "gain" is ommited; the default value 128 is used 
+extern HX711 scaleC;    // parameter "gain" is ommited; the default value 128 is used 
+extern HX711 scaleD;    // parameter "gain" is ommited; the default value 128 is used 
 extern int HX711_NbLect;
 
 #endif

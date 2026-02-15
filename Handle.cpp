@@ -30,6 +30,7 @@
 //  Les saisie de Listes, numériques, Alphanumériques, chaines HEXA, date, time, email et IP
 
 
+
 #define __SerialDebugPoc      // decommenter pour afficher messages debug
 
 // ---------------------------------------------------------------------------*
@@ -40,24 +41,10 @@
 // @return void
 // ---------------------------------------------------------------------------*
 void handleOperationMode(void) // Mode exploitation : que réveil payload
-{ 
-// debugSerial.println("handleOperationMode()"); // non,  defile en continu.
+{ uint8_t rc;
   if (switchToOperationMode)    // affiche qu'une fois
   { 
-// supprimer 3 lignes si pas revu.
-debugSerial.println("Passage en mode EXPLOITATION");
-
-    switchToProgrammingMode = true;
-    switchToOperationMode = false;
-// Reactive l'affichage du menu de démarrage pour sortie mode EXPLOITATION
-    startupListActivated = false;
-    OLEDClear(); 
-    OLEDDrawText(1, 7, 0, "MODE EXPLOITATION   ");
-
-// préciser le statut des menus, retour au propre au PRINCIPAL
-//debugSerialPrintMenuStruct(&menuStack[currentMenuDepth]);
-//debugSerialListStruct();
-/**/
+    SETUPswitchToOperationMode();
   }  
 #ifdef __SerialDebugPoc    
 //debugSerial.print("E");   // EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
@@ -78,42 +65,27 @@ debugSerial.println("handleOperationMode/wakeupPayload set to false");
 sprintf(serialbuf, "I2£%d ", counterPayload);   
 debugSerial.println(serialbuf);       // I2£n I2£n I2£n I2£n I2£n I2£n I2£n
 //#endif
-    turnOnRedLED();     // PCB donne GREEN?
-
-// preferer takeAllMeasure()
-  for ( int z=0;z<4;z++)                                 // Z  0 .. 3
-  {     
-    if (Peson[config.materiel.Num_Carte][z])
-    { 
-      Contrainte_List[z]=GetStrainGaugeAverage(z,10);  // renvoi la moyenne des &à dernières mesures 
-      HiveSensor_Data.HX711Weight[z] =  calculePoids(z); // kg
-    }
-/*    else 
-    {
-      sprintf(OLEDbuf,"Bal. %d: NONE ",z);
-     OLEDDebugDisplay(OLEDbuf);
-    }
-*/    
-  }
-
-    
-    buildLoraPayload();
+  turnOnRedLED();     // PCB donne GREEN?
+  MESUREStake_All_Measure();
+   
+  buildLoraPayload();
 #ifdef __SendLoRaInOperationMode
-debugSerial.println("__SendLoRaInOperationMode DEFINED => sendLoRaPayload()");   
-  sendLoRaPayload((uint8_t*)payload,19);   // hex
+debugSerial.println("__SendLoRaInOperationMode DEFINED => RN2483AsendLoRaPayload()");   
+  rc = RN2483AsendLoRaPayload((uint8_t*)payload,19);   // hex
+
+
+char localOLEDbuf[21] = "12345678901234567890";
+  snprintf(localOLEDbuf,20, "LoRa : %d", rc);    // 16
+
+  
+  OLEDDebugDisplay((char *)RN2483AloRaSendErrorToString(rc));
+
 #endif    
     turnOffRedLED();
 debugSerial.println("Fin Payload, Reactive IRQ1");    
     alarm1_enabled = true;   // Réactiver alarme 1 
-#ifdef __SerialDebugPoc  
-//debugSerial.print("7");   // 777777777777777777777777777777777777
-#endif
 // GestionEnCours("ISR2b");  // Surveillance pour Debug
   }
-
-#ifdef __SerialDebugPoc    
-//debugSerial.print("8");   // 888888888888888888888888888888888888
-#endif
 
 // Entrée en veille si activée
   if (DEBUG_LOW_POWER && modeExploitation) // pas de low power en config
@@ -123,6 +95,7 @@ debugSerial.println("Low");
     sleep();
 debugSerial.println("low"); 
   }
+// Lecture mode de fonctionnement
 }
 
 
@@ -140,13 +113,6 @@ unsigned int dtobin(unsigned char h)
    return b;
 }
 
-
-
-
-//Trace KKKKK avec from handleProgrammingModea: 0
-// changement de ...Active()vers rienActive()
-
-
 // ---------------------------------------------------------------------------*
 // @brief affiche le type de traitement en cours de gestion par le handler
 // @param Aucun
@@ -156,8 +122,6 @@ void GestionEnCours(char *from)
 { unsigned char encours=0;
   static unsigned char oldencours=255;
 // n'afficher qu'a chaque changement
-
-// return;    // KKKKKKK  apparait aussi si sortie
   
   if (isListInputActive())  
   {
@@ -196,9 +160,9 @@ void GestionEnCours(char *from)
   }
   if (encours != oldencours)
   {
-    debugSerial.print(serialbuf);
+    LOG_DEBUG(serialbuf);
     sprintf(serialbuf, "from %s: %d", from, dtobin(encours));
-    debugSerial.println(serialbuf);
+    LOG_DEBUG(serialbuf);                                             // passer sur 1 ligne
     oldencours = encours;
   }  
 }
@@ -213,80 +177,91 @@ void HandleSaisieActive()
           case 12:                                  // m01_2F_GetNumRucher()            pas initialement ???? > KKKKKKKKKKKKKKKKK
           {
             m01_2F_GetNumRucherDone();                            // 
-debugSerial.println("lancement m01_2F_GetNumRucher");                       
+LOG_DEBUG("lancement m01_2F_GetNumRucher");                       
             saisieActive=0;
             break;
           }
           case 21:                                  //  m02_1F_AppKEY()
           {
             m02_1F_AppKEYDone();
-debugSerial.println("lancement m02_1F_AppKEYDone");                       
+LOG_DEBUG("lancement m02_1F_AppKEYDone");                       
             saisieActive=0;
             break;
           }
           case 22:      // m02_1F_AppEUI
           {
             m02_2F_AppEUIDone();
-debugSerial.println("lancement m02_1F_AppEUIDone");                       
+LOG_DEBUG("lancement m02_1F_AppEUIDone");                       
             saisieActive=0;
             break;
           }
           case 23:
           {
              m02_3L_GetSFDone();
-debugSerial.println("lancement m02_3L_GetSFDone()");                       
+LOG_DEBUG("lancement m02_3L_GetSFDone()");                       
             saisieActive=0;
             break;
           }
           case 24:
           {
             m02_4F_GetPayloadDelayDone();
-debugSerial.println("lancement m02_3L_GetSFDone()");                       
+LOG_DEBUG("lancement m02_3L_GetSFDone()");                       
             saisieActive=0;
             break;
           }
           case 30:
           {
             m03_0F_CalibVBatDone();
-debugSerial.println("lancement m03_2F_CalibVBatDone()");                       
+LOG_DEBUG("lancement m03_2F_CalibVBatDone()");                       
             saisieActive=0;
             break;
           }     
           case 31:
           {
             m03_1F_CalibVSolDone();
-debugSerial.println("lancement m03_1F_CalibVSolDone()");                       
+LOG_DEBUG("lancement m03_1F_CalibVSolDone()");                       
             saisieActive=0;
             break;
           }     
           case 32:
           {
             m03_2F_CalibVLumDone();
-debugSerial.println("lancement m03_2F_CalibVLumDone()");                       
+LOG_DEBUG("lancement m03_2F_CalibVLumDone()");                       
             saisieActive=0;
             break;
           }     
           case 40:                 // m04_0F_InfoBalDone())
           {                        // désactive screenRefresh
             m04_0F_InfoBalDone();                            // 
-debugSerial.println("lancement m04_0F_InfoBalDone()");                       
+LOG_DEBUG("lancement m04_0F_InfoBalDone()");                       
             saisieActive=0;
             break;
           }
           case 41:                                  // m04_1F_PoidsTare()
           {
             m04_1F_PoidsTareDone();                            // 
-debugSerial.println("lancement m04_1F_PoidsTareDone()");                       
+LOG_DEBUG("lancement m04_1F_PoidsTareDone()");                       
             saisieActive=0;
             break;
           }
+          case 490:                                  // m04x_0F_numBalxDone()
+          {
+            m04x_0F_numBalxDone();                            // 
+LOG_DEBUG("lancement m04x_0F_numBalxDone()");                       
+            saisieActive=0;
+            break;
+          }
+
+
+
+          
           default:  // ne rien faire
           {
- debugSerial.println("default dans isListInputActive()/saisieActive/default, pourquoi ???????????????????");           
+ LOG_DEBUG("Default dans isListInputActive()/saisieActive/default, pourquoi ???????????????????");           
             break;      
           }
         }
-//EPR_24C32DumpConfigToJSON(); 
+//E24C32DumpConfigToJSON(); 
 }
 
 
@@ -303,35 +278,48 @@ void handleProgrammingMode(void)
 {  if (switchToProgrammingMode)    // affiche qu'une fois
   {  
 // supprimer ligne si pas revu.
-debugSerial.println("Passage en mode PROGRAMMATION");
+LOG_DEBUG("Passage en mode PROGRAMMATION");
 
     restartGestionSaisieOLED();
 
 // fin void Restart_Gestion_Saisie_OLED() 
     
   wakeupPayload = false; // désactive envoi généré pendant PROGRAMMATION
-debugSerial.println("handleProgrammingMode1/wakeupPayload set to false");
+LOG_DEBUG("handleProgrammingMode1/wakeupPayload set to false");
   }
 
 #ifdef __SendLoRaInProgrammationMode
   if (wakeupPayload)                          // Envoi LoRa, LED Activité LoRa
   { static int counterPayload=0;   
+    uint8_t rc;
     wakeupPayload = false;
-//debugSerial.println("handleProgrammingMode2/wakeupPayload set to false");
-//debugSerial.println("GestionEnCours(\"ISR2a\")");   //                                            recherche KKKKK
+//LOG_DEBUG("handleProgrammingMode2/wakeupPayload set to false");
+//LOG_DEBUG("GestionEnCours(\"ISR2a\")");   //                                            recherche KKKKK
     counterPayload++;  // compte le nombre d'envois Payload
 //#ifdef __SerialDebugPoc    
 //sprintf(serialbuf, "I2£%d ", counterPayload);   
-//debugSerial.println(serialbuf);       // I2£n I2£n I2£n I2£n I2£n I2£n I2£n
+//LOG_DEBUG(serialbuf);       // I2£n I2£n I2£n I2£n I2£n I2£n I2£n
 //#endif
+
+
+    // SAUVEGARDER l'état de l'écran avant l'envoi pour eviter KKKKKKKKKKKKKKKKKKK
+    infoScreenState_t savedInfoState = infoScreenState;
+
+
     turnOnRedLED();     // PCB donne GREEN?
     buildLoraPayload();                                          // pas la cause du KKKKKKKKKKKKKKKKKKKKK
-    sendLoRaPayload((uint8_t*)payload,19);   // pas la cause du KKKKKKKKKKKKKKKKKKKKK
+    rc = RN2483AsendLoRaPayload((uint8_t*)payload,19);   // pas la cause du KKKKKKKKKKKKKKKKKKKKK
     turnOffRedLED();
+   
+    // RESTAURER l'état de l'écran après l'envoi pour eviter KKKKKKKKKKKKKKKKKKK
+    infoScreenState = savedInfoState;
+    
+
+    
     alarm1_enabled = true;   // Réactiver alarme 1 
 #ifdef __SerialDebugPoc  
 
-//debugSerial.print("7");   // 777777777777777777777777777777777777
+//LOG_DEBUG("7");   // 777777777777777777777777777777777777
 
 //Apparition de KKKKK
 
@@ -768,12 +756,8 @@ backMenu();
 // ne devrait pas y arriver???
 
 GestionEnCours("handleProgrammingModek");     // affiche le type de traitement en cours de gestion par le handler
-#ifdef __SerialDebugPoc    
-debugSerial.print("K");   // KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
-#endif   
 
-
-LOG_ERROR("Perte de la Gestion courante");
+LOG_ERROR("Perte de la Gestion courante dans Handle.cpp (Saisies_NB)");
 
 startupListActivated = false;
 restartGestionSaisieOLED();    // solution de sortie d'urgence à valider
@@ -852,9 +836,7 @@ infoScreenState_t processInfoScreen(void)
   // Traitement de la touche VALIDE pour revenir
   if (touche == VALIDE)
   {
-
 debugSerial.println("processInfoScreen()\VALIDE");
-    
     touche = KEY_NONE;
     infoScreenState = INFO_SCREEN_CLOSED;
     // Revenir au menu d'appel de l'écran d'info
