@@ -32,10 +32,10 @@ pour :
 
           
   InfoBalScreenRefreshTime = false; // desactive rafraichissement time/date  
-  InfoBalScreenRefreshBal_1 = false; // desactive rafraichissement Balance 1
-  InfoBalScreenRefreshBal_2 = false; // desactive rafraichissement Balance 2
-  InfoBalScreenRefreshBal_3 = false; // desactive rafraichissement Balance 3
-  InfoBalScreenRefreshBal_4 = false; // desactive rafraichissement Balance 4
+  InfoBalScreenRefreshBal_A = false; // desactive rafraichissement Balance 1
+  InfoBalScreenRefreshBal_B = false; // desactive rafraichissement Balance 2
+  InfoBalScreenRefreshBal_C = false; // desactive rafraichissement Balance 3
+  InfoBalScreenRefreshBal_D = false; // desactive rafraichissement Balance 4
 
 
 m02_0E_PageInfosLoRa()

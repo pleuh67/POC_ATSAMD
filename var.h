@@ -49,7 +49,7 @@ uint8_t currentMenuDepth = 0;
 
 
 // ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
-char saisieActive=0;
+uint16_t saisieActive=0;
 
 // Contexte de Listes et menus
 bool startupListActivated = false;    // Flag pour activer la liste au démarrage
@@ -97,10 +97,10 @@ bool LoRaScreenRefreshTime = false;         // rafraichissement heure ecran LoRa
 bool LoraScreenRefreshNextPayload = false;
 // Balances
 bool InfoBalScreenRefreshTime = false;      // rafraichissement heure ecran Balances
-bool InfoBalScreenRefreshBal_1 = false;     // desactive rafraichissement Balance 1
-bool InfoBalScreenRefreshBal_2 = false;     // desactive rafraichissement Balance 2
-bool InfoBalScreenRefreshBal_3 = false;     // desactive rafraichissement Balance 3
-bool InfoBalScreenRefreshBal_4 = false;     // desactive rafraichissement Balance 4
+bool InfoBalScreenRefreshBal_A = false;     // desactive rafraichissement Balance 1
+bool InfoBalScreenRefreshBal_B = false;     // desactive rafraichissement Balance 2
+bool InfoBalScreenRefreshBal_C = false;     // desactive rafraichissement Balance 3
+bool InfoBalScreenRefreshBal_D = false;     // desactive rafraichissement Balance 4
 
 // Analogiques
 bool InfoVBatScreenRefreshTime = false;     // rafraichissement heure ecran VBAT
@@ -123,6 +123,7 @@ bool InfoVSolScreenRefresh = false;         // rafraichissement mesures ecran VS
 
 char OLEDbuf[OLEDBUFLEN] = "12345678901234567890";  // 128
 char serialbuf[SERIALBUFLEN];                       // 256
+char LOGmsg[LOGBUFLEN];                                // 120
 bool debugOLEDDrawText = false;
 
 // Variables pour gestion des interruptions
@@ -231,26 +232,25 @@ float Jauge[22][4] = {                // Tare , Echelle (positif) , TareTemp , C
       {0,0,0,0},     // J00 => pas de peson connecté
       {178666,108.5,20,0},    // J01 20kg
       {30250,21.2,20,0},      // J02
-{-21000,-23208.92,20,0},     // J03 évolution valeurs en négatif. tester sur bornier
+  {-62120,-21155.09091,16.9,0},     // J03 200kg 0004A30B00EEEE01-C
       {31000,32000,20,0},     // J04
       {41000,42000,20,0},     // J05
-{-142358,20048,19.7,0},     // J06  BAL_A  200kg  le 19/03/2021                     // new
+  {-172934,-19971.81818,16.9,0},    // J06 200kg 0004A30B00EEEE01-A
       {61000,62000,20,0},     // J07MS 200kg
- {-35751,-22785.07079,20,0},     // J08SL proto1 SLB 200kg (OK à 5 et 50kg)
- {-28026,-22990.56199,20,0},    // J09MS proto1 SL 200kg (OK à 5 et 50kg)
+  {-66631,-21091.18182,16.9,0},     // J08 200kg 0004A30B00EEEE01-D
+  {-59236,-20018.81818,16.9,0},     // J09 200kg 0004A30B00EEEE01-B
       {374942,1145.58,20,0},  // J10 2kg
       {4798647,1053.71,20,0}, // J11 2kg
       {179568,1056.40,20,0},  // J12 2kg
       {20369,19.93,20,-2},   // J13MS proto1 Master 200kg (53kg ok 5kg => 3.12!!!)
- {120895,103286.1433,20,1},    // J14 2/20 kg                                   new
+ {120895,103286.1433,20,1},         // J14 2/20 kg    0004A30B00F547C-C
       {139983,20.46,17.1,0.048341},    // J15SFX proto1 SLC 200kg (OK à 5 et 50kg)
       {-4031212 ,1117,20,1},    // J16 proto1  2kg (OK à 1 et 5kg)                        new 
- {150625,104371.5144,20,1},    // J17 2/20 kg 
+ {150625,104371.5144,20,1},         // J17 20kg 0004A30B00F547C-D
       {34134.50,103.77,20,0},    // J18 proto1  20kg (OK à 1 et 5kg)
-//      {7929.70,97.49,20,0},    // J19 proto1  20kg (OK à 1 et 5kg) + DHT22
- {191991,109204.6332,20,1},    // J19 proto1  20kg (OK à 1 et 5kg) + DHT22               new
+ {191991,109204.6332,20,1},         // J19 20kg 0004A30B00F547C-A + DHT22
       {22005.70,97.49,20,0},    // J20
- {-21641,106727.5847,20,1}                // J21   2/20 kg                                            new
+ {-21641,106727.5847,20,1}          // J21 20kg 0004A30B00F547C-B + DHT22
     };
 
 
@@ -381,7 +381,7 @@ extern menuLevel_t menuStack[];
 extern uint8_t currentMenuDepth;
 
 // ===== VARIABLES GLOBALES MACHINE A ETAT SAISIES=====
-extern char saisieActive;
+extern uint16_t saisieActive;
 extern bool startupListActivated;
 extern char *stringSaisie;
 extern listInputContext_t listInputCtx;
@@ -419,10 +419,10 @@ extern bool LoRaScreenRefreshTime;
 extern bool LoraScreenRefreshNextPayload;
 // Balances
 extern bool InfoBalScreenRefreshTime;
-extern bool InfoBalScreenRefreshBal_1;     // desactive rafraichissement Balance 1
-extern bool InfoBalScreenRefreshBal_2;     // desactive rafraichissement Balance 2
-extern bool InfoBalScreenRefreshBal_3;     // desactive rafraichissement Balance 3
-extern bool InfoBalScreenRefreshBal_4;     // desactive rafraichissement Balance 4
+extern bool InfoBalScreenRefreshBal_A;     // desactive rafraichissement Balance 1
+extern bool InfoBalScreenRefreshBal_B;     // desactive rafraichissement Balance 2
+extern bool InfoBalScreenRefreshBal_C;     // desactive rafraichissement Balance 3
+extern bool InfoBalScreenRefreshBal_D;     // desactive rafraichissement Balance 4
 
 
 // Analogiques
@@ -445,6 +445,7 @@ extern clavier_context_t clavierContext;
 
 extern char *OLEDbuf; //[];
 extern char serialbuf[];
+extern char LOGmsg[];
 
 //extern char Module_ID_HWEUI[];   
 

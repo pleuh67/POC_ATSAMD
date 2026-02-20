@@ -251,10 +251,21 @@ LOG_DEBUG("lancement m04x_0F_numBalxDone()");
             saisieActive=0;
             break;
           }
+          case 491:                                  // m04x_0F_numBalxDone()
+          {
+             m04x_0F_tareBalDone();                            // 
+LOG_DEBUG("lancement  m04x_0F_tareBalDone()");                       
+            saisieActive=0;
+            break;
+          }
 
-
-
-          
+           case 493:                                  // m04x_0F_numBalxDone()
+          {
+   //         m04x_2F_tempBalDone();                            // 
+LOG_DEBUG("lancement m04x_2F_tempBalDone()");                       
+            saisieActive=0;
+            break;
+          }
           default:  // ne rien faire
           {
  LOG_DEBUG("Default dans isListInputActive()/saisieActive/default, pourquoi ???????????????????");           
@@ -365,9 +376,9 @@ char dummy[21] = "";
  // Gestion navigation dans les menus       
 
 sprintf(serialbuf, " Mode selectionne: %d - Depth: %d - Val: %s", selectedModeIndex, currentMenuDepth, currentMenu->title);
-debugSerial.println(serialbuf);
+LOG_DEBUG(serialbuf);
 sprintf(serialbuf, "azerty: %s", currentMenu->menuList[selectedModeIndex]);
-debugSerial.println(serialbuf);
+LOG_DEBUG(serialbuf);
 //        debugSerial.println(m0_Demarrage[selectedModeIndex]);
 
         if (currentMenuDepth > 0)
@@ -395,13 +406,13 @@ debugSerial.println(currentMenu->title);
         }
         else
         {
-debugSerial.println("Cas ELSE");  
+LOG_DEBUG("Cas ELSE");  
           processMenuSelection(selectedModeIndex);
         }
         break;        
       }
       case LIST_INPUT_CANCELLED:
-debugSerial.println("Selection LISTE annulee par timeout");
+LOG_DEBUG("Selection LISTE annulee par timeout");
 
        // Si on était dans un sous-menu, revenir au menu précédent
         if (currentMenuDepth > 1)

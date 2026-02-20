@@ -161,11 +161,8 @@ void m04_0F_InfoBalDone(void);
 void m04_1F_PoidsTare(void);        // existe
 void m04_1F_PoidsTareDone(void);    // existe
 
-void m04_2M_CalibBal(int numJauge);
-//void m04_2F_CalibBal_1(void); // appel menu calib#1 des paramètre
-//void m04_1F_CalibBal_2(void); // appel menu calib#2 des paramètre
-//void m04_2F_CalibBal_3(void); // appel menu calib#3 des paramètre
-//void m04_3F_CalibBal_4(void); // appel menu calib#4 des paramètre
+void m04_2M_CalibBal(); // une fonction pour les  Bal, utilis var Globale!
+
 
 
 //void m04_1F_poidsBal_kgDone(void);
@@ -174,12 +171,12 @@ void m04_2M_CalibBal(int numJauge);
 // Appels du menu m04x => appel écrans de calibrations
 void m04x_0F_numBalx(void);
 void m04x_0F_numBalxDone(void);
-void m04x_0F_tareBal_n(void); //int numJauge);    // appel écran de calibration
-void m04x_0F_tareBal_nDone(void); //int numJauge);    // appel écran de calibration
-void m04x_1F_echelleBal_n(void); // appel écran de calibration
-void m04x_1F_echelleBal_nDone(void); // appel écran de calibration
-void m04x_2F_tempBal_n(void);    // appel écran de calibration
-void m04x_2F_tempBal_nDone(void);    // appel écran de calibration
+void m04x_0F_tareBal(void); //int numJauge);    // appel écran de calibration
+void m04x_0F_tareBalDone(void); //int numJauge);    // appel écran de calibration
+void m04x_1F_echelleBal(void); // appel écran de calibration
+void m04x_1F_echelleBalDone(void); // appel écran de calibration
+void m04x_2F_tempBal(void);    // appel écran de calibration
+void m04x_2F_tempBalDone(void);    // appel écran de calibration
 
 // ---------------------------------------------------------------------------*
 // Fonctions de gestion des calibrations
@@ -433,6 +430,7 @@ void OLEDdisplayInfoScreenLoRa(void);
 void OLEDdisplayInfoBal(void);
 void OLEDdisplayWeightBal(void);
 void OLEDdisplayCalibBal(void);
+void OLEDdisplayTareBal(void);
 
 
 // Gestion saisies

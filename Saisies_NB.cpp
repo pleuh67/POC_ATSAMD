@@ -69,9 +69,9 @@ void initStartupList(void)
 {
   // Activer la liste menu000Demarrage au démarrage
   pushMenu("-- MENU PRINCIPAL --", m0_Demarrage, M0_ITEM, 0);
-
   startupListActivated = true;
-  debugSerial.println("initStartupList()\\Menu principal active");
+  LOG_DEBUG("initStartupList()\\Menu principal active");
+// replace
   debugSerial.print("initStartupList()\\currentMenuDepth apres init: ");
   debugSerial.println(currentMenuDepth);
 
@@ -135,20 +135,30 @@ void startListInput(const char* title, const char** itemList, uint8_t numItems, 
   listInputCtx.lastScrollOffset = 0xFF;      // Forcer le rafraîchissement initial
   listInputCtx.lastSelectedIndex = 0xFF;     // Forcer le rafraîchissement initial
   listInputCtx.lastCursorBlink = false;
-    
+ 
+  snprintf(LOGmsg,80,"startListInput()\\Selection dans liste demarree: %s Peson: %d Timeout: %d secondes",
+              title,timeoutMs / 1000); 
+  LOG_DEBUG(LOGmsg); 
+/*
+// replace 
   debugSerial.print("startListInput()\\Selection dans liste demarree: ");
   debugSerial.println(title);
   debugSerial.print("Timeout: ");
   debugSerial.print(timeoutMs / 1000);
   debugSerial.println(" secondes");
-
+*/
 // afficher itemList
   uint8_t i =0;
-  debugSerial.println("startListInput()fin\\Liste des options du menu :");
+  LOG_DEBUG("startListInput()fin\\Liste des options du menu :");
   for (i=0; i<numItems; i++)
   {
+  snprintf(LOGmsg,80," %s -",itemList[i]); 
+  debugSerial.print(LOGmsg); 
+/*   
+// replace
     debugSerial.print(itemList[i]);
     debugSerial.print(" - ");
+*/
   }
 debugSerial.println("");
 
@@ -174,7 +184,7 @@ listInputState_t processListInput(void)
   if (listInputCtx.timeoutDuration > 0 && (millis() - listInputCtx.lastActivity > listInputCtx.timeoutDuration))
   {
     listInputCtx.state = LIST_INPUT_CANCELLED;
-    debugSerial.println("Selection annulee par timeout");
+    LOG_DEBUG("Selection annulee par timeout");
     OLEDDisplayMessageL8("Timeout             ", false, false);
     return listInputCtx.state;
   }
@@ -210,15 +220,20 @@ listInputState_t processListInput(void)
           }
         }
         listInputCtx.displayRefresh = true;
+ // replace       
+
+
+ 
         debugSerial.print("Selection index: ");
         debugSerial.print(listInputCtx.selectedIndex);
         debugSerial.print(" - ");
         debugSerial.println(listInputCtx.itemList[listInputCtx.selectedIndex]);
+        
         break;
         
       case DOWN:
         // Descendre dans la liste
-        debugSerial.println("Down de processListInput"); 
+        LOG_DEBUG("Down de processListInput"); 
         
         if (listInputCtx.selectedIndex < listInputCtx.maxItems - 1)
         {
@@ -236,6 +251,7 @@ listInputState_t processListInput(void)
           listInputCtx.scrollOffset = 0;  // Remettre au début de l'affichage
         }
         listInputCtx.displayRefresh = true;
+// replace        
         debugSerial.print("Selection index: ");
         debugSerial.print(listInputCtx.selectedIndex);
         debugSerial.print(" - ");
@@ -244,6 +260,7 @@ listInputState_t processListInput(void)
         
       case VALIDE:
         listInputCtx.state = LIST_INPUT_COMPLETED;
+// replace
         debugSerial.print("Selection validee: ");
         debugSerial.print(listInputCtx.selectedIndex);
         debugSerial.print(" - ");
@@ -282,7 +299,7 @@ uint8_t finalizeListInput(char* outputItem)
   
   if (!outputItem)
   {
-    debugSerial.println("Erreur: outputItem NULL");
+    LOG_ERROR("Erreur: outputItem NULL");
     return 0xFF;
   }
   
@@ -295,16 +312,13 @@ uint8_t finalizeListInput(char* outputItem)
     {
       strncpy(outputItem, listInputCtx.itemList[selectedIndex], 20);
       outputItem[20] = '\0';
-      
-      debugSerial.print("Item final selectionne [");
-      debugSerial.print(selectedIndex);
-      debugSerial.print("]: ");
-      debugSerial.println(outputItem);
-    }
+  snprintf(LOGmsg,80,"Item final selectionne [%d]: %s",selectedIndex,outputItem);
+  LOG_DEBUG(msg); 
+     }
     else
     {
       strcpy(outputItem, "NONE");
-      debugSerial.println("Erreur: item invalide, retour NONE");
+      LOG_ERROR("Erreur: item invalide, retour NONE");
     }
     
     // Reset du contexte
@@ -320,7 +334,7 @@ uint8_t finalizeListInput(char* outputItem)
     strcpy(outputItem, "NONE");
     selectedIndex = 0xFF;
     
-    debugSerial.println("Selection annulee (timeout), retour: NONE");
+    LOG_DEBUG("Selection annulee (timeout), retour: NONE");
     
     // Reset du contexte
     listInputCtx.state = LIST_INPUT_IDLE;
@@ -333,6 +347,7 @@ uint8_t finalizeListInput(char* outputItem)
   {
     // État inattendu
     strcpy(outputItem, "NONE");
+// replace    
     debugSerial.print("Erreur: etat inattendu (");
     debugSerial.print(listInputCtx.state);
     debugSerial.println("), retour: NONE");
@@ -349,7 +364,7 @@ uint8_t finalizeListInput(char* outputItem)
 void cancelListInput(void)
 {
   listInputCtx.state = LIST_INPUT_CANCELLED;
-  debugSerial.println("Selection dans liste annulee");
+  LOG_DEBUG("Selection dans liste annulee");
   OLEDDisplayMessageL8("Selection annulee", false, false);
   
   // Reset du contexte
@@ -373,7 +388,7 @@ bool isListInputActive(void)
 // ---------------------------------------------------------------------------*
 void refreshListDisplay(void)
 {
-  char timeoutMsg[21];
+  char timeoutLOGLOGmsg[21];
   bool scrollChanged = (listInputCtx.scrollOffset != listInputCtx.lastScrollOffset);
   bool selectionChanged = (listInputCtx.selectedIndex != listInputCtx.lastSelectedIndex);
   bool cursorBlinkChanged = (listInputCtx.cursorBlink != listInputCtx.lastCursorBlink);
@@ -381,9 +396,8 @@ void refreshListDisplay(void)
   // Afficher le titre seulement au premier affichage
   if (listInputCtx.lastScrollOffset == 0xFF)
   {
-    char paddedTitle[21];
-    snprintf(paddedTitle, 21, "%-20s", listInputCtx.title);
-    OLEDDrawText(1, 0, 0, paddedTitle);
+    snprintf(OLEDbuf, 21, "%-20s", listInputCtx.title);
+    OLEDDrawText(1, 0, 0, OLEDbuf);
   }
   
   // Calcul du nombre d'éléments à afficher (maximum 6 lignes disponibles)
@@ -400,9 +414,8 @@ void refreshListDisplay(void)
         if (itemIndex < listInputCtx.maxItems)
         {
           // Afficher le texte de l'item (colonnes 2-19, 18 caractères)
-          char textBuffer[19];
-          snprintf(textBuffer, 19, "%-18.18s", listInputCtx.itemList[itemIndex]);
-          OLEDDrawText(1, i + 1, 2, textBuffer);
+          snprintf(OLEDbuf, 19, "%-18.18s", listInputCtx.itemList[itemIndex]);
+          OLEDDrawText(1, i + 1, 2, OLEDbuf);
           
           // Afficher ou non le curseur (colonnes 0-1)
           if (itemIndex == listInputCtx.selectedIndex && listInputCtx.cursorBlink)
@@ -481,19 +494,19 @@ void refreshListDisplay(void)
     
     if (remainingTime <= 5) // Afficher le countdown les 5 dernières secondes
     {
-      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-      OLEDDrawText(1, 7, 0, timeoutMsg);
+      snprintf(OLEDbuf, 21, "Timeout: %lds       ", remainingTime);
+      OLEDDrawText(1, 7, 0, OLEDbuf);
     }
     else if (listInputCtx.lastScrollOffset == 0xFF) // Premier affichage uniquement
     {
-      snprintf(timeoutMsg, 21, "+/-: Nav  VALIDE: OK");
-      OLEDDrawText(1, 7, 0, timeoutMsg);
+      snprintf(OLEDbuf, 21, "+/-: Nav  VALIDE: OK");
+      OLEDDrawText(1, 7, 0, OLEDbuf);
     }
   }
   else if (listInputCtx.lastScrollOffset == 0xFF) // Pas de timeout, premier affichage uniquement
   {
-    snprintf(timeoutMsg, 21, "+/-: Nav  VALIDE: OK");
-    OLEDDrawText(1, 7, 0, timeoutMsg);
+    snprintf(OLEDbuf, 21, "+/-: Nav  VALIDE: OK");
+    OLEDDrawText(1, 7, 0, OLEDbuf);
   }
   
   // Sauvegarder les états pour la prochaine comparaison
@@ -723,9 +736,8 @@ void refreshNumDisplay(void)
     
     if (remainingTime <= 5 && remainingTime != numInputCtx.lastTimeoutValue)
     {
-      char timeoutMsg[21];
-      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-      OLEDDrawText(1, 7, 0, timeoutMsg);
+      snprintf(OLEDbuf, 21, "Timeout: %lds       ", remainingTime);
+      OLEDDrawText(1, 7, 0, OLEDbuf);
       numInputCtx.lastTimeoutValue = remainingTime;
     }
     else if (remainingTime > 5 && numInputCtx.lastTimeoutValue <= 5)
@@ -755,6 +767,11 @@ bool isNumValid(const char *num, bool allowNeg, bool allowDec, long minVal, long
   
   bool hasPoint = false;
   bool hasMinus = false;
+
+//LOG_DEBUG(num);
+//LOG_DEBUG(len);
+//LOG_DEBUG("test conformité");
+
   
   for (uint8_t i = 0; i < len; i++)
   {
@@ -763,28 +780,45 @@ bool isNumValid(const char *num, bool allowNeg, bool allowDec, long minVal, long
     // Vérifier le signe moins
     if (c == '-')
     {
-      if (!allowNeg || i != 0 || hasMinus) return false;
+      if (!allowNeg || i != 0 || hasMinus) 
+      {
+       LOG_DEBUG("non conforme : signe");
+        return false;
+      }  
       hasMinus = true;
+      
       continue;
     }
     
     // Vérifier le point décimal
     if (c == '.')
     {
-      if (!allowDec || hasPoint) return false;
+      if (!allowDec || hasPoint) 
+      {
+        LOG_DEBUG("non conforme : decimal");
+        return false;
+      }  
       hasPoint = true;
       continue;
     }
     
     // Vérifier que c'est un chiffre
-    if (c < '0' || c > '9') return false;
+    if (c < '0' || c > '9') 
+      {
+        LOG_DEBUG("non conforme : pas chiffre");
+        return false;
+      }  
   }
   
   // Vérifier la valeur si pas de décimale
   if (!hasPoint)
   {
     long value = atol(num);
-    if (value < minVal || value > maxVal) return false;
+    if (value < minVal || value > maxVal)
+      {
+        LOG_DEBUG("non conforme : decimal");
+        return false;
+      }  
   }
   
   return true;
@@ -911,8 +945,7 @@ void updateNumDisplayOffset(void)
 // @return numInputState_t État actuel de la saisie (IDLE, ACTIVE, COMPLETED, CANCELLED)
  // ---------------------------------------------------------------------------*
 numInputState_t processNumInput(void)
-{ char msg[80];
-
+{ 
   if (numInputCtx.state != NUM_INPUT_ACTIVE)
   {
     return numInputCtx.state;
@@ -945,8 +978,8 @@ numInputState_t processNumInput(void)
           numInputCtx.position--;
           updateNumDisplayOffset();
           numInputCtx.displayRefresh = true;
-          snprintf(msg,80,"Position curseur num: %d",numInputCtx.position);
-          LOG_DEBUG(msg);
+          snprintf(LOGmsg,80,"Position curseur num: %d",numInputCtx.position);
+          LOG_DEBUG(LOGmsg);
         }
         break;
         
@@ -957,8 +990,8 @@ numInputState_t processNumInput(void)
           numInputCtx.position++;
           updateNumDisplayOffset();
           numInputCtx.displayRefresh = true;
-          snprintf(msg,80,"Position curseur num: %d",numInputCtx.position);
-          LOG_DEBUG(msg);
+          snprintf(LOGmsg,80,"Position curseur num: %d",numInputCtx.position);
+          LOG_DEBUG(LOGmsg);
         }
         break;
         
@@ -998,12 +1031,12 @@ numInputState_t processNumInput(void)
         {
           numInputCtx.state = NUM_INPUT_COMPLETED;
           LOG_DEBUG("Nombre valide");
-          OLEDDisplayMessageL8("Nombre accepte", false, false);
+          OLEDDisplayMessageL8("Nombre accepte      ", false, false);
         }
         else
         {
           LOG_DEBUG("Nombre invalide");
-          OLEDDisplayMessageL8("Nombre invalide !", false, false);
+          OLEDDisplayMessageL8("Nombre invalide !   ", false, false);
         }
         break;
         
@@ -1033,8 +1066,7 @@ numInputState_t processNumInput(void)
 void finalizeNumInput(char* outputNum)
 {
   if (numInputCtx.state == NUM_INPUT_COMPLETED)
-  { char msg[20];
-  
+  {  
     strncpy(outputNum, numInputCtx.workingNum, 20);
     outputNum[20] = '\0';
     
@@ -1043,8 +1075,8 @@ void finalizeNumInput(char* outputNum)
     numInputCtx.position = 0;
     numInputCtx.length = 0;
     numInputCtx.displayOffset = 0;
-    snprintf(msg,20,"Nombre final: %d",outputNum);
-    LOG_DEBUG(msg);
+    snprintf(LOGmsg,20,"Nombre final: %d",outputNum);
+    LOG_DEBUG(LOGmsg);
   }
 }
 
@@ -1142,7 +1174,7 @@ void modifyStringChar(char* str, uint8_t pos, int delta)
   }
   
   str[pos] = getNextAlphaNumChar(str[pos], delta);
-  
+ // replace 
   debugSerial.print("Position string ");
   debugSerial.print(pos);
   debugSerial.print(" modifiee: '");
@@ -1212,8 +1244,8 @@ void startStringInput(const char* title, const char* initialString, uint8_t maxL
   stringInputCtx.timeoutDuration = TIMEOUT_SAISIE; // 30 secondes
   stringInputCtx.firstDisplay = true;
   stringInputCtx.lastTimeoutValue = 0xFF;
-  
-  debugSerial.print("Saisie alphanumérique demarree: ");
+// replace  
+  debugSerial.print("Saisie alphanumérique demarrée: ");
   debugSerial.println(title);
   
   OLEDDisplayMessageL8("Modifiez le texte   ", false, false);
@@ -1258,6 +1290,7 @@ void refreshStringDisplay(void)
   if (stringChanged)
   {
     char displayText[21];
+// same ??????????????
     strncpy(displayText, stringInputCtx.workingString, 20);
     displayText[20] = '\0';
     OLEDDrawText(1, 2, 0, displayText);
@@ -1326,9 +1359,8 @@ void refreshStringDisplay(void)
     
     if (remainingTime <= 5 && remainingTime != stringInputCtx.lastTimeoutValue)
     {
-      char timeoutMsg[21];
-      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-      OLEDDrawText(1, 7, 0, timeoutMsg);
+      snprintf(OLEDbuf, 21, "Timeout: %lds       ", remainingTime);
+      OLEDDrawText(1, 7, 0, OLEDbuf);
       stringInputCtx.lastTimeoutValue = remainingTime;
     }
     else if (remainingTime > 5 && stringInputCtx.lastTimeoutValue <= 5)
@@ -1384,6 +1416,7 @@ stringInputState_t processStringInput(void)
         {
           stringInputCtx.position--;
           stringInputCtx.displayRefresh = true;
+// replace
           debugSerial.print("Position curseur string: ");
           debugSerial.println(stringInputCtx.position);
         }
@@ -1395,6 +1428,7 @@ stringInputState_t processStringInput(void)
         {
           stringInputCtx.position++;
           stringInputCtx.displayRefresh = true;
+// replace
           debugSerial.print("Position curseur string: ");
           debugSerial.println(stringInputCtx.position);
         }
@@ -1415,6 +1449,7 @@ stringInputState_t processStringInput(void)
       case VALIDE:
         // Valider la saisie
         stringInputCtx.state = STRING_INPUT_COMPLETED;
+// replace
         debugSerial.print("Chaine alphanumérique validee: ");
         debugSerial.println(stringInputCtx.workingString);
         OLEDDisplayMessageL8("Texte accepte       ", false, false);
@@ -1461,7 +1496,7 @@ void finalizeStringInput(char* outputString)
     // Reset du contexte
     stringInputCtx.state = STRING_INPUT_IDLE;
     stringInputCtx.position = 0;
-    
+// replace    
     debugSerial.print("Chaine finale: ");
     debugSerial.println(outputString);
   }
@@ -1567,7 +1602,7 @@ void modifyHexDigit(char *hex, uint8_t pos, int delta)
   }
   
   hex[pos] = getNextHexChar(hex[pos], delta);
-  
+// relace  
   debugSerial.print("Position hex ");
   debugSerial.print(pos);
   debugSerial.print(" modifiee: ");
@@ -1585,7 +1620,7 @@ void startHexInput(const char* title, const char* initialHex, uint8_t maxLen)
 {
   if (hexInputCtx.state != HEX_INPUT_IDLE)
   {
-    debugSerial.println("Saisie hexadecimale en cours????");
+    LOG_DEBUG("Saisie hexadecimale en cours????");
     return; // Saisie déjà en cours
   }
   
@@ -1648,7 +1683,7 @@ void startHexInput(const char* title, const char* initialHex, uint8_t maxLen)
   hexInputCtx.lastValidity = false;
   hexInputCtx.firstDisplay = true;
   hexInputCtx.lastTimeoutValue = 0xFF;
-  
+// replace  
   debugSerial.print(hexInputCtx.title);
   debugSerial.print(" => Saisie hexa demarree (longueur: ");
   debugSerial.print(maxLen);
@@ -1716,7 +1751,7 @@ hexInputState_t processHexInput(void)
       (millis() - hexInputCtx.lastActivity > hexInputCtx.timeoutDuration))
   {
     hexInputCtx.state = HEX_INPUT_CANCELLED;
-    debugSerial.println("Saisie hexadecimale annulee par timeout");
+    LOG_DEBUG("Saisie hexadecimale annulee par timeout");
     OLEDDisplayMessageL8("Timeout             ", false, false);
     return hexInputCtx.state;
   }
@@ -1735,6 +1770,7 @@ hexInputState_t processHexInput(void)
           hexInputCtx.position--;
           updateHexDisplayOffset();
           hexInputCtx.displayRefresh = true;
+ // replace         
           debugSerial.print("Position curseur hex: ");
           debugSerial.println(hexInputCtx.position);
         }
@@ -1746,6 +1782,7 @@ hexInputState_t processHexInput(void)
           hexInputCtx.position++;
           updateHexDisplayOffset();
           hexInputCtx.displayRefresh = true;
+  // replace        
           debugSerial.print("Position curseur hex: ");
           debugSerial.println(hexInputCtx.position);
         }
@@ -1765,7 +1802,7 @@ hexInputState_t processHexInput(void)
         if (isHexStringValid(hexInputCtx.workingHex, hexInputCtx.maxLength))
         {
           hexInputCtx.state = HEX_INPUT_COMPLETED;
-          debugSerial.println("Chaine hexadecimale validee");
+          LOG_DEBUG("Chaine hexadecimale validee");
           OLEDDisplayMessageL8("Cle hexa acceptee   ", false, false);
         }
         else
@@ -1929,9 +1966,8 @@ void refreshHexDisplay(void)
     // N'afficher le timeout que dans les 5 dernières secondes
     if (remainingTime <= 5 && remainingTime != hexInputCtx.lastTimeoutValue)
     {
-      char timeoutMsg[21];
-      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-      OLEDDrawText(1, 7, 0, timeoutMsg);
+      snprintf(OLEDbuf, 21, "Timeout: %lds       ", remainingTime);
+      OLEDDrawText(1, 7, 0, OLEDbuf);
       hexInputCtx.lastTimeoutValue = remainingTime;
     }
     else if (remainingTime > 5 && hexInputCtx.lastTimeoutValue <= 5)
@@ -1963,7 +1999,7 @@ void finalizeHexInput(char* outputHex)
     hexInputCtx.position = 0;
     hexInputCtx.displayOffset = 0;
     hexInputCtx.firstDisplay = true;
-    
+// replace    
     debugSerial.print("Chaine hexadecimale finale: ");
     debugSerial.println(outputHex);
   }
@@ -1977,7 +2013,7 @@ void finalizeHexInput(char* outputHex)
 void cancelHexInput(void)
 {
   hexInputCtx.state = HEX_INPUT_CANCELLED;
-  debugSerial.println("Saisie hexadecimale annulee");
+  LOG_DEBUG("Saisie hexadecimale annulee");
   OLEDDisplayMessageL8("Saisie annulee      ", false, false);
   
   // Reset du contexte
@@ -2396,9 +2432,9 @@ void refreshHexDisplay(void)
     // N'afficher le timeout que dans les 5 dernières secondes
     if (remainingTime <= 5 && remainingTime != hexInputCtx.lastTimeoutValue)
     {
-      char timeoutMsg[21];
-      snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-      OLEDDrawText(1, 7, 0, timeoutMsg);
+      char timeoutLOGLOGmsg[21];
+      snprintf(timeoutLOGmsg, 21, "Timeout: %lds       ", remainingTime);
+      OLEDDrawText(1, 7, 0, timeoutLOGmsg);
       hexInputCtx.lastTimeoutValue = remainingTime;
     }
     else if (remainingTime > 5 && hexInputCtx.lastTimeoutValue <= 5)
@@ -2499,7 +2535,7 @@ void startTimeInput(const char* title, const char* initialTime)
   timeInputCtx.lastValidity = false;
   timeInputCtx.firstDisplay = true;
   
-  debugSerial.println("Saisie d'heure demarree");
+  LOG_DEBUG("Saisie d'heure demarree");
   OLEDDisplayMessageL8("Modifiez l'heure    ", false, false);
 }
 
@@ -2522,7 +2558,7 @@ timeInputState_t processTimeInput(void)
   if (timeInputCtx.timeoutDuration > 0 && (millis() - timeInputCtx.lastActivity > timeInputCtx.timeoutDuration))
   {
     timeInputCtx.state = TIME_INPUT_CANCELLED;
-    debugSerial.println("Saisie heure annulee par timeout");
+    LOG_DEBUG("Saisie heure annulee par timeout");
     OLEDDisplayMessageL8("Timeout             ", false, false);
     return timeInputCtx.state;
   }
@@ -2542,6 +2578,7 @@ timeInputState_t processTimeInput(void)
           {
             timeInputCtx.position = newPos;
             timeInputCtx.displayRefresh = true;
+  // replace          
             debugSerial.print("Position curseur heure: ");
             debugSerial.println(timeInputCtx.position);
           }
@@ -2555,6 +2592,7 @@ timeInputState_t processTimeInput(void)
           {
             timeInputCtx.position = newPos;
             timeInputCtx.displayRefresh = true;
+  // replace          
             debugSerial.print("Position curseur heure: ");
             debugSerial.println(timeInputCtx.position);
           }
@@ -2575,7 +2613,7 @@ timeInputState_t processTimeInput(void)
         if (isTimeValid(timeInputCtx.workingTime))
         {
           timeInputCtx.state = TIME_INPUT_COMPLETED;
-          debugSerial.println("Heure validee");
+          LOG_DEBUG("Heure validee");
           OLEDDisplayMessageL8("Heure OK           ", false, false);
         }
         else
@@ -2619,7 +2657,7 @@ void finalizeTimeInput(char* outputTime)
     // Reset du contexte
     timeInputCtx.state = TIME_INPUT_IDLE;
     timeInputCtx.position = 0;
-    
+// replace   
     debugSerial.print("Heure finale: ");
     debugSerial.println(outputTime);
   }
@@ -2633,7 +2671,7 @@ void finalizeTimeInput(char* outputTime)
 void cancelTimeInput(void)
 {
   timeInputCtx.state = TIME_INPUT_CANCELLED;
-  debugSerial.println("cancelTimeInput() Saisie d'heure annulee");
+  LOG_DEBUG("cancelTimeInput() Saisie d'heure annulee");
   OLEDDisplayMessageL8("Saisie annulee", false, false);  
   // Reset du contexte
   timeInputCtx.state = TIME_INPUT_IDLE;
@@ -2729,9 +2767,8 @@ void refreshTimeDisplay(void)
       unsigned long remainingTime = (timeInputCtx.timeoutDuration - (millis() - timeInputCtx.lastActivity)) / 1000;
       if (remainingTime <= 5)
       {
-        char timeoutMsg[21];
-        snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-        OLEDDrawText(1, 7, 0, timeoutMsg);
+        snprintf(OLEDbuf, 21, "Timeout: %lds       ", remainingTime);
+        OLEDDrawText(1, 7, 0, OLEDbuf);
       }
 
 // 25 ne me plait pas !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2886,7 +2923,7 @@ void modifyTimeDigit(char *t, uint8_t pos, int delta)
   }
   
   t[pos] = newVal + '0';
-  
+// replace  
   debugSerial.print("Position heure ");
   debugSerial.print(pos);
   debugSerial.print(" modifiee: ");
@@ -2972,7 +3009,7 @@ dateInputState_t processDateInput(void)
   if (dateInputCtx.timeoutDuration > 0 && (millis() - dateInputCtx.lastActivity > dateInputCtx.timeoutDuration))
   {
     dateInputCtx.state = DATE_INPUT_CANCELLED;
-    debugSerial.println("Saisie date annulee par timeout");
+    LOG_DEBUG("Saisie date annulee par timeout");
     OLEDDisplayMessageL8("Timeout", false, false);
     return dateInputCtx.state;
   }
@@ -2992,6 +3029,7 @@ dateInputState_t processDateInput(void)
           {
             dateInputCtx.position = newPos;
             dateInputCtx.displayRefresh = true;
+  // replace          
             debugSerial.print("Position curseur date: ");
             debugSerial.println(dateInputCtx.position);
           }
@@ -3005,6 +3043,7 @@ dateInputState_t processDateInput(void)
           {
             dateInputCtx.position = newPos;
             dateInputCtx.displayRefresh = true;
+// replace            
             debugSerial.print("Position curseur date: ");
             debugSerial.println(dateInputCtx.position);
           }
@@ -3025,12 +3064,12 @@ dateInputState_t processDateInput(void)
         if (isDateValid(dateInputCtx.workingDate))
         {
           dateInputCtx.state = DATE_INPUT_COMPLETED;
-          debugSerial.println("Date validee");
+          LOG_DEBUG("Date validee");
           OLEDDisplayMessageL8("Date OK             ", false, false);
         }
         else
         {
-          debugSerial.println("Date invalide, validation refusee");
+          LOG_DEBUG("Date invalide, validation refusee");
           OLEDDisplayMessageL8("Date invalide !     ", false, false);
         }
         break;
@@ -3069,7 +3108,7 @@ void finalizeDateInput(char* outputDate)
     // Reset du contexte
     dateInputCtx.state = DATE_INPUT_IDLE;
     dateInputCtx.position = 0;
-    
+// replace    
     debugSerial.print("Date finale: ");
     debugSerial.println(outputDate);
   }
@@ -3083,7 +3122,7 @@ void finalizeDateInput(char* outputDate)
 void cancelDateInput(void)
 {
   dateInputCtx.state = DATE_INPUT_CANCELLED;
-  debugSerial.println("Saisie de date annulee");
+  LOG_DEBUG("Saisie de date annulee");
   OLEDDisplayMessageL8("Saisie annulee      ", false, false);
   
   // Reset du contexte
@@ -3180,9 +3219,8 @@ void refreshDateDisplay(void)
       unsigned long remainingTime = (dateInputCtx.timeoutDuration - (millis() - dateInputCtx.lastActivity)) / 1000;
       if (remainingTime <= 5)
       {
-        char timeoutMsg[21];
-        snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-        OLEDDrawText(1, 7, 0, timeoutMsg);
+        snprintf(OLEDbuf, 21, "Timeout: %lds       ", remainingTime);
+        OLEDDrawText(1, 7, 0, OLEDbuf);
       }
 /* //     Les instructions ne clignottent pas
       else if (dateInputCtx.cursorBlink)
@@ -3336,7 +3374,7 @@ void modifyDateDigit(char *d, uint8_t pos, int delta)
   }
   
   d[pos] = newVal + '0';
-  
+ // replace 
   debugSerial.print("Position date ");
   debugSerial.print(pos);
   debugSerial.print(" modifiee: ");
@@ -3515,7 +3553,7 @@ void modifyIPDigit(char *ip, uint8_t pos, int delta)
   ip[offset] = '0' + (octetValue / 100);
   ip[offset + 1] = '0' + ((octetValue / 10) % 10);
   ip[offset + 2] = '0' + (octetValue % 10);
-  
+ // replace 
   debugSerial.print("Position IP ");
   debugSerial.print(pos);
   debugSerial.print(" modifiee, octet: ");
@@ -3561,7 +3599,7 @@ void startIPInput(const char* initialIP)
   ipInputCtx.lastValidity = false;
   ipInputCtx.firstDisplay = true;
   
-  debugSerial.println("Saisie IP demarree");
+  LOG_DEBUG("Saisie IP demarree");
   OLEDDisplayMessageL8("Modifiez l'IP       ", false, false);
 }
 
@@ -3584,7 +3622,7 @@ ipInputState_t processIPInput(void)
   if (ipInputCtx.timeoutDuration > 0 && (millis() - ipInputCtx.lastActivity > ipInputCtx.timeoutDuration))
   {
     ipInputCtx.state = IP_INPUT_CANCELLED;
-    debugSerial.println("Saisie IP annulee par timeout");
+    LOG_DEBUG("Saisie IP annulee par timeout");
     OLEDDisplayMessageL8("Timeout             ", false, false);
     return ipInputCtx.state;
   }
@@ -3604,6 +3642,7 @@ ipInputState_t processIPInput(void)
           {
             ipInputCtx.position = newPos;
             ipInputCtx.displayRefresh = true;
+  // replace          
             debugSerial.print("Position curseur IP: ");
             debugSerial.println(ipInputCtx.position);
           }
@@ -3617,6 +3656,7 @@ ipInputState_t processIPInput(void)
           {
             ipInputCtx.position = newPos;
             ipInputCtx.displayRefresh = true;
+   // replace         
             debugSerial.print("Position curseur IP: ");
             debugSerial.println(ipInputCtx.position);
           }
@@ -3637,12 +3677,12 @@ ipInputState_t processIPInput(void)
         if (isIPValid(ipInputCtx.workingIP))
         {
           ipInputCtx.state = IP_INPUT_COMPLETED;
-          debugSerial.println("IP validee");
+          LOG_DEBUG("IP validee");
           OLEDDisplayMessageL8("IP acceptee         ", false, false);
         }
         else
         {
-          debugSerial.println("IP invalide");
+          LOG_DEBUG("IP invalide");
           OLEDDisplayMessageL8("IP invalide !       ", false, false);
         }
         break;
@@ -3681,7 +3721,7 @@ void finalizeIPInput(char* outputIP)
     // Reset du contexte
     ipInputCtx.state = IP_INPUT_IDLE;
     ipInputCtx.position = 0;
-    
+ // replace   
     debugSerial.print("IP finale: ");
     debugSerial.println(outputIP);
   }
@@ -3788,9 +3828,9 @@ void refreshIPDisplay(void)
       unsigned long remainingTime = (ipInputCtx.timeoutDuration - (millis() - ipInputCtx.lastActivity)) / 1000;
       if (remainingTime <= 5)
       {
-        char timeoutMsg[21];
-        snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-        OLEDDrawText(1, 7, 0, timeoutMsg);
+
+        snprintf(OLEDbuf, 21, "Timeout: %lds       ", remainingTime);
+        OLEDDrawText(1, 7, 0, OLEDbuf);
       }
       else if (ipInputCtx.cursorBlink)
       {
@@ -3983,7 +4023,7 @@ void startEmailInput(const char* initialEmail)
   emailInputCtx.lastValidityState = 0xFF;
   emailInputCtx.firstDisplay = true;
   
-  debugSerial.println("Saisie email demarree");
+  LOG_DEBUG("Saisie email demarree");
   OLEDDisplayMessageL8("Saisissez email", false, false);
 }
 
@@ -4030,7 +4070,7 @@ emailInputState_t processEmailInput(void)
   if (emailInputCtx.timeoutDuration > 0 && (millis() - emailInputCtx.lastActivity > emailInputCtx.timeoutDuration))
   {
     emailInputCtx.state = EMAIL_INPUT_CANCELLED;
-    debugSerial.println("Saisie email annulee par timeout");
+    LOG_DEBUG("Saisie email annulee par timeout");
     OLEDDisplayMessageL8("Timeout             ", false, false);
     return emailInputCtx.state;
   }
@@ -4050,6 +4090,7 @@ emailInputState_t processEmailInput(void)
           emailInputCtx.position--;
           updateEmailDisplayOffset();
           emailInputCtx.displayRefresh = true;
+ // replace         
           debugSerial.print("Position curseur email: ");
           debugSerial.println(emailInputCtx.position);
         }
@@ -4062,6 +4103,7 @@ emailInputState_t processEmailInput(void)
           emailInputCtx.position++;
           updateEmailDisplayOffset();
           emailInputCtx.displayRefresh = true;
+// replace          
           debugSerial.print("Position curseur email: ");
           debugSerial.println(emailInputCtx.position);
         }
@@ -4111,12 +4153,12 @@ emailInputState_t processEmailInput(void)
         if (isEmailValid(emailInputCtx.workingEmail))
         {
           emailInputCtx.state = EMAIL_INPUT_COMPLETED;
-          debugSerial.println("Email valide");
+          LOG_DEBUG("Email valide");
           OLEDDisplayMessageL8("Email accepte       ", false, false);
         }
         else
         {
-          debugSerial.println("Email invalide");
+          LOG_DEBUG("Email invalide");
           OLEDDisplayMessageL8("Email invalide !    ", false, false);
         }
         break;
@@ -4157,7 +4199,7 @@ void finalizeEmailInput(char* outputEmail)
     emailInputCtx.position = 0;
     emailInputCtx.length = 0;
     emailInputCtx.displayOffset = 0;
-    
+ // replace   
     debugSerial.print("Email final: ");
     debugSerial.println(outputEmail);
   }
@@ -4171,7 +4213,7 @@ void finalizeEmailInput(char* outputEmail)
 void cancelEmailInput(void)
 {
   emailInputCtx.state = EMAIL_INPUT_CANCELLED;
-  debugSerial.println("Saisie email annulee");
+  LOG_DEBUG("Saisie email annulee");
   OLEDDisplayMessageL8("Saisie annulee      ", false, false);
   
   // Reset du contexte
@@ -4314,9 +4356,8 @@ void refreshEmailDisplay(void)
       unsigned long remainingTime = (emailInputCtx.timeoutDuration - (millis() - emailInputCtx.lastActivity)) / 1000;
       if (remainingTime <= 5)
       {
-        char timeoutMsg[21];
-        snprintf(timeoutMsg, 21, "Timeout: %lds       ", remainingTime);
-        OLEDDrawText(1, 5, 0, timeoutMsg);
+        snprintf(OLEDbuf, 21, "Timeout: %lds       ", remainingTime);
+        OLEDDrawText(1, 5, 0, OLEDbuf);
       }
       else if (emailInputCtx.cursorBlink)
       {

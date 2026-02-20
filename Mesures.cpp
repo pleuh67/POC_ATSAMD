@@ -123,7 +123,7 @@ static float oldpoids2=0;
 poidsBal_g(2) = poidsBal_g(2)-0.5 - (Temp_Peson(2)-TareTemp(2))*CompTemp(2); // decalé de 500g
 if (oldpoids2 ==0)
   oldpoids2 = poidsBal_g(2);
-  float delta = abs(poidsBal_g(2)-oldpoids2);
+  float delta = fabs(poidsBal_g(2)-oldpoids2);
   sprintf(serialbuf, "%6.3f",poidsBal_g(2) );
 debugSerial.println(serialbuf); 
   sprintf(serialbuf, "%6.3f",oldpoids2);
@@ -207,20 +207,20 @@ if (!scale.wait_ready_timeout(2000))  // 2 secondes de timeout
   scale.power_down();
   return 0.0;  // Sortir de la fonction
 }
-  valAVide = abs(scale.read_average(20));                   // sans charge
+  valAVide = fabs(scale.read_average(20));                   // sans charge
   debugSerial.print("Val a vide : "); debugSerial.println(valAVide);
   //valeur à saisir ou en //metre !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   debugSerial.println("poser poids xxxxxg (15s)");
   delay(15000);
 
   //  pesee = scale.get_units(HX711_NbLect);
-  valEnCharge = abs(scale.read_average(20));              // en charge
+  valEnCharge = fabs(scale.read_average(20));              // en charge
   debugSerial.print("val en charge : "); debugSerial.println(valEnCharge);
   Echelle = (valEnCharge - valAVide) / poids_en_grammes;  //
   debugSerial.println("Mise à echelle faite");
   debugSerial.print("Echelle : "); debugSerial.println(Echelle);
   debugSerial.print("poids calculé : ");
-  Contrainte_List [num] = (abs(scale.read_average(20)));
+  Contrainte_List [num] = (fabs(scale.read_average(20)));
   debugSerial.println((Contrainte_List [num] - valAVide) / Echelle);
 
   scale.power_down();              // put the ADC in sleep mode
@@ -271,11 +271,13 @@ float MESURESHX711GetStrainGauge(int numJauge,HX711 scale,int sample)    // N° 
  //  debugSerial.print(numJauge); debugSerial.println((char)(65+numJauge));  // affiche A/B/C/D
 
   if (logPeson)
-  { char msg[200];
-    snprintf(msg,80,"Jauge: %c Peson: %d average: %d Tare: %.0f Scale: %.0f poids: %f",
+  {
+    snprintf(LOGmsg,90,"len! Jauge: %c Peson: %d average: %d Tare: %.0f Scale: %.0f poids: %f",
               numJauge+65,Peson[config.materiel.Num_Carte][numJauge],
               readSample,pesonTare(numJauge), pesonScale(numJauge), calculePoids(numJauge)); 
-    LOG_DEBUG(msg); 
+#define LOG_DEBUG(LOGmsg) debugSerial.print("[DEBUG] "); debugSerial.println(LOGmsg)
+    LOG_DEBUG(LOGmsg); 
+#define LOG_DEBUG(LOGmsg) //  debugSerial.print("[DEBUG] "); debugSerial.println(LOGmsg)
    }
    return(readSample);   // valeur du peson brute moyennée sur les 10  mesures 
 }

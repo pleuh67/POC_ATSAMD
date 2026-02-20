@@ -463,7 +463,7 @@ void nondebugSerialDisplayScaledSensorState(int num)     // num 0 .. 3
 // temp : utiliser DHT22 si existe sinon temperature interne µC
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-float toto = (abs(scaleA.read_average(20)));
+float toto = (fabs(scaleA.read_average(20)));
 float pesonValue = toto - pesonTare(num) ;           // valeur à convertir
 float pesonPoids = pesonValue /  pesonScale(num);              // poids correspondant
 // /* 

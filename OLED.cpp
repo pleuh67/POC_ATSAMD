@@ -740,6 +740,8 @@ snprintf(localOLEDbuf, 21,"== INFOS BALANCES ==");
 
 // pas reellement du INFO_SCREEN
 
+
+
 void OLEDdisplayCalibBal(void)
 {char localOLEDbuf[21] = "12345678901234567890";
   infoScreenState = INFO_SCREEN_ACTIVE;   // pour eviter KKKKKKKK
@@ -763,6 +765,7 @@ snprintf(localOLEDbuf, 21,"=== CALIB. BAL:%d ===", bal);
 // fin Fonction()
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
 }
+
 
 
 // ---------------------------------------------------------------------------*
@@ -790,7 +793,7 @@ debugSerial.println("InfoVSolScreenRefreshTime()");
 
 // Weight INFOS
 char localOLEDbuf[21] = "";
-  if (InfoBalScreenRefreshBal_1)   // rafraichir les poids
+  if (InfoBalScreenRefreshBal_A)   // rafraichir les poids
   { 
  
 // debugOLEDDrawText = true;     
@@ -799,17 +802,17 @@ char localOLEDbuf[21] = "";
      OLEDDrawText(1, 3, 7, localOLEDbuf);
   } 
 
-  if (InfoBalScreenRefreshBal_2)   // rafraichir les poids
+  if (InfoBalScreenRefreshBal_B)   // rafraichir les poids
   { 
      snprintf(localOLEDbuf, 21," %8.2f",calculePoids(1));
      OLEDDrawText(1, 4, 7, localOLEDbuf);
   } 
-  if (InfoBalScreenRefreshBal_3)   // rafraichir les poids
+  if (InfoBalScreenRefreshBal_C)   // rafraichir les poids
   {
      snprintf(localOLEDbuf, 21," %8.2f",calculePoids(2));
      OLEDDrawText(1, 5, 7, localOLEDbuf);
   } 
-  if (InfoBalScreenRefreshBal_4)   // rafraichir les poids
+  if (InfoBalScreenRefreshBal_D)   // rafraichir les poids
   {
      snprintf(localOLEDbuf, 21," %8.2f",calculePoids(3));
      OLEDDrawText(1, 6, 7, localOLEDbuf);
@@ -931,10 +934,10 @@ void OLEDDisabelAllRefresh()
           LoraScreenRefreshNextPayload = false;
 // écran InFoBal
   InfoBalScreenRefreshTime = false; // desactive rafraichissement time/date  
-  InfoBalScreenRefreshBal_1 = false; // desactive rafraichissement Balance 1
-  InfoBalScreenRefreshBal_2 = false; // desactive rafraichissement Balance 2
-  InfoBalScreenRefreshBal_3 = false; // desactive rafraichissement Balance 3
-  InfoBalScreenRefreshBal_4 = false; // desactive rafraichissement Balance 4
+  InfoBalScreenRefreshBal_A = false; // desactive rafraichissement Balance A
+  InfoBalScreenRefreshBal_B = false; // desactive rafraichissement Balance B
+  InfoBalScreenRefreshBal_C = false; // desactive rafraichissement Balance C
+  InfoBalScreenRefreshBal_D = false; // desactive rafraichissement Balance D
 // CalibVBat() 
  InfoVBatScreenRefresh = false; // desactive rafraichissement
  InfoVBatScreenRefreshTime = false; // desactive rafraichissement time/date  

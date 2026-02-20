@@ -268,7 +268,7 @@ void DS3231copyTimeToMicro(bool forcer)
     debugSerial.println(" secondes");
     
     // Si la différence est significative ou si forcé, synchroniser
-    if (forcer || abs(difference) > 2) // Plus de 2 secondes de différence
+    if (forcer || fabs(difference) > 2) // Plus de 2 secondes de différence
     {
         debugSerial.println("Synchronisation nécessaire...");
         

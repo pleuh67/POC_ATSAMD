@@ -74,9 +74,8 @@ printByteArray(config.materiel.DevEUI, 16);
 char Module_ID[17];
   convertToHexString(config.materiel.DevEUI, Module_ID, 8);
 
-char msg[80];
-  snprintf(msg,80,"Module %s",Module_ID);
-  LOG_INFO(msg);
+  snprintf(LOGmsg,80,"Module %s",Module_ID);
+  LOG_INFO(LOGmsg);
 
   for (config.materiel.Num_Carte=0;config.materiel.Num_Carte< MAX_HWEUI_List; config.materiel.Num_Carte++)
   { 

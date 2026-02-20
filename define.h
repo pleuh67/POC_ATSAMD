@@ -25,13 +25,11 @@
 #define PROJECT_NAME "POC IRQ_Payload IRQ_1s LOW_POWER OLED RN2483 DHT22 KEY5"  // len = 55
 #define VERSION "1.1.1-PL"
 
-
-#define LOG_ERROR(msg)   debugSerial.print("[ERROR] "); debugSerial.println(msg)
-#define LOG_WARNING(msg) debugSerial.print("[WARN]  "); debugSerial.println(msg)
-#define LOG_INFO(msg)    debugSerial.print("[INFO]  "); debugSerial.println(msg)
-#define LOG_DEBUG(msg)   debugSerial.print("[DEBUG] "); debugSerial.println(msg)
-
-
+#define LOGBUFLEN        120
+#define LOG_DEBUG(msg)  // debugSerial.print("[DEBUG] "); debugSerial.println(msg)
+#define LOG_ERROR(msg)  // debugSerial.print("[ERROR] "); debugSerial.println(msg)
+#define LOG_WARNING(msg) // debugSerial.print("[WARN]  "); debugSerial.println(msg)
+#define LOG_INFO(msg)  //  debugSerial.print("[INFO]  "); debugSerial.println(msg)
 
 #define NB_RUCHES 4 // 3 Protos Atsamd, Fixe à 4 pesées
 
@@ -70,13 +68,13 @@
 #define CONFIG_VERSION 111   // Version 1.1.1
 // ===== ADRESSE EEPROM CONFIGURATION =====
 #define CONFIG_EEPROM_START 0x0000  // Adresse de début en EEPROM
-#define CONFIG_MAGIC_NUMBER 0xFF03  // Nombre magique pour valider config
+#define CONFIG_MAGIC_NUMBER 0xFF01  // Nombre magique pour valider config
 
 // defines pour raccourcir et clarifier les instructions
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // noms courts et explicites, parametrer (num: 0..3) par Macro
 #define poidsBal_g(num)   HiveSensor_Data.HX711Weight[num]         // g 
-#define poidsBal_kg(num)  abs((Contrainte_List[num]-pesonTare(num))/pesonScale(num)) // kg
+#define poidsBal_kg(num)  fabs((Contrainte_List[num]-pesonTare(num))/pesonScale(num)) // kg
 
 #define pesonTare(num)    Jauge[Peson[config.materiel.Num_Carte][num]][0]
 #define pesonScale(num)   Jauge[Peson[config.materiel.Num_Carte][num]][1]

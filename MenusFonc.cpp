@@ -95,7 +95,7 @@ void m0_0E_PageInfosSystDone()   // appel dans Handle.cpp en fonction de saisieA
 void m0_1M_ConfigSystem() //
 {
   //  infoScreenState = INFO_SCREEN_ACTIVE;  // pour eviter KKKKK met en mode ecran info, continu par appuii touche "VALIDE"
-  debugSerial.println("Appel du Menu: CONFIG. SYSTEME");
+  LOG_DEBUG("Appel du Menu: CONFIG. SYSTEME");
   pushMenu("-- CONFIG Systeme --", m01_ConfigSystem, M01_ITEM, 0);
   //OLEDDrawText(1, 7, 0, "VALIDE pour retour");
 }
@@ -104,7 +104,7 @@ void m0_1M_ConfigSystem() //
 void m0_2M_ConfigLoRa()    //
 {
   // infoScreenState = INFO_SCREEN_ACTIVE;  // pour eviter KKKKK met en mode ecran info, continu par appuii touche "VALIDE"
-  debugSerial.println("Appel du Menu: CONFIG. LoRa   (M)");
+  LOG_DEBUG("Appel du Menu: CONFIG. LoRa   (M)");
   pushMenu("--- CONFIG LoRa ----", m02_ConfigLoRa, M02_ITEM, 0);
 }
 
@@ -113,18 +113,17 @@ void m0_2M_ConfigLoRa()    //
 void m0_3M_CalibTensions()   //
 {
   debugSerial.println("Appel d'un sous menu");
-  pushMenu("CALIB. TENSIONS:", m03_CalibTensions, M03_ITEM, 0);
+  pushMenu("-- CALIB. TENSION --", m03_CalibTensions, M03_ITEM, 0);
 }
 
 
 //  "CALIB. BALANCES(F)",
 void m0_4M_CalibBal()   //
 {
-  // debugSerial.print("Appel d'un sous menu:");
   sprintf(serialbuf, "Appel d'un sous menu: CONFIG. BALANCE %1d", bal);
-  debugSerial.println(serialbuf);
+  LOG_DEBUG(serialbuf);
   //  pushMenu(serialbuf, m04_CalibBalances, M04_ITEM, 0);
-  pushMenu("- CALIB. BALANCE # -", m04_CalibBalances, M04_ITEM, 0);
+  pushMenu("-- CALIB. BALANCE --", m04_CalibBalances, M04_ITEM, 0);
 }
 
 // ---------------------------------------------------------------------------*
@@ -259,15 +258,9 @@ void m01_2F_GetNumRucherDone()   // appel dans Handle.cpp en fonction de saisieA
 
   finalizeNumInput(number); // Récupérer saisie finale
   config.applicatif.RucherID = atoi(number);
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-char msg[80];
-  snprintf(msg,80,"Num. de rucher mémorisé: %d",config.applicatif.RucherID);  
-  LOG_INFO(msg);
-//  LOG_WARNING(msg)
-//  LOG_ERROR(msg)
-//  LOG_DEBUG(msg); 
-//  OLEDDrawText(1,2, 0, msg );
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  snprintf(LOGmsg,80,"Num. de rucher mémorisé: %d",config.applicatif.RucherID);  
+  LOG_INFO(LOGmsg);
   E24C32saveConfig();
   backMenu();
 }
@@ -293,15 +286,9 @@ void m01_3F_GetNameRucherDone()   // appel dans Handle.cpp en fonction de saisie
 //  debugSerial.println(currentString);
   sprintf(config.applicatif.RucherName, "%s", currentString);
 // debugSerial.println(config.applicatif.RucherName);
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-char msg[80];
-  snprintf(msg,80,"Nom de rucher mémorisé: %s",config.applicatif.RucherName);  
-  LOG_INFO(msg);
-//  LOG_WARNING(msg)
-//  LOG_ERROR(msg)
-//  LOG_DEBUG(msg); 
-//  OLEDDrawText(1,2, 0, msg );
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  snprintf(LOGmsg,80,"Nom de rucher mémorisé: %s",config.applicatif.RucherName);  
+  LOG_INFO(LOGmsg);
   E24C32saveConfig();
   backMenu();
 }
@@ -428,15 +415,9 @@ void m02_2F_AppEUIDone()    // appel dans Handle.cpp en fonction de saisieActive
 //  uint8_t AppKey [17];        // AppKEY: // 5048494C495050454C4F564542454553 - PHILIPPELOVEBEES
 
 hexStringToByteArray(hexBuffer, config.applicatif.AppEUI, 9);
-  
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-char msg[80];
-  snprintf(msg,80,"AppEUI mémorisé: %s",hexBuffer);
-  LOG_INFO(msg);
-//  LOG_WARNING(msg);
-//  LOG_ERROR(msg);
-//  OLEDDrawText(1,2, 0, msg );
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  snprintf(LOGmsg,80,"AppEUI mémorisé: %s",hexBuffer);
+  LOG_INFO(LOGmsg);
   E24C32saveConfig();
   backMenu();
 }
@@ -475,14 +456,10 @@ void m02_3L_GetSFDone()    // appel dans Handle.cpp en fonction de saisieActive
     config.applicatif.SpreadingFactor = 9;
   else if (strcmp(selectedSF, "SF12") == 0)
     config.applicatif.SpreadingFactor = 12;
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-char msg[80];
-  snprintf(msg,80,"SpreadingFactor mémorisé: %d",config.applicatif.SpreadingFactor);
-  LOG_INFO(msg);
-//  LOG_WARNING(msg)
-//  LOG_ERROR(msg)
-//  OLEDDrawText(1,2, 0, msg );
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  snprintf(LOGmsg,80,"SpreadingFactor mémorisé: %d",config.applicatif.SpreadingFactor);
+  LOG_INFO(LOGmsg);
+
   E24C32saveConfig();
   backMenuFromList(); // Fin de gestion hors Timeout
 }
@@ -517,14 +494,9 @@ void m02_4F_GetPayloadDelayDone()                          // appel de Handle.cp
   debugSerial.print("PayloadDelay selectionne: ");
   debugSerial.println(strNumber);
   config.applicatif.SendingPeriod = atoi(strNumber);
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-char msg[80];
-  snprintf(msg,80,"PayloadDelay mémorisé: %d",config.applicatif.SendingPeriod);  
-  LOG_INFO(msg);
-//  LOG_WARNING(msg)
-//  LOG_ERROR(msg)
-//  OLEDDrawText(1,2, 0, msg );
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  snprintf(LOGmsg,80,"PayloadDelay mémorisé: %d",config.applicatif.SendingPeriod);  
+  LOG_INFO(LOGmsg);
 
   E24C32saveConfig();
   DS3231setRTCAlarm2();
@@ -604,7 +576,7 @@ void m02_7M_PopMenu()  // retour menu000Demarrage
 void m03_0E_DisplayVoltageInput()
 { char localOLEDbuf[21] = "12345678901234567890";
 
-  infoScreenState = INFO_SCREEN_ACTIVE;  // pour eviter KKKKK met en mode ecran info, continu par appuii touche "VALIDE"
+  infoScreenState = INFO_SCREEN_ACTIVE;  
   debugSerial.print("Appel d'une Fonction: ");
   debugSerial.println("CalibVBat - Fonction a implementer");
 
@@ -797,13 +769,13 @@ void m04_0F_InfoBal(void)    //
   saisieActive=40;                 // appel desactivation screenRefresh
   InfoBalScreenRefreshTime = true; // active rafraichissement time/date
   if (Peson[config.materiel.Num_Carte][0]) 
-    InfoBalScreenRefreshBal_1 = true; // Active rafraichissement Balance 1 
+    InfoBalScreenRefreshBal_A = true; // Active rafraichissement Balance 1 
   if (Peson[config.materiel.Num_Carte][1]) 
-    InfoBalScreenRefreshBal_2 = true; // Active rafraichissement Balance 2
+    InfoBalScreenRefreshBal_B = true; // Active rafraichissement Balance 2
   if (Peson[config.materiel.Num_Carte][2]) 
-    InfoBalScreenRefreshBal_3 = true; // Active rafraichissement Balance 3
+    InfoBalScreenRefreshBal_C = true; // Active rafraichissement Balance 3
   if (Peson[config.materiel.Num_Carte][3]) 
-    InfoBalScreenRefreshBal_4 = true; // Active rafraichissement Balance 4
+    InfoBalScreenRefreshBal_D = true; // Active rafraichissement Balance 4
 
   OLEDdisplayInfoBal();
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
@@ -816,10 +788,10 @@ void m04_0F_InfoBal(void)    //
 void m04_0F_InfoBalDone()     // 
 {
   InfoBalScreenRefreshTime = false; // desactive rafraichissement time/date
-  InfoBalScreenRefreshBal_1 = false; // desactive rafraichissement Balance 1
-  InfoBalScreenRefreshBal_2 = false; // desactive rafraichissement Balance 2
-  InfoBalScreenRefreshBal_3 = false; // desactive rafraichissement Balance 3
-  InfoBalScreenRefreshBal_4 = false; // desactive rafraichissement Balance 4
+  InfoBalScreenRefreshBal_A = false; // desactive rafraichissement Balance A
+  InfoBalScreenRefreshBal_B = false; // desactive rafraichissement Balance B
+  InfoBalScreenRefreshBal_C = false; // desactive rafraichissement Balance C
+  InfoBalScreenRefreshBal_D = false; // desactive rafraichissement Balance D
   backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
@@ -828,7 +800,7 @@ void m04_1F_PoidsTare()
 
   saisieActive = 41; // pour identifier variable saisie lors de l'affectation
 
-  debugSerial.print("Appel d'une Fonction: m04_1F_PoidsTare()");
+  LOG_DEBUG("Appel d'une Fonction: m04_1F_PoidsTare()");
   sprintf(number, "%d", config.materiel.poidsTare);
   debugSerial.println(config.materiel.poidsTare);
   debugSerial.println(number);
@@ -847,10 +819,9 @@ void m04_1F_PoidsTareDone()
   debugSerial.print("Nombre memorisé: ");
   debugSerial.println(config.materiel.poidsTare);
 // sauvegarde en EEPROM
-char msg[80];
-  snprintf(msg, 21, "poidsTare:%d",config.materiel.poidsTare);
-  LOG_INFO(msg);
-  OLEDDrawText(1,2, 0, msg );
+  snprintf(LOGmsg, 21, "poidsTare:%d",config.materiel.poidsTare);
+  LOG_INFO(LOGmsg);
+  OLEDDrawText(1,2, 0, LOGmsg );
   E24C32saveConfig();
   backMenu();  
 }
@@ -870,30 +841,32 @@ void m04_nM_CalibBal_bal()    // utiliser la var gloale bal
     OLEDdisplayInfoBal();     // part dans KKKKKKKKK
   */
   // fonction implementer
-
-
-
-  
   OLEDdisplayCalibBal();
   InfoScreenRefreshTime = false;
   //  backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
-void m04_2M_CalibBal(int numJauge)
+// ---------------------------------------------------------------------------*
+// @brief 
+// @param Aucun
+// @return void
+// @description 
+// ---------------------------------------------------------------------------*
+void m04_2M_CalibBal()
 {
+  LOG_DEBUG("Appel du Menu: CONFIG. LoRa   (M)");
+  pushMenu("--- CALIB. BAL # ---", m04x_CalibBal, M04x_ITEM, 0); 
 /*
 menu qui appelle :
+  "Num. Balance    (S)",    // m04x_0F_numBalx()
   "Tare Balance    (F)",    // m04x_1F_tareBal(int numJauge); enregistre la tare et temperature
   "Echelle Balance (F)",    // m04x_2F_echBal(int numJauge); calcule la mise à l'echelle
   "Saisie Comp. Temp. ",    // m04x_3F_adjustTempBal(int numJauge); saisie d'un coefficient de correction
-
-m04_2F_CalibBal_1();   devient tare/echelle?  
-
-  */
+*/
 }
 
 
-
+/*
 
 void m04_2F_CalibBal_1()  //
 {
@@ -912,25 +885,13 @@ void m04_2F_CalibBal_1()  //
     }
 
 config.materiel.HX711NoloadValue_0 = Contrainte_List[0];
-
+ 
+  snprintf(LOGmsg, 21, "tareJaugeA:%8f",Contrainte_List[0]);
   
-/*
-  uint8_t Peson_0;              //  N° Peson
-  uint8_t HX711Clk_0;           
-  uint8_t HX711Dta_0;
-  float   HX711NoloadValue_0;   // valeur sans charge (relevée par opérateur )
-  float   HX711Tare_Temp_0;     // Température lors de la tare (mesurée lors de la tare)  
-  float   HX711Scaling_0;       // Facteur de mise à l'echelle
-  float   HX711Cor_Temp_0;      // Facteur de compensation en température
-*/
-    
-char msg[80];
-  snprintf(msg, 21, "tareJaugeA:%8f",Contrainte_List[0]);
-  
-  LOG_INFO(msg);
-//  LOG_WARNING(msg)
-//  LOG_ERROR(msg)
-  OLEDDrawText(1,2, 0, msg );
+  LOG_INFO(LOGmsg);
+//  LOG_WARNING(LOGmsg)
+//  LOG_ERROR(LOGmsg)
+  OLEDDrawText(1,2, 0, LOGmsg );
 
 char rc = read_DHT(dht); 
 config.materiel.HX711Tare_Temp_0 = rc ? 99 : HiveSensor_Data.DHT_Temp;
@@ -977,7 +938,7 @@ void m04_3F_CalibBal_4()  //
   OLEDDrawText(1, 7, 0, "VALIDE pour retour");
   backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
-
+*/
 
 //  "RET  popMenu(M000)"       // 4: Retour menu principal
 void m04_6M_PopMenu()  // retour menu000Demarrage
@@ -1027,94 +988,202 @@ void m04x_0F_numBalx(void)
 //  backMenu(); // Relance la navigation menu après saisie  ou timeout  
 }
 
+// ---------------------------------------------------------------------------*
+// @brief Sélection de la jauge connectée sur A
+// @param Aucun
+// @return void
+// @description saisie la jauge et affecte les paramètres correspondants
+// ---------------------------------------------------------------------------*
 void m04x_0F_numBalxDone(void)
 { static char number[3] = ""; // Buffer pour le numérique 0..99
 
   LOG_INFO("Appel d'une Fonction: m04x_0F_numBalxDone()");
   finalizeNumInput(number); // Récupérer saisie finale
-char msg[80];
-  snprintf(msg,80,"Nouveau nombre: %d",number);
-  LOG_INFO(msg);
+
+  snprintf(LOGmsg,80,"Nouveau nombre: %d",number);
+  LOG_INFO(LOGmsg);
   config.materiel.Peson_0 = atoi(number);
 //  modifier struct pour tableau [num] vs switch (num)/case 1..3
-  snprintf(msg,80,"Nombre memorisé: %d",config.materiel.Peson_0);
-  LOG_INFO(msg);
-
+  snprintf(LOGmsg,80,"Nombre memorisé: %d",config.materiel.Peson_0);
+  LOG_INFO(LOGmsg);
+// initialisation des configurations mémorisées
+  config.materiel.HX711NoloadValue_0 = Jauge[config.materiel.Peson_0][0];
+  config.materiel.HX711Scaling_0 = Jauge[config.materiel.Peson_0][1];
+  config.materiel.HX711Tare_Temp_0 = Jauge[config.materiel.Peson_0][2];
+  config.materiel.HX711Cor_Temp_0 = Jauge[config.materiel.Peson_0][3];
 // sauvegarde en EEPROM
-  snprintf(msg, 21, "Bal %c => Jauge %d",bal+65,config.materiel.Peson_0);
-  LOG_INFO(msg);
-  OLEDDrawText(1,2, 0, msg );
+  snprintf(LOGmsg, 21, "Bal %c => Jauge %d",bal+65,config.materiel.Peson_0);
+  LOG_INFO(LOGmsg);
+  OLEDDrawText(1,2, 0, LOGmsg );
   E24C32saveConfig();
 E24C32DumpConfigToJSON();    
-  backMenu();                                            // erreur retour menu
-/*  
-09:49:53.653 -> Nombre valide
-09:49:53.653 -> OLEDDisplayMessageL8() => Nombre accepte
-09:49:54.127 -> [DEBUG] Default dans isListInputActive()/saisieActive/default, pourquoi ???????????????????
-09:49:54.127 -> [DEBUG] !!!else!!! : 146106 GestionEnCours 
-09:49:54.127 -> [DEBUG] from handleProgrammingModea: 0
-09:49:54.127 -> [ERROR] Perte de la Gestion courante dans Handle.cpp (Saisies_NB)
-09:49:54.175 -> Lancement Menu principal
-09:49:54.175 -> pushMenu()\title: -- MENU PRINCIPAL --
-*/
-  LOG_ERROR("m04x_0F_numBalxDone: erreur retour menu");
+  backMenu();                   
 }
 
-void m04x_0F_tareBal_n(void)    // appel écran de calibration
-{
-  debugSerial.println("Appel m04x_0F_tareBal_n - a implementer");
-  saisieActive = 491; // pour identifier variable saisie lors de l'affectation
-// selectionner numBal et affectation DEFAULT_VAL + Write EEPROM
-// ou timeout
-  InfoScreenRefreshTime = true;
-  OLEDdisplayInfoBal();     // part dans KKKKKKKKK
+//lfzliefjzlefjzlmefjzmlefjbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+#define LOG_DEBUG(LOGmsg)   debugSerial.print("[DEBUG] "); debugSerial.println(LOGmsg)
 
-  // fonction implementer
-
-    if (Peson[config.materiel.Num_Carte][0])//  Poids_Peson(3) = GetPoids(4, 1);
-    {
-      Contrainte_List[0]= MESURESHX711GetStrainGauge(0,scaleA,AVR_10);  // renvoi la moyenne des 10 dernières mesures 
-      HiveSensor_Data.HX711Weight[0] =  calculePoids(0); // kg     
-    }
-
-config.materiel.HX711NoloadValue_0 = Contrainte_List[0];
-
-  
-/*
-  uint8_t Peson_0;              //  N° Peson
-  uint8_t HX711Clk_0;           
-  uint8_t HX711Dta_0;
-  float   HX711NoloadValue_0;   // valeur sans charge (relevée par opérateur )
-  float   HX711Tare_Temp_0;     // Température lors de la tare (mesurée lors de la tare)  
-  float   HX711Scaling_0;       // Facteur de mise à l'echelle
-  float   HX711Cor_Temp_0;      // Facteur de compensation en température
-*/
+// Saisie de config.materiel.Noeud_LoRa
+void m04x_0F_tareBal()
+{ static char number[20]="";
     
-char msg[80];
-  snprintf(msg, 21, "tareJaugeA:%8f",Contrainte_List[0]);
+  saisieActive = 491; // pour identifier variable saisie lors de l'affectation
+  LOG_DEBUG("Appel m04x_0F_tareBal() - tititi");
+  // ne pas formater %f
+  switch (bal)
+{
+    case 0:
+            snprintf(number,20, "%.0f", MESURESHX711GetStrainGauge(bal,scaleA,AVR_10));
+            snprintf(LOGmsg,20,"Tare Bal %c, Jauge %d",bal+65,config.materiel.Peson_0);
+            LOG_DEBUG(LOGmsg);
+            break; 
+    case 1:
+            snprintf(number,20, "%.0f", MESURESHX711GetStrainGauge(bal,scaleB,AVR_10));
+            snprintf(LOGmsg,20,"Tare Bal %c, Jauge %d",bal+65,config.materiel.Peson_1);
+            LOG_DEBUG(LOGmsg);
+            break;
+    case 2:
+            snprintf(number,20, "%.0f", MESURESHX711GetStrainGauge(bal,scaleC,AVR_10));
+            snprintf(LOGmsg,20,"Tare Bal %c, Jauge %d",bal+65,config.materiel.Peson_2);
+            LOG_DEBUG(LOGmsg);
+            break;
+    case 3:
+            snprintf(number,20, "%.0f", MESURESHX711GetStrainGauge(bal,scaleD,AVR_10));
+            snprintf(LOGmsg,20,"Tare Bal %c, Jauge %d",bal+65,config.materiel.Peson_3);
+            LOG_DEBUG(LOGmsg);
+            break;
+}
+  LOG_DEBUG(number);  // affiche la valeur de la Jauge
+
+  snprintf(LOGmsg,20,"==== TARE BAL %c ====",bal+65);
+  startNumInput(LOGmsg, number, 15, true, true, -9999999, 9999999);
+}  
+
+// Sauvegarde de config.materiel.Noeud_LoRa
+void m04x_0F_tareBalDone()   // appel dans Handle.cpp en fonction de saisieActive
+{ static char number[10] = ""; // Buffer pour le numérique
+
+  finalizeNumInput(number); // Récupérer saisie finale
+ 
+  snprintf(LOGmsg,80,"Nouveau nombre: %d",number);
+  LOG_INFO(LOGmsg);
+
+char rc = read_DHT(dht); // HiveSensor_Data.DHT_Temp initialisé dans fonction
+// µC
+if (rc)   // si DHT pas lu, utilisation de température µC
+    HiveSensor_Data.DHT_Temp = getTemperature();
   
-  LOG_INFO(msg);
-//  LOG_WARNING(msg)
-//  LOG_ERROR(msg)
-  OLEDDrawText(1,2, 0, msg );
+switch (bal)
+{
+    case 0:
+            config.materiel.HX711NoloadValue_0 = atof(number);
+            config.materiel.HX711Tare_Temp_0 = HiveSensor_Data.DHT_Temp;
+            break; 
+    case 1:
+            config.materiel.HX711NoloadValue_1 = atof(number);
+            config.materiel.HX711Tare_Temp_1 = HiveSensor_Data.DHT_Temp;
+            InfoBalScreenRefreshBal_B=false;
+            break;
+    case 2:
+            config.materiel.HX711NoloadValue_2 = atof(number);
+            config.materiel.HX711Tare_Temp_2 = HiveSensor_Data.DHT_Temp;            
+            InfoBalScreenRefreshBal_C=false;
+            break;
+    case 3:
+            config.materiel.HX711NoloadValue_3 = atof(number);
+            config.materiel.HX711Tare_Temp_3 = HiveSensor_Data.DHT_Temp;
+            InfoBalScreenRefreshBal_D=false;
+            break;
+}
+  E24C32saveConfig();
+E24C32DumpConfigToJSON();    
+  backMenu();  
+}
+// fhzelfZHELFIZJlefijlibbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+#define LOG_DEBUG(LOGmsg) //  debugSerial.print("[DEBUG] "); debugSerial.println(LOGmsg)
 
-char rc = read_DHT(dht); 
-config.materiel.HX711Tare_Temp_0 = rc ? 99 : HiveSensor_Data.DHT_Temp;
-E24C32saveConfig();
+/*
+// ---------------------------------------------------------------------------*
+// @brief 
+// @param Aucun
+// @return void
+// @description La tare est automatique (pas de saisie utilisateur) :
+//  c'est ce que fait le code actuel. La fonction mesure, stocke, et c'est fini.
+// ---------------------------------------------------------------------------*
+void m04x_0F_tareBal(void)    // appel écran de calibration
+{
+  saisieActive = 491; // pour identifier variable saisie lors de l'affectation
 
-//delay(10000);
+  LOG_DEBUG("Appel m04x_0F_tareBal() - tititi");
 
-  InfoScreenRefreshTime = false;
-  //  backMenu(); // Relance la navigation menu après saisie  ou timeout
+  OLEDdisplayTareBal();   
+
+  E24C32saveConfig();
+E24C32DumpConfigToJSON(); 
+  backMenu();             // retour au menu parent
 }
 
+void m04x_0F_tareBalDone(void)    // appel écran de calibration
+{ //static char number[10] = ""; // Buffer pour le numérique 0..9999999999
 
+  LOG_INFO("Appel d'une Fonction: 04x_0F_tareBalDone()");
+ finalizeNumInput(number); // Récupérer saisie finale
+;
+  snprintf(LOGmsg,80,"Nouveau nombre: %d",number);
+  LOG_INFO(LOGmsg);
+switch (bal)
+{
+    case 0:
+            config.materiel.HX711NoloadValue_0 = atof(number);
+            config.materiel.HX711Tare_Temp_0 = HiveSensor_Data.DHT_Temp;
+            break; 
+    case 1:
+            config.materiel.HX711NoloadValue_1 = atof(number);
+            config.materiel.HX711Tare_Temp_1 = HiveSensor_Data.DHT_Temp;
+            InfoBalScreenRefreshBal_B=false;
+            break;
+    case 2:
+            config.materiel.HX711NoloadValue_2 = atof(number);
+            config.materiel.HX711Tare_Temp_2 = HiveSensor_Data.DHT_Temp;            
+            InfoBalScreenRefreshBal_C=false;
+            break;
+    case 3:
+            config.materiel.HX711NoloadValue_3 = atof(number);
+            config.materiel.HX711Tare_Temp_3 = HiveSensor_Data.DHT_Temp;
+            InfoBalScreenRefreshBal_D=false;
+            break;
+}
 
+char rc = read_DHT(dht); // HiveSensor_Data.DHT_Temp initialisé dans fonction
+// µC
+if (rc)   // si DHT pas lu, utilisation de température µC
+    HiveSensor_Data.DHT_Temp = getTemperature();
 
-void m04x_1F_echelleBal_n(void) // appel écran de calibration
+switch (bal)
+{
+    case 0:
+            config.materiel.HX711Tare_Temp_0 = HiveSensor_Data.DHT_Temp;
+            break; 
+    case 1:
+            config.materiel.HX711Tare_Temp_1 = HiveSensor_Data.DHT_Temp;
+            break;
+    case 2:
+            config.materiel.HX711Tare_Temp_2 = HiveSensor_Data.DHT_Temp;
+            break;
+    case 3:
+            config.materiel.HX711Tare_Temp_3 = HiveSensor_Data.DHT_Temp;
+            break;
+}
+  E24C32saveConfig();
+E24C32DumpConfigToJSON();    
+  backMenu();  
+}
+*/
+
+void m04x_1F_echelleBal(void) // appel écran de calibration
 {
   debugSerial.print("Appel d'une Fonction: ");
-  debugSerial.println("m04x_1F_echelleBal_n()");
+  debugSerial.println("m04x_1F_echelleBal()");
 
   saisieActive = 492; // pour identifier variable saisie lors de l'affectation
 // selectionner numBal et affectation DEFAULT_VAL + Write EEPROM
@@ -1123,14 +1192,58 @@ void m04x_1F_echelleBal_n(void) // appel écran de calibration
   backMenu(); // Relance la navigation menu après saisie  ou timeout
 }
 
-void m04x_2F_tempBal_n(void)    // appel écran de calibration
+void m04x_1F_echelleBalDone(void) // appel écran de calibration
+{ static char number[10] = ""; // Buffer pour le numérique 0..9999999999
+
+  LOG_INFO("Appel d'une Fonction: 04x_0F_tareBalDone()");
+  finalizeNumInput(number); // Récupérer saisie finale
+
+  snprintf(LOGmsg,80,"Nouveau nombre: %d",number);
+  LOG_INFO(LOGmsg);
+  config.materiel.HX711Tare_Temp_0 = atoi(number);
+//  modifier struct pour tableau [num] vs switch (num)/case 1..3
+  snprintf(LOGmsg,80,"Nombre memorisé: %d",config.materiel.HX711Tare_Temp_0);
+  LOG_INFO(LOGmsg);
+// sauvegarde en EEPROM
+  snprintf(LOGmsg, 21, "Bal %c => Jauge %d",bal+65,config.materiel.Peson_0);
+  LOG_INFO(LOGmsg);
+  OLEDDrawText(1,2, 0, LOGmsg );
+  E24C32saveConfig();
+E24C32DumpConfigToJSON();    
+  backMenu(); 
+}
+
+void m04x_2F_tempBal(void)    // appel écran de calibration
 {
   debugSerial.print("Appel d'une Fonction: ");
-  debugSerial.println("m04x_2F_tempBal_n()");
+  debugSerial.println("m04x_2F_tempBal()");
   saisieActive = 493; // pour identifier variable saisie lors de l'affectation
 // selectionner numBal et affectation DEFAULT_VAL + Write EEPROM
 // ou timeout
   backMenu(); // Relance la navigation menu après saisie  ou timeout
+}
+
+
+void m04x_2F_tempBalDone(void)    // appel écran de calibration
+{ static char number[10] = ""; // Buffer pour le numérique 0..9999999999
+
+  LOG_INFO("Appel d'une Fonction: 04x_0F_tareBalDone()");
+  finalizeNumInput(number); // Récupérer saisie finale
+
+  snprintf(LOGmsg,80,"Nouveau nombre: %d",number);
+  LOG_INFO(LOGmsg);
+  config.materiel.HX711Tare_Temp_0 = atoi(number);
+//  modifier struct pour tableau [num] vs switch (num)/case 1..3
+  snprintf(LOGmsg,80,"Nombre memorisé: %d",config.materiel.HX711Tare_Temp_0);
+  LOG_INFO(LOGmsg);
+// sauvegarde en EEPROM
+  snprintf(LOGmsg, 21, "Bal %c => Jauge %d",bal+65,config.materiel.Peson_0);
+  LOG_INFO(LOGmsg);
+  OLEDDrawText(1,2, 0, LOGmsg );
+  E24C32saveConfig();
+E24C32DumpConfigToJSON();    
+  backMenu(); 
+
 }
 
 void m04x_3M_PopMenu(void)   // Retour menu précédent m04_CalibBalances

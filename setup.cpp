@@ -205,9 +205,9 @@ debugSerial.println(Module_ID);
 
 // nnnnnnnnnnnnnnnnn 
       if (config.materiel.Num_Carte)
-      {char msg[80];
-        snprintf(msg,80," Init 2483 done with card : %2d",config.materiel.Num_Carte);
-        LOG_DEBUG(msg);
+      {
+        snprintf(LOGmsg,80," Init 2483 done with card : %2d",config.materiel.Num_Carte);
+        LOG_DEBUG(LOGmsg);
         OLEDDebugDisplay("RN2483A STP       OK");
       }
       else
@@ -317,9 +317,9 @@ void SETUP_HX711initWithWatchdog(int num)
 // ---------------------------------------------------------------------------
 // exemple appel: SETUPSetStructDefaultValues();
 void SETUPSetStructDefaultValues()
-{ char msg[80];
-  snprintf(msg,80,"SETUPSetStructDefaultValues() executé: RESET STRUCTURE en EEPROM"); 
-  LOG_INFO(msg);   
+{
+  snprintf(LOGmsg,80,"SETUPSetStructDefaultValues() executé: RESET STRUCTURE en EEPROM"); 
+  LOG_INFO(LOGmsg);   
   
 // ---------------------------------------------------------------------------
 // ========================= Configuration Applicatif ========================

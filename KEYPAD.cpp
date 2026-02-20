@@ -82,7 +82,7 @@ key_code_t readKeyOnce(void)
 char localserialbuf[81];
 
 sprintf(localserialbuf, "KEY-INVALID: %d/%d",val, levels[4] + TOL); 
-debugSerial.println(localserialbuf);
+LOG_DEBUG(localserialbuf);
 
   return KEY_INVALID;                                     // Val non identifiable
 }
