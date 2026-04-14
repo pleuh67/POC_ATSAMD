@@ -30,11 +30,6 @@
 // 
 // ---------------------------------------------------------------------------*
 
-
-
-
-
-
 // toutes les machines à état de saisie retournent le résultat de la saisie dans 
 // char stringSaisie[OLEDBUFLEN]="azerty";   // 128/retour de toutes les saisies
 // initialisé quand XXXXXX_INPUT_COMPLETED = true
@@ -53,8 +48,6 @@
 // suite HEXA
 // suite HEURE
 // suite DATE
-
-
 
 // ---------------------------------------------------------------------------*
 // ===== FONCTIONS DE SÉLECTION DANS UNE LISTE =====
@@ -80,8 +73,6 @@ void initStartupList(void)
 //      startListInput(currentMenu->title, currentMenu->menuList, currentMenu->menuSize, currentMenu->selectedIndex);
 }
 
-
-
 // ---------------------------------------------------------------------------*
 // @brief Démarre la sélection dans une liste de valeurs avec timeout personnalisé
 // @param title Titre de la sélection à afficher
@@ -98,8 +89,6 @@ void startListInput(const char* title, const char** itemList, uint8_t numItems, 
     return; // Sélection déjà en cours
   }
 
-
-  
   // Validation des paramètres
   if (initialIndex >= numItems) initialIndex = 0;
   
@@ -136,7 +125,7 @@ void startListInput(const char* title, const char** itemList, uint8_t numItems, 
   listInputCtx.lastSelectedIndex = 0xFF;     // Forcer le rafraîchissement initial
   listInputCtx.lastCursorBlink = false;
  
-  snprintf(LOGmsg,80,"startListInput()\\Selection dans liste demarree: %s Peson: %d Timeout: %d secondes",
+  snprintf(LOGmsg,90,"len? startListInput()\\Selection dans liste demarree: %s Peson: %d Timeout: %d secondes",
               title,timeoutMs / 1000); 
   LOG_DEBUG(LOGmsg); 
 /*

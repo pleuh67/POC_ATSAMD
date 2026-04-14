@@ -88,7 +88,7 @@ void sleep(void)
     delay(10);
 }
 
-
+/*
 // ===== FONCTIONS UTILITAIRES SUPPLÉMENTAIRES =====
 
 // ---------------------------------------------------------------------------*
@@ -108,3 +108,4 @@ void configureLowPowerMode(void)
   }
   debugSerial.println("Mode basse consommation configuré");
 }
+*/

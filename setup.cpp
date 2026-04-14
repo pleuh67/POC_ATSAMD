@@ -71,6 +71,8 @@ void SETUPsoftReset()
 // Le code ne continue jamais après cette ligne
 }
 
+
+/*
 // ---------------------------------------------------------------------------*
 //  out : 0 (Error ou non référencé) / n (Num de carte)  
 // @brief Find card number
@@ -80,11 +82,11 @@ void SETUPsoftReset()
 // ---------------------------------------------------------------------------*
 uint8_t non_RN2483Init(uint8_t *HWEUI)  
 { 
-/*
-RN2483AgetHWEUI(Module_ID_HWEUI);     // get the Hardware DevEUI ex: "0004A30B0020300A"               char Module_ID_HWEUI[20] 
-sprintf(serialbuf,"Init_2483()/RN2483AgetHWEUI Module_ID_HWEUI: %s",Module_ID_HWEUI ); 
-debugSerial.println(serialbuf);
-*/
+
+//RN2483AgetHWEUI(Module_ID_HWEUI);     // get the Hardware DevEUI ex: "0004A30B0020300A"               char Module_ID_HWEUI[20] 
+//sprintf(serialbuf,"Init_2483()/RN2483AgetHWEUI Module_ID_HWEUI: %s",Module_ID_HWEUI ); 
+//debugSerial.println(serialbuf);
+
 RN2483AgetHWEUI(config.materiel.DevEUI);     // get the Hardware DevEUI ex: "0004A30B0020300A"   uint8_t HWEUI[8];
 
 
@@ -130,7 +132,7 @@ RN2483AgetHWEUI(config.materiel.DevEUI);     // get the Hardware DevEUI ex: "000
       }
   return((config.materiel.Num_Carte == MAX_HWEUI_List) ? 0 : config.materiel.Num_Carte); // retourne 0 error or Card number
 }
-
+*/
 
 
 // ---------------------------------------------------------------------------*
